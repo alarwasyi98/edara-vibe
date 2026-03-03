@@ -1,5 +1,7 @@
-import { BookOpen, Users, UserCheck, TrendingUp } from 'lucide-react'
+import { useState } from 'react'
+import { PlusCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
     Card,
     CardContent,
@@ -15,6 +17,17 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { toast } from 'sonner'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -23,6 +36,9 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { PageHeader } from '@/components/shared/page-header'
 import { StatCard } from '@/components/shared/stat-card'
+import { BookOpen, Users, UserCheck, TrendingUp } from 'lucide-react'
+import { KelasDialog } from './components/kelas-dialog'
+import { KelasRowActions } from './components/kelas-row-actions'
 
 type Kelas = {
     id: string
@@ -34,7 +50,7 @@ type Kelas = {
     tahunAjaran: string
 }
 
-const dataKelas: Kelas[] = [
+const initialKelas: Kelas[] = [
     { id: '1', namaKelas: 'VII-A', jenjang: 'VII', waliKelas: 'Ustdzh. Fatimah Hidayatullah', jumlahSiswa: 32, kapasitas: 35, tahunAjaran: '2025/2026' },
     { id: '2', namaKelas: 'VII-B', jenjang: 'VII', waliKelas: 'Ibu Sari Nugroho', jumlahSiswa: 30, kapasitas: 35, tahunAjaran: '2025/2026' },
     { id: '3', namaKelas: 'VII-C', jenjang: 'VII', waliKelas: 'Ustadz Ahmad Maulana', jumlahSiswa: 28, kapasitas: 35, tahunAjaran: '2025/2026' },
@@ -46,8 +62,6 @@ const dataKelas: Kelas[] = [
     { id: '9', namaKelas: 'IX-C', jenjang: 'IX', waliKelas: 'Ustdz. Zahra Firdaus', jumlahSiswa: 27, kapasitas: 35, tahunAjaran: '2025/2026' },
 ]
 
-const totalSiswa = dataKelas.reduce((s, k) => s + k.jumlahSiswa, 0)
-
 const jenjangColor: Record<string, string> = {
     VII: 'bg-blue-100/30 text-blue-800 dark:text-blue-200 border-blue-200',
     VIII: 'bg-amber-100/30 text-amber-800 dark:text-amber-200 border-amber-200',
@@ -55,6 +69,50 @@ const jenjangColor: Record<string, string> = {
 }
 
 export function DataKelas() {
+    const [kelasList, setKelasList] = useState<Kelas[]>(initialKelas)
+    const [dialogOpen, setDialogOpen] = useState(false)
+    const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add')
+    const [selectedKelas, setSelectedKelas] = useState<Kelas | undefined>()
+    const [deleteTarget, setDeleteTarget] = useState<Kelas | null>(null)
+
+    const totalSiswa = kelasList.reduce((s, k) => s + k.jumlahSiswa, 0)
+
+    const handleAdd = () => {
+        setDialogMode('add')
+        setSelectedKelas(undefined)
+        setDialogOpen(true)
+    }
+
+    const handleEdit = (k: Kelas) => {
+        setDialogMode('edit')
+        setSelectedKelas(k)
+        setDialogOpen(true)
+    }
+
+    const handleSave = (data: Omit<Kelas, 'id' | 'jumlahSiswa'>) => {
+        if (dialogMode === 'add') {
+            setKelasList((prev) => [
+                ...prev,
+                { ...data, id: String(Date.now()), jumlahSiswa: 0 },
+            ])
+        } else if (selectedKelas) {
+            setKelasList((prev) =>
+                prev.map((k) =>
+                    k.id === selectedKelas.id ? { ...k, ...data } : k
+                )
+            )
+        }
+    }
+
+    const handleDelete = (k: Kelas) => setDeleteTarget(k)
+
+    const confirmDelete = () => {
+        if (!deleteTarget) return
+        setKelasList((prev) => prev.filter((k) => k.id !== deleteTarget.id))
+        toast.success(`Kelas ${deleteTarget.namaKelas} dihapus. (Demo)`)
+        setDeleteTarget(null)
+    }
+
     return (
         <>
             <Header fixed>
@@ -70,19 +128,23 @@ export function DataKelas() {
                 <PageHeader
                     title='Data Kelas'
                     description='Kelola kelas dan rombongan belajar madrasah.'
-                />
+                >
+                    <Button className='gap-1.5' onClick={handleAdd}>
+                        <PlusCircle className='h-4 w-4' /> Tambah Kelas
+                    </Button>
+                </PageHeader>
 
                 <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-                    <StatCard title='Total Kelas' value={`${dataKelas.length}`} description='aktif TA 2025/2026' icon={<BookOpen className='h-4 w-4 text-muted-foreground' />} />
+                    <StatCard title='Total Kelas' value={`${kelasList.length}`} description='aktif TA 2025/2026' icon={<BookOpen className='h-4 w-4 text-muted-foreground' />} />
                     <StatCard title='Total Siswa' value={`${totalSiswa}`} description='seluruh kelas' icon={<Users className='h-4 w-4 text-muted-foreground' />} />
-                    <StatCard title='Wali Kelas' value={`${dataKelas.length}`} description='guru yang bertugas' icon={<UserCheck className='h-4 w-4 text-muted-foreground' />} />
-                    <StatCard title='Rata-rata Siswa' value={`${Math.round(totalSiswa / dataKelas.length)}`} description='per kelas' icon={<TrendingUp className='h-4 w-4 text-muted-foreground' />} />
+                    <StatCard title='Wali Kelas' value={`${kelasList.length}`} description='guru yang bertugas' icon={<UserCheck className='h-4 w-4 text-muted-foreground' />} />
+                    <StatCard title='Rata-rata Siswa' value={`${kelasList.length ? Math.round(totalSiswa / kelasList.length) : 0}`} description='per kelas' icon={<TrendingUp className='h-4 w-4 text-muted-foreground' />} />
                 </div>
 
                 <Card>
                     <CardHeader>
                         <CardTitle>Daftar Kelas</CardTitle>
-                        <CardDescription>Tahun ajaran 2025/2026</CardDescription>
+                        <CardDescription>Tahun ajaran 2025/2026 — {kelasList.length} kelas</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className='overflow-auto rounded-md border'>
@@ -95,11 +157,12 @@ export function DataKelas() {
                                         <TableHead className='text-center'>Siswa</TableHead>
                                         <TableHead className='text-center'>Kapasitas</TableHead>
                                         <TableHead className='text-center'>Terisi</TableHead>
+                                        <TableHead className='w-12'></TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {dataKelas.map((kelas) => {
-                                        const pct = Math.round((kelas.jumlahSiswa / kelas.kapasitas) * 100)
+                                    {kelasList.map((kelas) => {
+                                        const pct = kelas.kapasitas > 0 ? Math.round((kelas.jumlahSiswa / kelas.kapasitas) * 100) : 0
                                         return (
                                             <TableRow key={kelas.id}>
                                                 <TableCell className='font-medium'>{kelas.namaKelas}</TableCell>
@@ -116,6 +179,9 @@ export function DataKelas() {
                                                         {pct}%
                                                     </span>
                                                 </TableCell>
+                                                <TableCell className='text-right'>
+                                                    <KelasRowActions kelas={kelas} onEdit={handleEdit} onDelete={handleDelete} />
+                                                </TableCell>
                                             </TableRow>
                                         )
                                     })}
@@ -125,6 +191,31 @@ export function DataKelas() {
                     </CardContent>
                 </Card>
             </Main>
+
+            <KelasDialog
+                open={dialogOpen}
+                onOpenChange={setDialogOpen}
+                mode={dialogMode}
+                initialData={selectedKelas}
+                onSave={handleSave}
+            />
+
+            <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Hapus Kelas?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Kelas <strong>{deleteTarget?.namaKelas}</strong> akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDelete} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
+                            Ya, Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     )
 }

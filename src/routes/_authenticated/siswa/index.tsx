@@ -18,6 +18,7 @@ const siswaSearchSchema = z.object({
         .catch([]),
     kelas: z.array(z.string()).optional().catch([]),
     nama: z.string().optional().catch(''),
+    tahunMasuk: z.array(z.string()).optional().catch([]),
 })
 
 export const Route = createFileRoute('/_authenticated/siswa/')({

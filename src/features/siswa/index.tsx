@@ -7,6 +7,9 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { PageHeader } from '@/components/shared/page-header'
 import { SiswaTable } from './components/siswa-table'
+import { SiswaActionButtons } from './components/siswa-action-buttons'
+import { SiswaProvider } from './components/siswa-provider'
+import { SiswaImportDialog, SiswaExportDialog, SiswaDeleteDialog } from './components/siswa-dialogs'
 import { students } from './data/students'
 
 const route = getRouteApi('/_authenticated/siswa/')
@@ -16,7 +19,7 @@ export function DataSiswa() {
     const navigate = route.useNavigate()
 
     return (
-        <>
+        <SiswaProvider>
             <Header fixed>
                 <Search />
                 <div className='ms-auto flex items-center space-x-4'>
@@ -29,10 +32,17 @@ export function DataSiswa() {
             <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
                 <PageHeader
                     title='Data Siswa'
-                    description='Kelola data siswa madrasah Anda.'
-                />
+                    description='Kelola data peserta didik madrasah.'
+                >
+                    <SiswaActionButtons />
+                </PageHeader>
+
                 <SiswaTable data={students} search={search} navigate={navigate} />
             </Main>
-        </>
+
+            <SiswaImportDialog />
+            <SiswaExportDialog />
+            <SiswaDeleteDialog />
+        </SiswaProvider>
     )
 }

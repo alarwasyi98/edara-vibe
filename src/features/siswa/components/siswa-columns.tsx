@@ -8,6 +8,7 @@ import { formatDateShort } from '@/lib/format'
 import { genderLabels } from '@/lib/constants'
 import { statusColorMap, statusOptions } from '../data/data'
 import { type Student } from '../data/schema'
+import { SiswaRowActions } from './siswa-row-actions'
 
 export const siswaColumns: ColumnDef<Student>[] = [
     {
@@ -132,5 +133,11 @@ export const siswaColumns: ColumnDef<Student>[] = [
                 {formatDateShort(row.getValue('tanggalLahir'))}
             </div>
         ),
+    },
+    {
+        id: 'actions',
+        cell: ({ row }) => <SiswaRowActions row={row} />,
+        enableSorting: false,
+        enableHiding: false,
     },
 ]

@@ -52,6 +52,7 @@ export function SiswaTable({ data, search, navigate }: SiswaTableProps) {
             { columnId: 'namaLengkap', searchKey: 'nama', type: 'string' },
             { columnId: 'status', searchKey: 'status', type: 'array' },
             { columnId: 'kelas', searchKey: 'kelas', type: 'array' },
+            { columnId: 'tahunMasuk', searchKey: 'tahunMasuk', type: 'array' },
         ],
     })
 
@@ -110,6 +111,14 @@ export function SiswaTable({ data, search, navigate }: SiswaTableProps) {
                         options: kelasOptions.map((k) => ({
                             label: k,
                             value: k,
+                        })),
+                    },
+                    {
+                        columnId: 'tahunMasuk',
+                        title: 'Tahun Masuk',
+                        options: ['2023', '2024', '2025', '2026'].map((y) => ({
+                            label: y,
+                            value: y,
                         })),
                     },
                 ]}
