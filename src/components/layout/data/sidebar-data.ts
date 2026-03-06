@@ -69,6 +69,10 @@ export const sidebarData: SidebarData = {
               url: '/tahun-ajaran',
             },
             {
+              title: 'Alumni',
+              url: '/alumni',
+            },
+            {
               title: 'PPDB',
               url: '/ppdb',
             },
@@ -76,8 +80,17 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Manajemen Guru',
-          url: '/guru',
           icon: UserCheck,
+          items: [
+            {
+              title: 'Data Guru',
+              url: '/guru',
+            },
+            {
+              title: 'Penugasan',
+              url: '/guru/penugasan',
+            },
+          ],
         },
         {
           title: 'Kalender Kegiatan',
@@ -109,8 +122,25 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Pencatatan Keuangan',
-          url: '/keuangan',
           icon: BookOpen,
+          items: [
+            {
+              title: 'Arus Kas',
+              url: '/keuangan',
+            },
+            {
+              title: 'Akun',
+              url: '/keuangan/akun',
+            },
+            {
+              title: 'Kategori',
+              url: '/keuangan/kategori',
+            },
+            {
+              title: 'Laporan',
+              url: '/keuangan/laporan',
+            },
+          ],
         },
       ],
     },

@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PencatatanKeuangan } from '@/features/keuangan'
+import { ArusKas } from '@/features/keuangan/arus-kas'
 
 export const Route = createFileRoute('/_authenticated/keuangan/')({
-    component: PencatatanKeuangan,
+    component: ArusKas,
 })
