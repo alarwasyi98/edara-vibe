@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { CheckIcon, PlusCircledIcon } from '@radix-ui/react-icons'
+import { CheckIcon } from '@radix-ui/react-icons'
+import { ChevronsUpDown } from 'lucide-react'
 import { type Column } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -41,12 +42,15 @@ export function DataTableFacetedFilter<TData, TValue>({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant='outline' size='sm' className='h-8 border-dashed'>
-          <PlusCircledIcon className='size-4' />
-          {title}
+        <Button
+          variant='outline'
+          size='sm'
+          className='h-8 gap-1.5 border-input bg-background px-2.5 font-normal text-muted-foreground hover:text-foreground'
+        >
+          <span className='text-xs font-medium text-foreground'>{title}</span>
           {selectedValues?.size > 0 && (
             <>
-              <Separator orientation='vertical' className='mx-2 h-4' />
+              <Separator orientation='vertical' className='mx-0.5 h-3.5' />
               <Badge
                 variant='secondary'
                 className='rounded-sm px-1 font-normal lg:hidden'
@@ -59,7 +63,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                     variant='secondary'
                     className='rounded-sm px-1 font-normal'
                   >
-                    {selectedValues.size} selected
+                    {selectedValues.size} terpilih
                   </Badge>
                 ) : (
                   options
@@ -77,6 +81,7 @@ export function DataTableFacetedFilter<TData, TValue>({
               </div>
             </>
           )}
+          <ChevronsUpDown className='ms-auto size-3.5 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
       <PopoverContent className='w-[200px] p-0' align='start'>
@@ -133,7 +138,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                     onSelect={() => column?.setFilterValue(undefined)}
                     className='justify-center text-center'
                   >
-                    Clear filters
+                    Hapus filter
                   </CommandItem>
                 </CommandGroup>
               </>
