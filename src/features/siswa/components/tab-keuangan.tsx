@@ -1,0 +1,355 @@
+import { useMemo } from 'react'
+import {
+    type ColumnDef,
+    flexRender,
+    getCoreRowModel,
+    useReactTable,
+    getSortedRowModel,
+    getPaginationRowModel,
+} from '@tanstack/react-table'
+import {
+    Receipt,
+    CircleCheckBig,
+    CircleAlert,
+    MoreHorizontal,
+    Eye,
+    Printer,
+} from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
+import { formatRupiah, formatBulanTagihan, formatDateShort } from '@/lib/format'
+import { cn } from '@/lib/utils'
+import { type StudentFinanceRecord } from '../data/schema'
+import { getStudentFinance, getFinanceSummary } from '../data/student-finance'
+
+// ── Status badge colors ─────────────────────────
+
+const statusConfig: Record<
+    StudentFinanceRecord['status'],
+    { label: string; className: string }
+> = {
+    paid: {
+        label: 'Lunas',
+        className:
+            'bg-green-100/30 text-green-900 dark:text-green-200 border-green-200',
+    },
+    partial: {
+        label: 'Sebagian',
+        className:
+            'bg-amber-100/30 text-amber-900 dark:text-amber-200 border-amber-200',
+    },
+    unpaid: {
+        label: 'Belum Bayar',
+        className:
+            'bg-gray-100/30 text-gray-900 dark:text-gray-200 border-gray-200',
+    },
+    overdue: {
+        label: 'Menunggak',
+        className:
+            'bg-red-100/30 text-red-900 dark:text-red-200 border-red-200',
+    },
+}
+
+// ── Column definitions ──────────────────────────
+
+const columns: ColumnDef<StudentFinanceRecord>[] = [
+    {
+        accessorKey: 'bulan',
+        header: 'Bulan',
+        cell: ({ row }) => (
+            <span className='text-sm'>
+                {formatBulanTagihan(row.getValue('bulan'))}
+            </span>
+        ),
+    },
+    {
+        accessorKey: 'jenis',
+        header: 'Jenis',
+        cell: ({ row }) => (
+            <Badge variant='outline' className='text-nowrap'>
+                {row.getValue('jenis')}
+            </Badge>
+        ),
+    },
+    {
+        accessorKey: 'jumlah',
+        header: 'Jumlah',
+        cell: ({ row }) => (
+            <span className='font-mono text-sm'>
+                {formatRupiah(row.getValue('jumlah'))}
+            </span>
+        ),
+    },
+    {
+        accessorKey: 'dibayar',
+        header: 'Dibayar',
+        cell: ({ row }) => (
+            <span className='font-mono text-sm'>
+                {formatRupiah(row.getValue('dibayar'))}
+            </span>
+        ),
+    },
+    {
+        id: 'sisa',
+        header: 'Sisa',
+        cell: ({ row }) => {
+            const sisa =
+                (row.original.jumlah as number) -
+                (row.original.dibayar as number)
+            return (
+                <span
+                    className={cn(
+                        'font-mono text-sm',
+                        sisa > 0 && 'text-red-600 dark:text-red-400'
+                    )}
+                >
+                    {formatRupiah(sisa)}
+                </span>
+            )
+        },
+    },
+    {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row }) => {
+            const status = row.getValue(
+                'status'
+            ) as StudentFinanceRecord['status']
+            const cfg = statusConfig[status]
+            return (
+                <Badge variant='outline' className={cn('capitalize', cfg.className)}>
+                    {cfg.label}
+                </Badge>
+            )
+        },
+    },
+    {
+        accessorKey: 'tanggalBayar',
+        header: 'Tgl. Bayar',
+        cell: ({ row }) => {
+            const val = row.getValue('tanggalBayar') as Date | null
+            return (
+                <span className='text-sm text-muted-foreground'>
+                    {val ? formatDateShort(val) : '-'}
+                </span>
+            )
+        },
+    },
+    {
+        id: 'actions',
+        cell: () => (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant='ghost'
+                        size='icon'
+                        className='h-8 w-8 p-0'
+                    >
+                        <MoreHorizontal className='h-4 w-4' />
+                        <span className='sr-only'>Buka menu</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align='end'>
+                    <DropdownMenuItem>
+                        <Eye className='mr-2 h-4 w-4' />
+                        Lihat Detail
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <Printer className='mr-2 h-4 w-4' />
+                        Cetak Kwitansi
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
+]
+
+// ── Component ───────────────────────────────────
+
+interface TabKeuanganProps {
+    studentId: string
+}
+
+export function TabKeuangan({ studentId }: TabKeuanganProps) {
+    const records = useMemo(
+        () => getStudentFinance(studentId),
+        [studentId]
+    )
+    const summary = useMemo(() => getFinanceSummary(records), [records])
+
+    const table = useReactTable({
+        data: records,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        initialState: {
+            pagination: { pageSize: 12 },
+        },
+    })
+
+    return (
+        <div className='space-y-4'>
+            {/* Summary Cards */}
+            <div className='grid gap-4 md:grid-cols-3'>
+                <Card>
+                    <CardHeader className='flex flex-row items-center justify-between pb-2'>
+                        <CardTitle className='text-sm font-medium text-muted-foreground'>
+                            Total Tagihan
+                        </CardTitle>
+                        <Receipt className='h-4 w-4 text-muted-foreground' />
+                    </CardHeader>
+                    <CardContent>
+                        <p className='text-2xl font-bold'>
+                            {formatRupiah(summary.totalTagihan)}
+                        </p>
+                        <p className='text-xs text-muted-foreground'>
+                            Tahun ajaran 2025/2026
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className='flex flex-row items-center justify-between pb-2'>
+                        <CardTitle className='text-sm font-medium text-muted-foreground'>
+                            Sudah Dibayar
+                        </CardTitle>
+                        <CircleCheckBig className='h-4 w-4 text-green-600' />
+                    </CardHeader>
+                    <CardContent>
+                        <p className='text-2xl font-bold text-green-600 dark:text-green-400'>
+                            {formatRupiah(summary.sudahDibayar)}
+                        </p>
+                        <p className='text-xs text-muted-foreground'>
+                            {summary.totalTagihan > 0
+                                ? `${Math.round((summary.sudahDibayar / summary.totalTagihan) * 100)}% dari total`
+                                : '-'}
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className='flex flex-row items-center justify-between pb-2'>
+                        <CardTitle className='text-sm font-medium text-muted-foreground'>
+                            Sisa Tunggakan
+                        </CardTitle>
+                        <CircleAlert className='h-4 w-4 text-red-600' />
+                    </CardHeader>
+                    <CardContent>
+                        <p className='text-2xl font-bold text-red-600 dark:text-red-400'>
+                            {formatRupiah(summary.sisaTunggakan)}
+                        </p>
+                        <p className='text-xs text-muted-foreground'>
+                            {summary.totalTagihan > 0
+                                ? `${Math.round((summary.sisaTunggakan / summary.totalTagihan) * 100)}% belum lunas`
+                                : '-'}
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Payment History Table */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className='text-base'>
+                        Riwayat Keuangan
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className='rounded-md border'>
+                        <Table>
+                            <TableHeader>
+                                {table.getHeaderGroups().map((headerGroup) => (
+                                    <TableRow key={headerGroup.id}>
+                                        {headerGroup.headers.map((header) => (
+                                            <TableHead key={header.id}>
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                        header.column
+                                                            .columnDef.header,
+                                                        header.getContext()
+                                                    )}
+                                            </TableHead>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableHeader>
+                            <TableBody>
+                                {table.getRowModel().rows?.length ? (
+                                    table.getRowModel().rows.map((row) => (
+                                        <TableRow key={row.id}>
+                                            {row
+                                                .getVisibleCells()
+                                                .map((cell) => (
+                                                    <TableCell key={cell.id}>
+                                                        {flexRender(
+                                                            cell.column
+                                                                .columnDef.cell,
+                                                            cell.getContext()
+                                                        )}
+                                                    </TableCell>
+                                                ))}
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell
+                                            colSpan={columns.length}
+                                            className='h-24 text-center'
+                                        >
+                                            Tidak ada data keuangan.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+
+                    {/* Pagination */}
+                    {table.getPageCount() > 1 && (
+                        <div className='flex items-center justify-end space-x-2 pt-4'>
+                            <Button
+                                variant='outline'
+                                size='sm'
+                                onClick={() => table.previousPage()}
+                                disabled={!table.getCanPreviousPage()}
+                            >
+                                Sebelumnya
+                            </Button>
+                            <span className='text-sm text-muted-foreground'>
+                                Halaman {table.getState().pagination.pageIndex + 1} dari{' '}
+                                {table.getPageCount()}
+                            </span>
+                            <Button
+                                variant='outline'
+                                size='sm'
+                                onClick={() => table.nextPage()}
+                                disabled={!table.getCanNextPage()}
+                            >
+                                Selanjutnya
+                            </Button>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
+    )
+}

@@ -1,0 +1,296 @@
+import { useState } from 'react'
+import { toast } from 'sonner'
+import { UserCircle, MapPin, Users, GraduationCap, Save } from 'lucide-react'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { useSiswa } from './siswa-provider'
+
+export function SiswaAddDialog() {
+    const { open, setOpen } = useSiswa()
+    const [loading, setLoading] = useState(false)
+    const [activeTab, setActiveTab] = useState('pribadi')
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setLoading(true)
+
+        // Mock API call
+        setTimeout(() => {
+            toast.success('Data siswa baru berhasil ditambahkan!')
+            setLoading(false)
+            setOpen(null)
+            setActiveTab('pribadi')
+        }, 1000)
+    }
+
+    const handleClose = () => {
+        setOpen(null)
+        setActiveTab('pribadi')
+    }
+
+    return (
+        <Dialog open={open === 'add'} onOpenChange={handleClose}>
+            <DialogContent className="max-h-[90vh] max-w-4xl flex flex-col p-0 gap-0">
+                <form onSubmit={handleSubmit} className="flex flex-col h-full max-h-[90vh]">
+                    <DialogHeader className="px-6 py-4 border-b shrink-0">
+                        <DialogTitle>Tambah Data Siswa</DialogTitle>
+                        <DialogDescription>
+                            Isi formulir berikut untuk menambahkan data peserta didik baru. Field dengan tanda (*) wajib diisi.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex-1 overflow-hidden">
+                        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+                            <div className="px-6 pt-4 shrink-0">
+                                <TabsList className="w-full justify-start h-auto flex-wrap">
+                                    <TabsTrigger value="pribadi" className="gap-1.5 py-2">
+                                        <UserCircle className="h-4 w-4" />
+                                        Data Pribadi
+                                    </TabsTrigger>
+                                    <TabsTrigger value="alamat" className="gap-1.5 py-2">
+                                        <MapPin className="h-4 w-4" />
+                                        Alamat & Kontak
+                                    </TabsTrigger>
+                                    <TabsTrigger value="keluarga" className="gap-1.5 py-2">
+                                        <Users className="h-4 w-4" />
+                                        Data Keluarga
+                                    </TabsTrigger>
+                                    <TabsTrigger value="akademik" className="gap-1.5 py-2">
+                                        <GraduationCap className="h-4 w-4" />
+                                        Data Akademik
+                                    </TabsTrigger>
+                                </TabsList>
+                            </div>
+
+                            <ScrollArea className="flex-1 px-6 pb-6 pt-2">
+                                {/* TAB: PRIBADI */}
+                                <TabsContent value="pribadi" className="space-y-4 m-0 mt-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="nis">NIS <span className="text-red-500">*</span></Label>
+                                            <Input id="nis" required placeholder="Ex: 202501001" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="nisn">NISN <span className="text-red-500">*</span></Label>
+                                            <Input id="nisn" required placeholder="Ex: 0101234567" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="nikSiswa">NIK Siswa <span className="text-red-500">*</span></Label>
+                                            <Input id="nikSiswa" required placeholder="16 digit NIK" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="nomorKK">Nomor Kartu Keluarga <span className="text-red-500">*</span></Label>
+                                            <Input id="nomorKK" required placeholder="16 digit No. KK" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2 md:col-span-2">
+                                            <Label htmlFor="namaLengkap">Nama Lengkap <span className="text-red-500">*</span></Label>
+                                            <Input id="namaLengkap" required placeholder="Nama lengkap sesuai ijazah/akta" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="jenisKelamin">Jenis Kelamin <span className="text-red-500">*</span></Label>
+                                            <Select required>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Pilih..." />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="L">Laki-laki</SelectItem>
+                                                    <SelectItem value="P">Perempuan</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="tempatLahir">Tempat Lahir <span className="text-red-500">*</span></Label>
+                                            <Input id="tempatLahir" required placeholder="Kab/Kota" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="tanggalLahir">Tanggal Lahir <span className="text-red-500">*</span></Label>
+                                            <Input id="tanggalLahir" type="date" required />
+                                        </div>
+                                    </div>
+                                </TabsContent>
+
+                                {/* TAB: ALAMAT */}
+                                <TabsContent value="alamat" className="space-y-4 m-0 mt-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="alamat">Alamat Lengkap (Jalan/Dusun) <span className="text-red-500">*</span></Label>
+                                        <Input id="alamat" required placeholder="Contoh: Jl. Merdeka No. 10" />
+                                    </div>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="rt">RT <span className="text-red-500">*</span></Label>
+                                            <Input id="rt" required placeholder="001" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="rw">RW <span className="text-red-500">*</span></Label>
+                                            <Input id="rw" required placeholder="002" />
+                                        </div>
+                                        <div className="space-y-2 md:col-span-2">
+                                            <Label htmlFor="kelurahan">Desa/Kelurahan <span className="text-red-500">*</span></Label>
+                                            <Input id="kelurahan" required placeholder="Nama Desa/Kelurahan" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="kecamatan">Kecamatan <span className="text-red-500">*</span></Label>
+                                            <Input id="kecamatan" required placeholder="Kecamatan" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="kabKota">Kabupaten/Kota <span className="text-red-500">*</span></Label>
+                                            <Input id="kabKota" required placeholder="Kabupaten/Kota" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="provinsi">Provinsi <span className="text-red-500">*</span></Label>
+                                            <Input id="provinsi" required placeholder="Provinsi" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="kodePos">Kode Pos</Label>
+                                            <Input id="kodePos" placeholder="Cth: 12345" />
+                                        </div>
+                                    </div>
+                                    <div className="pt-4 border-t space-y-2">
+                                        <Label htmlFor="nomorHp">Nomor HP / WhatsApp (Aktif) <span className="text-red-500">*</span></Label>
+                                        <Input id="nomorHp" required placeholder="08123456789" />
+                                    </div>
+                                </TabsContent>
+
+                                {/* TAB: KELUARGA */}
+                                <TabsContent value="keluarga" className="space-y-6 m-0 mt-4">
+                                    <div className="space-y-4">
+                                        <h4 className="font-semibold text-sm bg-muted/50 p-2 rounded">Data Ayah Kandung</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="namaAyah">Nama Ayah</Label>
+                                                <Input id="namaAyah" placeholder="Nama lengkap ayah" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="nikAyah">NIK Ayah</Label>
+                                                <Input id="nikAyah" placeholder="16 digit NIK" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="pekerjaanAyah">Pekerjaan</Label>
+                                                <Input id="pekerjaanAyah" placeholder="Pekerjaan ayah" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <h4 className="font-semibold text-sm bg-muted/50 p-2 rounded">Data Ibu Kandung</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="namaIbu">Nama Ibu <span className="text-red-500">*</span></Label>
+                                                <Input id="namaIbu" required placeholder="Nama lengkap ibu (wajib)" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="nikIbu">NIK Ibu</Label>
+                                                <Input id="nikIbu" placeholder="16 digit NIK" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="pekerjaanIbu">Pekerjaan</Label>
+                                                <Input id="pekerjaanIbu" placeholder="Pekerjaan ibu" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <h4 className="font-semibold text-sm bg-muted/50 p-2 rounded">Data Wali (Opsional)</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="namaWali">Nama Wali</Label>
+                                                <Input id="namaWali" placeholder="Nama lengkap wali" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="nikWali">NIK Wali</Label>
+                                                <Input id="nikWali" placeholder="16 digit NIK" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="pekerjaanWali">Pekerjaan</Label>
+                                                <Input id="pekerjaanWali" placeholder="Pekerjaan wali" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="teleponWali">Nomor HP Wali</Label>
+                                                <Input id="teleponWali" placeholder="08..." />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </TabsContent>
+
+                                {/* TAB: AKADEMIK */}
+                                <TabsContent value="akademik" className="space-y-4 m-0 mt-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="tahunMasuk">Tahun Masuk <span className="text-red-500">*</span></Label>
+                                            <Input id="tahunMasuk" required placeholder="Cth: 2025" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="kelas">Kelas Awal <span className="text-red-500">*</span></Label>
+                                            <Select required>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Pilih Kelas..." />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="VII-A">VII-A</SelectItem>
+                                                    <SelectItem value="VII-B">VII-B</SelectItem>
+                                                    <SelectItem value="VII-C">VII-C</SelectItem>
+                                                    <SelectItem value="VIII-A">VIII-A</SelectItem>
+                                                    <SelectItem value="IX-A">IX-A</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="status">Status Aktif <span className="text-red-500">*</span></Label>
+                                            <Select defaultValue="active" required>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Pilih Status..." />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="active">Aktif</SelectItem>
+                                                    <SelectItem value="inactive">Nonaktif</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                </TabsContent>
+                            </ScrollArea>
+                        </Tabs>
+                    </div>
+
+                    <div className="px-6 py-4 border-t shrink-0 flex items-center justify-between bg-muted/20">
+                        <div className="text-xs text-muted-foreground hidden sm:block">
+                            Pastikan data yang diisi sudah valid dan sesuai dengan dokumen asli.
+                        </div>
+                        <div className="flex gap-2 w-full sm:w-auto justify-end">
+                            <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
+                                Batal
+                            </Button>
+                            <Button type="submit" disabled={loading} className="gap-2">
+                                <Save className="h-4 w-4" />
+                                {loading ? 'Menyimpan...' : 'Simpan Data'}
+                            </Button>
+                        </div>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+    )
+}

@@ -91,7 +91,16 @@ export const siswaColumns: ColumnDef<Student>[] = [
         filterFn: (row, id, value) => {
             return value.includes(row.getValue(id))
         },
-        enableSorting: false,
+        sortingFn: (rowA, rowB) => {
+            const order: Record<string, number> = { VII: 1, VIII: 2, IX: 3 }
+            const parse = (v: string) => {
+                const [level, suffix] = v.split('-')
+                return [order[level] ?? 0, suffix ?? ''] as const
+            }
+            const [la, sa] = parse(rowA.getValue('kelas'))
+            const [lb, sb] = parse(rowB.getValue('kelas'))
+            return la !== lb ? la - lb : sa.localeCompare(sb)
+        },
     },
     {
         accessorKey: 'status',
