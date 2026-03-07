@@ -1,23 +1,13 @@
-# Shadcn Admin Dashboard
+# Madrasah Connect Admin Dashboard
 
 Admin Dashboard UI crafted with Shadcn and Vite. Built with responsiveness and accessibility in mind.
 
-![alt text](public/images/shadcn-admin.png)
+![alt text](public/images/madrasah-connect.png)
 
 > [!NOTE]
-> This is not a starter project (template) though. This is a modified version adapted to the context of Ulul Ilmi.
+> This is a modified, adapted, and integrated to the context of [Ulul Ilmi Islamic Boarding School](https://ululilmi.sch.id/) by [Abdul Hakim](https://github.com/alarwasyi98)
 
-## Features
-
-- Light/dark mode
-- Responsive
-- Accessible
-- With built-in Sidebar component
-- Global search command
-- 10+ pages
-- Extra custom components
-- RTL support
-
+> [!SEE ALSO] [Original Template](https://github.com/satnaing/shadcn-admin)
 
 ## Tech Stack
 
@@ -31,28 +21,12 @@ Admin Dashboard UI crafted with Shadcn and Vite. Built with responsiveness and a
 
 ## Run Locally
 
-Clone the project
-
 ```bash
-  git clone https://github.com/satnaing/shadcn-admin.git
+  git clone https://github.com/alarwasyi98/sims-admin.git
 ```
-
-Go to the project directory
-
-```bash
-  cd shadcn-admin
-```
-
-Install dependencies
 
 ```bash
   pnpm install
-```
-
-Start the server
-
-```bash
-  pnpm run dev
 ```
 
 ## License
