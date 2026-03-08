@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
     Card,
     CardContent,
@@ -7,6 +9,23 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 import {
     Table,
     TableBody,
@@ -23,7 +42,7 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { PageHeader } from '@/components/shared/page-header'
 import { formatRupiah } from '@/lib/format'
-import { Receipt } from 'lucide-react'
+import { Plus, Receipt } from 'lucide-react'
 
 type PeriodeBayar = 'bulanan' | 'tahunan' | 'sekali'
 
@@ -43,7 +62,7 @@ const periodeConfig: Record<PeriodeBayar, { label: string; color: string }> = {
     sekali: { label: 'Sekali Bayar', color: 'bg-amber-100/30 text-amber-800 dark:text-amber-200 border-amber-200' },
 }
 
-const jenisBayarList: JenisBayarItem[] = [
+const initialList: JenisBayarItem[] = [
     { id: '1', kode: 'SPP-MTS', nama: 'SPP MTs', nominal: 450000, periode: 'bulanan', keterangan: 'Sumbangan Pembinaan Pendidikan bulanan', aktif: true },
     { id: '2', kode: 'SPP-MA', nama: 'SPP MA', nominal: 500000, periode: 'bulanan', keterangan: 'Sumbangan Pembinaan Pendidikan MA', aktif: true },
     { id: '3', kode: 'PPDB-2026', nama: 'Biaya Pendaftaran PPDB', nominal: 150000, periode: 'sekali', keterangan: 'Biaya formulir dan seleksi PPDB', aktif: true },
@@ -55,8 +74,26 @@ const jenisBayarList: JenisBayarItem[] = [
     { id: '9', kode: 'UJIAN', nama: 'Biaya Ujian', nominal: 200000, periode: 'tahunan', keterangan: 'UN / UAS (termasuk kartu ujian)', aktif: true },
 ]
 
+function emptyForm(): Omit<JenisBayarItem, 'id'> {
+    return { kode: '', nama: '', nominal: 0, periode: 'bulanan', keterangan: '', aktif: true }
+}
+
 export function JenisBayar() {
-    const aktifCount = jenisBayarList.filter((j) => j.aktif).length
+    const [list, setList] = useState<JenisBayarItem[]>(initialList)
+    const [open, setOpen] = useState(false)
+    const [form, setForm] = useState(emptyForm())
+
+    const handleAdd = () => {
+        const newItem: JenisBayarItem = {
+            ...form,
+            id: Date.now().toString(),
+        }
+        setList((prev) => [...prev, newItem])
+        setOpen(false)
+        setForm(emptyForm())
+    }
+
+    const aktifCount = list.filter((j) => j.aktif).length
 
     return (
         <>
@@ -76,13 +113,19 @@ export function JenisBayar() {
                 />
 
                 <Card>
-                    <CardHeader>
-                        <CardTitle className='flex items-center gap-2'>
-                            <Receipt className='h-5 w-5' /> Daftar Jenis Pembayaran
-                        </CardTitle>
-                        <CardDescription>
-                            {aktifCount} aktif dari {jenisBayarList.length} jenis pembayaran
-                        </CardDescription>
+                    <CardHeader className='flex flex-row items-start justify-between'>
+                        <div>
+                            <CardTitle className='flex items-center gap-2'>
+                                <Receipt className='h-5 w-5' /> Daftar Jenis Pembayaran
+                            </CardTitle>
+                            <CardDescription>
+                                {aktifCount} aktif dari {list.length} jenis pembayaran
+                            </CardDescription>
+                        </div>
+                        <Button size='sm' className='gap-1.5' onClick={() => setOpen(true)}>
+                            <Plus className='h-4 w-4' />
+                            Tambah
+                        </Button>
                     </CardHeader>
                     <CardContent>
                         <div className='overflow-auto rounded-md border'>
@@ -98,7 +141,7 @@ export function JenisBayar() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {jenisBayarList.map((item) => {
+                                    {list.map((item) => {
                                         const pCfg = periodeConfig[item.periode]
                                         return (
                                             <TableRow key={item.id} className={!item.aktif ? 'opacity-60' : ''}>
@@ -125,6 +168,98 @@ export function JenisBayar() {
                     </CardContent>
                 </Card>
             </Main>
+
+            {/* ── Dialog Tambah Jenis Bayar ── */}
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent className='sm:max-w-[440px]'>
+                    <DialogHeader>
+                        <DialogTitle>Tambah Jenis Bayar</DialogTitle>
+                        <DialogDescription>Isi informasi pos pembayaran baru.</DialogDescription>
+                    </DialogHeader>
+
+                    <div className='grid gap-4 py-4'>
+                        <div className='grid grid-cols-4 items-center gap-4'>
+                            <Label htmlFor='kode' className='text-right'>Kode</Label>
+                            <Input
+                                id='kode'
+                                value={form.kode}
+                                onChange={(e) => setForm((f) => ({ ...f, kode: e.target.value }))}
+                                placeholder='Mis: SPP-MTS'
+                                className='col-span-3'
+                            />
+                        </div>
+                        <div className='grid grid-cols-4 items-center gap-4'>
+                            <Label htmlFor='nama' className='text-right'>Nama</Label>
+                            <Input
+                                id='nama'
+                                value={form.nama}
+                                onChange={(e) => setForm((f) => ({ ...f, nama: e.target.value }))}
+                                placeholder='Nama jenis bayar'
+                                className='col-span-3'
+                            />
+                        </div>
+                        <div className='grid grid-cols-4 items-center gap-4'>
+                            <Label htmlFor='nominal' className='text-right'>Nominal</Label>
+                            <Input
+                                id='nominal'
+                                type='number'
+                                value={form.nominal || ''}
+                                onChange={(e) => setForm((f) => ({ ...f, nominal: Number(e.target.value) }))}
+                                placeholder='0'
+                                className='col-span-3'
+                            />
+                        </div>
+                        <div className='grid grid-cols-4 items-center gap-4'>
+                            <Label className='text-right'>Periode</Label>
+                            <Select
+                                value={form.periode}
+                                onValueChange={(v) => setForm((f) => ({ ...f, periode: v as PeriodeBayar }))}
+                            >
+                                <SelectTrigger className='col-span-3'>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value='bulanan'>Bulanan</SelectItem>
+                                    <SelectItem value='tahunan'>Tahunan</SelectItem>
+                                    <SelectItem value='sekali'>Sekali Bayar</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className='grid grid-cols-4 items-center gap-4'>
+                            <Label htmlFor='ket' className='text-right'>Keterangan</Label>
+                            <Input
+                                id='ket'
+                                value={form.keterangan}
+                                onChange={(e) => setForm((f) => ({ ...f, keterangan: e.target.value }))}
+                                placeholder='Opsional'
+                                className='col-span-3'
+                            />
+                        </div>
+                        <div className='grid grid-cols-4 items-center gap-4'>
+                            <Label className='text-right'>Status</Label>
+                            <Select
+                                value={form.aktif ? 'aktif' : 'nonaktif'}
+                                onValueChange={(v) => setForm((f) => ({ ...f, aktif: v === 'aktif' }))}
+                            >
+                                <SelectTrigger className='col-span-3'>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value='aktif'>Aktif</SelectItem>
+                                    <SelectItem value='nonaktif'>Nonaktif</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant='outline' onClick={() => setOpen(false)}>Batal</Button>
+                        <Button onClick={handleAdd} disabled={!form.kode || !form.nama}>
+                            Simpan
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }
