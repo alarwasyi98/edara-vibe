@@ -1,8 +1,8 @@
 # EDARA (أدارة) — Dokumentasi Teknis Komprehensif
 
-**Versi Dokumentasi:** 2.2.1
-**Tanggal Dibuat:** 17 Maret 2026
-**Dibuat Oleh:** Claude Code — Automated Analysis
+**Versi Dokumentasi:** 2.2.2
+**Tanggal Dibuat:** 19 Maret 2026
+**Dibuat Oleh:** Antigravity AI — Automated Analysis
 **Status:** Draft
 
 ---
@@ -23,6 +23,7 @@
 12. [Deployment & Infrastruktur](#12-deployment--infrastruktur)
 13. [Atribusi & Lisensi](#13-atribusi--lisensi)
 14. [Glosarium](#14-glosarium)
+16. [Standar Data Table](#16-standar-data-table)
 15. [Riwayat Perubahan Dokumentasi](#15-riwayat-perubahan-dokumentasi)
 
 ---
@@ -372,12 +373,35 @@ File `LICENSE` menunjukkan proyek menggunakan dasar lisensi sumber standar. Depe
 
 ---
 
-## 15. RIWAYAT PERUBAHAN DOKUMENTASI
-| Versi | Tanggal | Penulis | Perubahan |
-|---|---|---|---|
-| 2.2.1 | 17 Maret 2026 | Claude Code — Automated Analysis | Pembuatan awal dokumen secara menyeluruh. |
+## 16. STANDAR DATA TABLE
+Aplikasi ini memiliki standar penggunaan Data Table berbasis `@tanstack/react-table` untuk menjaga konsistensi UI/UX di seluruh modul.
+
+### 16.1 Komponen Inti
+- **DataTableToolbar**: Komponen standar untuk kontrol di atas tabel.
+    - Lokasi Kolom Pencarian: Sisi kiri (Top-Left).
+    - Lokasi Filter Faceted: Sisi kiri, setelah pencarian.
+    - Lokasi Toggle Kolom: Sisi kanan (Top-Right).
+- **DataTablePagination**: Komponen standar untuk kontrol di bawah tabel.
+    - Lokasi Row Limit: Sisi kiri (Bottom-Left).
+    - Lokasi Paginasi & Info Halaman: Sisi kanan (Bottom-Right).
+- **DataTableColumnHeader**: Komponen untuk header kolom yang mendukung sorting.
+
+### 16.2 Aturan Kontainer (Card Wrapper)
+Untuk menjaga kepadatan informasi dan hierarki visual, penggunaan kontainer diatur sebagai berikut:
+- **Tanpa Container (Main Content)**: Digunakan jika tabel adalah konten utama dan satu-satunya fokus di halaman tersebut.
+    - *Contoh: Halaman Data Siswa, Data Guru, Manajemen User.*
+- **Dengan Container (Card Wrapper)**: Digunakan jika tabel adalah bagian dari komponen lain atau berada dalam layout yang lebih kompleks.
+    - *Contoh: Tabel dalam Tabs (Kalender Daftar), Tabel dalam dashboard dengan statistik (Pembayaran Siswa), atau Tabel Master Data (Tahun Ajaran, Kelas).*
 
 ---
 
-*Dokumentasi ini dibuat secara otomatis melalui analisis statis kode oleh Claude Code.  
+## 15. RIWAYAT PERUBAHAN DOKUMENTASI
+| Versi | Tanggal | Penulis | Perubahan |
+|---|---|---|---|
+| 2.2.1 | 17 Maret 2026 | Claude Code | Pembuatan awal dokumen secara menyeluruh. |
+| 2.2.2 | 19 Maret 2026 | Antigravity AI | Penambahan Standar Data Table dan refaktorisasi komponen SPP & Akademik. |
+
+---
+
+*Dokumentasi ini diperbarui secara otomatis melalui analisis kode oleh Antigravity AI.  
 Untuk pertanyaan atau koreksi, hubungi tim pengembang sentral EDARA.*
