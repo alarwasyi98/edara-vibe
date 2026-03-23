@@ -7,8 +7,9 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { PageHeader } from '@/components/shared/page-header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CalendarDays, List } from 'lucide-react'
+import { CalendarDays, CalendarPlus, List } from 'lucide-react'
 import { KalenderTable } from './components/kalender-table'
 import { EventCalendar } from './components/event-calendar'
 import { CalendarExport } from './components/calendar-export'
@@ -37,6 +38,9 @@ export function KalenderKegiatan() {
                     title='Kalender Kegiatan'
                     description='Jadwal kegiatan dan acara madrasah.'
                 >
+                    <Button className='gap-1.5' onClick={() => {/* handle dialog here */}}>
+                        <CalendarPlus size={16} /> Tambah
+                    </Button>
                     <CalendarExport events={events} />
                 </PageHeader>
 

@@ -82,7 +82,6 @@ import {
     MoreHorizontal,
     Pencil,
     Trash2,
-    Plus,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { DataTableToolbar, DataTablePagination, DataTableColumnHeader } from '@/components/data-table'
@@ -285,7 +284,7 @@ export function ManajemenSPP() {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end'>
-                        <DropdownMenuItem onClick={() => {}}>
+                        <DropdownMenuItem onClick={() => { }}>
                             <Pencil className='mr-2 h-4 w-4' />
                             Edit Transaksi
                         </DropdownMenuItem>
@@ -361,9 +360,8 @@ export function ManajemenSPP() {
                     title='Pembayaran Siswa'
                     description='Kelola tagihan dan pembayaran SPP siswa.'
                 >
-                    <Button size='sm' className='gap-1.5' onClick={() => navigate({ to: '/spp/tambah-pembayaran' })}>
-                        <Plus className='h-4 w-4' />
-                        Tambah
+                    <Button className='gap-1.5' onClick={() => navigate({ to: '/spp/tambah-pembayaran' })}>
+                        <Receipt size={16} /> Tambah
                     </Button>
                 </PageHeader>
 

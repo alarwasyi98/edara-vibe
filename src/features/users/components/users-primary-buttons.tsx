@@ -8,13 +8,13 @@ export function UsersPrimaryButtons() {
     <div className='flex gap-2'>
       <Button
         variant='outline'
-        className='space-x-1'
+        className='gap-1.5'
         onClick={() => setOpen('invite')}
       >
-        <span>Undang Pengguna</span> <MailPlus size={18} />
+        <MailPlus size={16} /> Undang
       </Button>
-      <Button className='space-x-1' onClick={() => setOpen('add')}>
-        <span>Tambah Pengguna</span> <UserPlus size={18} />
+      <Button className='gap-1.5' onClick={() => setOpen('add')}>
+        <UserPlus size={16} /> Tambah
       </Button>
     </div>
   )

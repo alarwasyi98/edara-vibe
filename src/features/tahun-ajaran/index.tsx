@@ -14,7 +14,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import { PlusCircle, CheckCircle2, Clock, BookOpen, CalendarRange } from 'lucide-react'
+import { CheckCircle2, Clock, BookOpen, CalendarRange } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -236,7 +236,7 @@ export function TahunAjaran() {
                     description='Kelola tahun ajaran dan periode akademik madrasah.'
                 >
                     <Button className='gap-1.5' onClick={handleAdd}>
-                        <PlusCircle className='h-4 w-4' /> Tambah
+                        <CalendarRange size={16} /> Tambah
                     </Button>
                 </PageHeader>
 

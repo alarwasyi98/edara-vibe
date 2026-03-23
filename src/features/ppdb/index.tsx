@@ -17,6 +17,8 @@ import {
 } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { PpdbDialog } from './components/ppdb-dialog'
 import {
     Card,
     CardContent,
@@ -158,6 +160,7 @@ export function DataPPDB() {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
+    const [openAdd, setOpenAdd] = useState(false)
 
     // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
@@ -191,7 +194,11 @@ export function DataPPDB() {
                 <PageHeader
                     title='PPDB 2026/2027'
                     description='Penerimaan Peserta Didik Baru — pantau status pendaftaran calon siswa.'
-                />
+                >
+                    <Button className='gap-1.5' onClick={() => setOpenAdd(true)}>
+                        <Users size={16} /> Tambah
+                    </Button>
+                </PageHeader>
 
                 <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
                     <StatCard title='Total Pendaftar' value={`${total}`} icon={<Users className='h-4 w-4 text-muted-foreground' />} />
@@ -273,6 +280,7 @@ export function DataPPDB() {
                     </CardContent>
                 </Card>
             </Main>
+            <PpdbDialog open={openAdd} onOpenChange={setOpenAdd} />
         </>
     )
 }

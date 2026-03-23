@@ -17,7 +17,6 @@ import {
 import { toast } from 'sonner'
 import {
     MoreHorizontal,
-    PlusCircle,
     Pencil,
     Trash2,
     Tag,
@@ -419,7 +418,7 @@ export function DiskonSPP() {
                     description='Kelola jenis diskon dan subsidi SPP untuk siswa madrasah.'
                 >
                     <Button className='gap-1.5' onClick={handleAdd}>
-                        <PlusCircle className='h-4 w-4' /> Tambah Diskon
+                        <BadgePercent size={16} /> Tambah
                     </Button>
                 </PageHeader>
 

@@ -14,7 +14,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import { PlusCircle, BookOpen, Users, UserCheck, TrendingUp } from 'lucide-react'
+import { Shapes, BookOpen, Users, UserCheck, TrendingUp } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -233,7 +233,7 @@ export function DataKelas() {
                     description='Kelola kelas dan rombongan belajar madrasah.'
                 >
                     <Button className='gap-1.5' onClick={handleAdd}>
-                        <PlusCircle className='h-4 w-4' /> Tambah Kelas
+                        <Shapes size={16} /> Tambah
                     </Button>
                 </PageHeader>
 

@@ -403,5 +403,26 @@ Untuk menjaga kepadatan informasi dan hierarki visual, penggunaan kontainer diat
 
 ---
 
+## 17. STANDAR AKSI HALAMAN (ACTION BUTTONS)
+
+Aplikasi ini menggunakan standar UI yang terpusat untuk tombol aksi primer per modul (misal: "Tambah Siswa", "Tambah Kelas") demi konsistensi.
+
+### 17.1 Konvensi Utama
+- **Lokasi**: Tombol harus selalu dijadikan sebagai *chidlren* pertama pada komponen `<PageHeader>`. `PageHeader` secara otomatis mengatur properti flexbox agar komponen rata-kanan sejajar dengan judul halaman.
+- **Teks**: Singkat dan jelas (Contoh: "Tambah", bukan "Tambah Tahun Ajaran"). Teks lebih panjang hanya boleh digunakan secara insidental.
+- **Ikon**: Menggunakan ikon Lucide spesifik modul (contoh: `Shapes` untuk Kelas, `Users` untuk PPDB). Parameter harus selalu disetel ke prop eksplisit `size={16}`.
+- **Styling Tombol**: Classname harus selaras menggunakan `gap-1.5` dengan varian `default`.
+
+#### Contoh Sintaks:
+```tsx
+<PageHeader title="Judul Modul" description="Deskripsi Modul">
+    <Button className='gap-1.5' onClick={handleAdd}>
+        <Shapes size={16} /> Tambah
+    </Button>
+</PageHeader>
+```
+
+---
+
 *Dokumentasi ini diperbarui secara otomatis melalui analisis kode oleh Antigravity AI.  
 Untuk pertanyaan atau koreksi, hubungi tim pengembang sentral EDARA.*

@@ -58,7 +58,7 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { PageHeader } from '@/components/shared/page-header'
 import { formatRupiah } from '@/lib/format'
-import { Plus, Receipt } from 'lucide-react'
+import { Blocks, Receipt } from 'lucide-react'
 import { toast } from 'sonner'
 import { DataTableToolbar, DataTablePagination, DataTableColumnHeader } from '@/components/data-table'
 
@@ -213,9 +213,8 @@ export function JenisBayar() {
                     title='Jenis Bayar'
                     description='Master data jenis pembayaran dan skema tarif madrasah.'
                 >
-                    <Button size='sm' className='gap-1.5' onClick={() => setOpen(true)}>
-                        <Plus className='h-4 w-4' />
-                        Tambah
+                    <Button className='gap-1.5' onClick={() => setOpen(true)}>
+                        <Blocks size={16} /> Tambah
                     </Button>
                 </PageHeader>
 
