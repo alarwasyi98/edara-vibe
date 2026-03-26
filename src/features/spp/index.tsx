@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { faker } from '@faker-js/faker'
 import {
@@ -44,24 +44,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import {
-    ChartContainer,
-    ChartTooltip,
-    ChartTooltipContent,
-    ChartLegend,
-    ChartLegendContent,
-    type ChartConfig,
-} from '@/components/ui/chart'
-import {
-    PieChart,
-    Pie,
-    Cell,
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-} from 'recharts'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -89,7 +71,9 @@ import { cn } from '@/lib/utils'
 import { DataTableToolbar, DataTablePagination, DataTableColumnHeader } from '@/components/data-table'
 import { SppImportDialog, SppExportDialog } from './components/spp-dialogs'
 
-// import { determineSppStatus } from './utils/calculations'
+// Lazy loaded charts
+const SppCharts = lazy(() => import('@/features/spp/components/spp-charts.tsx'))
+
 faker.seed(99999)
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -107,38 +91,14 @@ type SppPayment = {
 
 // ─── Seed Data ────────────────────────────────────────────────────────────────
 
-const bulanList = [
-    '2026-01',
-    '2026-02',
-    '2026-03',
-    '2026-04',
-    '2026-05',
-    '2026-06',
-]
-
+const bulanList = ['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06']
 const siswaNames = [
-    'Ahmad Rizki F.',
-    'Nisa Putri Ayu',
-    'Muhammad Faqih',
-    'Siti Aminah',
-    'Hasan Ridwan',
-    'Zahra Khadijah',
-    'Bayu Pratama',
-    'Fatimah Azzahra',
-    'Irfan Maulana',
-    'Layla Rahma',
-    'Galih Nugroho',
-    'Annisa Dewi',
-    'Rafi Hidayat',
-    'Salma Utami',
-    'Dani Kurniawan',
+    'Ahmad Rizki F.', 'Nisa Putri Ayu', 'Muhammad Faqih', 'Siti Aminah',
+    'Hasan Ridwan', 'Zahra Khadijah', 'Bayu Pratama', 'Fatimah Azzahra',
+    'Irfan Maulana', 'Layla Rahma', 'Galih Nugroho', 'Annisa Dewi',
+    'Rafi Hidayat', 'Salma Utami', 'Dani Kurniawan', 'Aji Saputra',
 ]
-
-const kelasList = [
-    'VII-A', 'VII-B', 'VII-C',
-    'VIII-A', 'VIII-B', 'VIII-C',
-    'IX-A', 'IX-B', 'IX-C',
-]
+const kelasList = ['VII-A', 'VII-B', 'VII-C', 'VIII-A', 'VIII-B', 'VIII-C', 'IX-A', 'IX-B', 'IX-C']
 
 const initialPayments: SppPayment[] = Array.from({ length: 50 }, () => {
     const nominal = 750000
@@ -155,30 +115,13 @@ const initialPayments: SppPayment[] = Array.from({ length: 50 }, () => {
         kelas: faker.helpers.arrayElement(kelasList),
         bulan: faker.helpers.arrayElement(bulanList),
         nominal,
-        dibayar:
-            status === 'paid'
-                ? nominal
-                : status === 'partial'
-                    ? Math.floor(nominal * 0.5)
-                    : 0,
+        dibayar: status === 'paid' ? nominal : status === 'partial' ? Math.floor(nominal * 0.5) : 0,
         status,
-        tanggalBayar:
-            status === 'paid' || status === 'partial'
-                ? faker.date.recent({ days: 30 }).toISOString().split('T')[0]
-                : null,
+        tanggalBayar: status === 'paid' || status === 'partial'
+            ? faker.date.recent({ days: 30 }).toISOString().split('T')[0]
+            : null,
     }
 })
-
-const pieConfig: ChartConfig = {
-    lunas: { label: 'Lunas', color: 'hsl(142 71% 45%)' },
-    menunggak: { label: 'Menunggak', color: 'hsl(0 72% 51%)' },
-    belumLunas: { label: 'Belum Lunas', color: 'hsl(38 92% 50%)' },
-}
-
-const lineConfig: ChartConfig = {
-    terbayar: { label: 'Terbayar', color: 'hsl(142 71% 45%)' },
-    tagihan: { label: 'Total Tagihan', color: 'hsl(215 20% 65%)' },
-}
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -192,17 +135,12 @@ export function ManajemenSPP() {
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
 
-
-    // ─── Column Definitions ───────────────────────────────────────────────────
     const columns: ColumnDef<SppPayment>[] = [
         {
             id: 'select',
             header: ({ table }) => (
                 <Checkbox
-                    checked={
-                        table.getIsAllPageRowsSelected() ||
-                        (table.getIsSomePageRowsSelected() && 'indeterminate')
-                    }
+                    checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
                     onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
                     aria-label='Pilih semua'
                     className='translate-y-[2px]'
@@ -278,24 +216,18 @@ export function ManajemenSPP() {
             cell: () => (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-8 w-8 p-0 text-muted-foreground'
-                        >
+                        <Button variant='ghost' size='icon' className='h-8 w-8 p-0 text-muted-foreground'>
                             <MoreHorizontal className='h-4 w-4' />
                             <span className='sr-only'>Buka menu</span>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end'>
                         <DropdownMenuItem onClick={() => { }}>
-                            <Pencil className='mr-2 h-4 w-4' />
-                            Edit Transaksi
+                            <Pencil className='mr-2 h-4 w-4' /> Edit Transaksi
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className='text-destructive focus:text-destructive' onClick={() => { }}>
-                            <Trash2 className='mr-2 h-4 w-4' />
-                            Hapus Transaksi
+                            <Trash2 className='mr-2 h-4 w-4' /> Hapus Transaksi
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -323,30 +255,13 @@ export function ManajemenSPP() {
     const selectedRows = table.getFilteredSelectedRowModel().rows
     const clearSelection = () => table.resetRowSelection()
 
-    // Agregat ditarik ke dalam komponen agar otomatis re-render jika `payments` berubah
     const totalTagihan = payments.reduce((sum, p) => sum + p.nominal, 0)
     const totalDibayar = payments.reduce((sum, p) => sum + p.dibayar, 0)
     const sisaTunggakan = totalTagihan - totalDibayar
 
-    // Chart data recalc
     const lunasCount = payments.filter((p) => p.status === 'paid').length
     const menunggakCount = payments.filter((p) => p.status === 'overdue').length
     const belumLunasCount = payments.filter((p) => p.status === 'unpaid' || p.status === 'partial').length
-
-    const pieData = [
-        { name: 'lunas', value: lunasCount, fill: 'var(--color-lunas)' },
-        { name: 'menunggak', value: menunggakCount, fill: 'var(--color-menunggak)' },
-        { name: 'belumLunas', value: belumLunasCount, fill: 'var(--color-belumLunas)' },
-    ]
-
-    const trendData = [
-        { bulan: 'Jan', terbayar: 28500000, tagihan: 37500000 },
-        { bulan: 'Feb', terbayar: 31200000, tagihan: 37500000 },
-        { bulan: 'Mar', terbayar: 29750000, tagihan: 37500000 },
-        { bulan: 'Apr', terbayar: 33100000, tagihan: 37500000 },
-        { bulan: 'Mei', terbayar: 35400000, tagihan: 37500000 },
-        { bulan: 'Jun', terbayar: totalDibayar, tagihan: totalTagihan },
-    ]
 
     return (
         <>
@@ -360,10 +275,7 @@ export function ManajemenSPP() {
             </Header>
 
             <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
-                <PageHeader
-                    title='Pembayaran Siswa'
-                    description='Kelola tagihan dan pembayaran SPP siswa.'
-                >
+                <PageHeader title='Pembayaran Siswa' description='Kelola tagihan dan pembayaran SPP siswa.'>
                     <div className='flex gap-2'>
                         <Button variant='outline' className='gap-1.5' onClick={() => setDialog('import')}>
                             <Upload size={16} /> Import
@@ -378,162 +290,26 @@ export function ManajemenSPP() {
                 </PageHeader>
 
                 <div className='grid gap-4 sm:grid-cols-3'>
-                    <StatCard
-                        title='Total Tagihan'
-                        value={formatRupiah(totalTagihan)}
-                        description='semester ini'
-                        icon={<Receipt className='h-4 w-4 text-muted-foreground' />}
-                    />
-                    <StatCard
-                        title='Total Terbayar'
-                        value={formatRupiah(totalDibayar)}
-                        trend={{
-                            value: `${Math.round((totalDibayar / totalTagihan) * 100)}%`,
-                            positive: true,
-                        }}
-                        description='dari total tagihan'
-                        icon={<TrendingUp className='h-4 w-4 text-muted-foreground' />}
-                    />
-                    <StatCard
-                        title='Sisa Tunggakan'
-                        value={formatRupiah(sisaTunggakan)}
-                        trend={{ value: 'perlu tindak lanjut', positive: false }}
-                        description='belum terbayar'
-                        icon={<AlertTriangle className='h-4 w-4 text-muted-foreground' />}
-                    />
+                    <StatCard title='Total Tagihan' value={formatRupiah(totalTagihan)} description='semester ini' icon={<Receipt className='h-4 w-4 text-muted-foreground' />} />
+                    <StatCard title='Total Terbayar' value={formatRupiah(totalDibayar)} trend={{ value: `${Math.round((totalDibayar / totalTagihan) * 100)}%`, positive: true }} description='dari total tagihan' icon={<TrendingUp className='h-4 w-4 text-muted-foreground' />} />
+                    <StatCard title='Sisa Tunggakan' value={formatRupiah(sisaTunggakan)} trend={{ value: 'perlu tindak lanjut', positive: false }} description='belum terbayar' icon={<AlertTriangle className='h-4 w-4 text-muted-foreground' />} />
                 </div>
 
-                <div className='grid gap-4 lg:grid-cols-2'>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Status Pembayaran Siswa</CardTitle>
-                            <CardDescription>
-                                {lunasCount} lunas · {menunggakCount} menunggak · {belumLunasCount} belum lunas
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className='flex items-center justify-center'>
-                            <ChartContainer
-                                config={pieConfig}
-                                className='h-[260px] w-full max-w-[320px] sm:max-w-none'
-                            >
-                                <PieChart>
-                                    <ChartTooltip
-                                        content={
-                                            <ChartTooltipContent
-                                                nameKey='name'
-                                                formatter={(value, name) => (
-                                                    <div className='flex items-center justify-between gap-4 w-full'>
-                                                        <span className='text-muted-foreground'>
-                                                            {pieConfig[name as keyof typeof pieConfig]?.label ?? name}
-                                                        </span>
-                                                        <span className='font-mono font-medium'>
-                                                            {Number(value)} siswa
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            />
-                                        }
-                                    />
-                                    <Pie
-                                        data={pieData}
-                                        dataKey='value'
-                                        nameKey='name'
-                                        cx='50%'
-                                        cy='50%'
-                                        innerRadius='35%'
-                                        outerRadius='60%'
-                                        paddingAngle={3}
-                                        strokeWidth={2}
-                                    >
-                                        {pieData.map((entry) => (
-                                            <Cell key={entry.name} fill={entry.fill} />
-                                        ))}
-                                    </Pie>
-                                    <ChartLegend
-                                        content={<ChartLegendContent nameKey='name' />}
-                                    />
-                                </PieChart>
-                            </ChartContainer>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Tren Pembayaran Bulanan</CardTitle>
-                            <CardDescription>Perbandingan tagihan vs terbayar Jan–Jun 2026</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <ChartContainer config={lineConfig} className='h-[260px] w-full'>
-                                <LineChart
-                                    data={trendData}
-                                    margin={{ top: 8, right: 12, left: 0, bottom: 0 }}
-                                >
-                                    <CartesianGrid
-                                        strokeDasharray='3 3'
-                                        vertical={false}
-                                        className='stroke-border'
-                                    />
-                                    <XAxis
-                                        dataKey='bulan'
-                                        tickLine={false}
-                                        axisLine={false}
-                                        tick={{ fontSize: 12 }}
-                                    />
-                                    <YAxis
-                                        tickLine={false}
-                                        axisLine={false}
-                                        tick={{ fontSize: 11 }}
-                                        tickFormatter={(v) =>
-                                            `${(v / 1_000_000).toFixed(0)}M`
-                                        }
-                                        width={40}
-                                    />
-                                    <ChartTooltip
-                                        content={
-                                            <ChartTooltipContent
-                                                formatter={(value, name) => (
-                                                    <div className='flex items-center justify-between gap-4 w-full'>
-                                                        <span className='text-muted-foreground'>
-                                                            {lineConfig[name as keyof typeof lineConfig]?.label ?? name}
-                                                        </span>
-                                                        <span className='font-mono font-medium'>
-                                                            {formatRupiah(Number(value))}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            />
-                                        }
-                                    />
-                                    <Line
-                                        type='monotone'
-                                        dataKey='tagihan'
-                                        stroke='var(--color-tagihan)'
-                                        strokeWidth={2}
-                                        strokeDasharray='4 4'
-                                        dot={false}
-                                    />
-                                    <Line
-                                        type='monotone'
-                                        dataKey='terbayar'
-                                        stroke='var(--color-terbayar)'
-                                        strokeWidth={2.5}
-                                        dot={{ r: 3, strokeWidth: 2 }}
-                                        activeDot={{ r: 5 }}
-                                    />
-                                    <ChartLegend content={<ChartLegendContent />} />
-                                </LineChart>
-                            </ChartContainer>
-                        </CardContent>
-                    </Card>
-                </div>
+                <Suspense fallback={<div className='h-[400px] w-full animate-pulse rounded-xl bg-muted' />}>
+                    <SppCharts
+                        lunasCount={lunasCount}
+                        menunggakCount={menunggakCount}
+                        belumLunasCount={belumLunasCount}
+                        totalTagihan={totalTagihan}
+                        totalDibayar={totalDibayar}
+                    />
+                </Suspense>
 
                 <Card>
                     <CardHeader className='space-y-4'>
                         <div>
                             <CardTitle>Daftar Pembayaran SPP</CardTitle>
-                            <CardDescription>
-                                {table.getFilteredRowModel().rows.length} tagihan ditampilkan · semester genap 2025/2026
-                            </CardDescription>
+                            <CardDescription>{table.getFilteredRowModel().rows.length} tagihan ditampilkan · semester genap 2025/2026</CardDescription>
                         </div>
                         <DataTableToolbar
                             table={table}
@@ -543,10 +319,7 @@ export function ManajemenSPP() {
                                 {
                                     columnId: 'status',
                                     title: 'Status',
-                                    options: Object.entries(sppStatusLabels).map(([value, label]) => ({
-                                        label,
-                                        value,
-                                    })),
+                                    options: Object.entries(sppStatusLabels).map(([value, label]) => ({ label, value })),
                                 },
                                 {
                                     columnId: 'kelas',
@@ -563,17 +336,8 @@ export function ManajemenSPP() {
                                     {table.getHeaderGroups().map((headerGroup) => (
                                         <TableRow key={headerGroup.id} className='group/row'>
                                             {headerGroup.headers.map((header) => (
-                                                <TableHead
-                                                    key={header.id}
-                                                    colSpan={header.colSpan}
-                                                    className={cn(
-                                                        'group-hover/row:bg-muted',
-                                                        header.column.columnDef.meta?.className
-                                                    )}
-                                                >
-                                                    {header.isPlaceholder
-                                                        ? null
-                                                        : flexRender(header.column.columnDef.header, header.getContext())}
+                                                <TableHead key={header.id} colSpan={header.colSpan} className={cn('group-hover/row:bg-muted', header.column.columnDef.meta?.className)}>
+                                                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                                 </TableHead>
                                             ))}
                                         </TableRow>
@@ -582,19 +346,9 @@ export function ManajemenSPP() {
                                 <TableBody>
                                     {table.getRowModel().rows?.length ? (
                                         table.getRowModel().rows.map((row) => (
-                                            <TableRow
-                                                key={row.id}
-                                                data-state={row.getIsSelected() && 'selected'}
-                                                className='group/row'
-                                            >
+                                            <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className='group/row'>
                                                 {row.getVisibleCells().map((cell) => (
-                                                    <TableCell
-                                                        key={cell.id}
-                                                        className={cn(
-                                                            'group-hover/row:bg-muted',
-                                                            cell.column.columnDef.meta?.className
-                                                        )}
-                                                    >
+                                                    <TableCell key={cell.id} className={cn('group-hover/row:bg-muted', cell.column.columnDef.meta?.className)}>
                                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                     </TableCell>
                                                 ))}
@@ -602,9 +356,7 @@ export function ManajemenSPP() {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={columns.length} className='h-24 text-center'>
-                                                Tidak ada data pembayaran.
-                                            </TableCell>
+                                            <TableCell colSpan={columns.length} className='h-24 text-center'>Tidak ada data pembayaran.</TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>
@@ -615,42 +367,17 @@ export function ManajemenSPP() {
                 </Card>
             </Main>
 
-            <div
-                className={cn(
-                    'fixed bottom-6 left-1/2 z-50 -translate-x-1/2 transition-all duration-300 ease-out',
-                    selectedRows.length > 0
-                        ? 'translate-y-0 opacity-100 pointer-events-auto'
-                        : 'translate-y-8 opacity-0 pointer-events-none'
-                )}
-            >
+            <div className={cn('fixed bottom-6 left-1/2 z-50 -translate-x-1/2 transition-all duration-300 ease-out', selectedRows.length > 0 ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none')}>
                 <div className='flex items-center gap-3 rounded-xl border bg-background px-4 py-3 shadow-2xl ring-1 ring-border/40'>
                     <span className='font-semibold text-foreground text-sm'>{selectedRows.length}</span>
                     <div className='h-4 w-px bg-border' />
-                    <Button
-                        size='sm'
-                        variant='outline'
-                        className='h-8 gap-1.5 text-xs'
-                        onClick={() => {/* TODO: kirim notifikasi massal */ }}
-                    >
-                        <Send className='h-3.5 w-3.5' />
-                        Kirim Notifikasi
+                    <Button size='sm' variant='outline' className='h-8 gap-1.5 text-xs' onClick={() => { }}>
+                        <Send className='h-3.5 w-3.5' /> Kirim Notifikasi
                     </Button>
-                    <Button
-                        size='sm'
-                        variant='outline'
-                        className='h-8 gap-1.5 text-xs text-emerald-700 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800 dark:hover:bg-emerald-950'
-                        onClick={() => {/* TODO: tandai lunas */ }}
-                    >
-                        <CheckSquare className='h-3.5 w-3.5' />
-                        Tandai Lunas
+                    <Button size='sm' variant='outline' className='h-8 gap-1.5 text-xs text-emerald-700 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800 dark:hover:bg-emerald-950' onClick={() => { }}>
+                        <CheckSquare className='h-3.5 w-3.5' /> Tandai Lunas
                     </Button>
-                    <Button
-                        size='icon'
-                        variant='ghost'
-                        className='h-8 w-8 text-muted-foreground hover:text-foreground'
-                        onClick={clearSelection}
-                        aria-label='Batalkan seleksi'
-                    >
+                    <Button size='icon' variant='ghost' className='h-8 w-8 text-muted-foreground hover:text-foreground' onClick={clearSelection}>
                         <X className='h-4 w-4' />
                     </Button>
                 </div>

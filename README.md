@@ -2,7 +2,7 @@
 
 Admin Dashboard UI crafted with Shadcn and Vite. Built with responsiveness and accessibility in mind.
 
-![alt text](public/images/madrasah-connect.png)
+![alt text](public/images/madrasah-connect.webp)
 
 > [!NOTE]
 > This is a modified, adapted, and integrated to the context of [Ulul Ilmi Islamic Boarding School](https://ululilmi.sch.id/) by [Abdul Hakim](https://github.com/alarwasyi98)
