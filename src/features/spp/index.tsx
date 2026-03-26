@@ -89,7 +89,7 @@ import { cn } from '@/lib/utils'
 import { DataTableToolbar, DataTablePagination, DataTableColumnHeader } from '@/components/data-table'
 import { SppImportDialog, SppExportDialog } from './components/spp-dialogs'
 
-import { determineSppStatus } from './utils/calculations'
+// import { determineSppStatus } from './utils/calculations'
 faker.seed(99999)
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -185,7 +185,7 @@ const lineConfig: ChartConfig = {
 export function ManajemenSPP() {
     const navigate = useNavigate()
     const [dialog, setDialog] = useState<'import' | 'export' | null>(null)
-    const [payments, setPayments] = useState<SppPayment[]>(initialPayments)
+    const [payments] = useState<SppPayment[]>(initialPayments)
     const [rowSelection, setRowSelection] = useState({})
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -275,7 +275,7 @@ export function ManajemenSPP() {
         },
         {
             id: 'actions',
-            cell: ({ row }) => (
+            cell: () => (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button

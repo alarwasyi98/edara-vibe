@@ -1,12 +1,12 @@
 import { type EventCategory } from './schema'
-import { BookOpen, GraduationCap, Trophy, Users } from 'lucide-react'
+import { BookOpen, GraduationCap, Trophy, Users, type LucideIcon } from 'lucide-react'
 import { kalenderKategoriColors } from '@/lib/constants'
 
 export const categoryOptions: {
     label: string
     value: EventCategory
     color: string
-    icon: any
+    icon: LucideIcon
 }[] = [
         {
             label: 'Akademik',
@@ -38,6 +38,6 @@ export const categoryColorMap = new Map<EventCategory, string>(
     categoryOptions.map((opt) => [opt.value, opt.color])
 )
 
-export const categoryIconMap = new Map<EventCategory, any>(
+export const categoryIconMap = new Map<EventCategory, LucideIcon>(
     categoryOptions.map((opt) => [opt.value, opt.icon])
 )

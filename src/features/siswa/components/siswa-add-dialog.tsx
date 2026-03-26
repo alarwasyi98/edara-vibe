@@ -56,7 +56,7 @@ export function SiswaAddDialog() {
 
     return (
         <Dialog open={open === 'add' || open === 'edit'} onOpenChange={handleClose}>
-            <DialogContent className="max-w-none w-screen h-[100dvh] m-0 p-0 rounded-none border-none flex flex-col sm:max-w-none sm:rounded-none">
+            <DialogContent className="max-w-none w-screen h-dvh m-0 p-0 rounded-none border-none flex flex-col sm:max-w-none sm:rounded-none">
                 <form key={isEdit ? currentRow?.id : 'new'} onSubmit={handleSubmit} className="flex flex-col h-full">
                     <DialogHeader className="px-6 py-4 border-b shrink-0">
                         <DialogTitle>{isEdit ? 'Edit Data Siswa' : 'Tambah Data Siswa'}</DialogTitle>
@@ -295,11 +295,11 @@ export function SiswaAddDialog() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="asalSekolah">Sekolah Asal</Label>
-                                            <Input id="asalSekolah" placeholder="Nama sekolah asal" defaultValue={isEdit ? (currentRow as any)?.asalSekolah : ''} />
+                                            <Input id="asalSekolah" placeholder="Nama sekolah asal" defaultValue={isEdit ? (currentRow as Record<string, unknown>)?.asalSekolah as string : ''} />
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="npsnAsalSekolah">NPSN Sekolah Asal</Label>
-                                            <Input id="npsnAsalSekolah" placeholder="NPSN sekolah asal" defaultValue={isEdit ? (currentRow as any)?.npsnAsalSekolah : ''} />
+                                            <Input id="npsnAsalSekolah" placeholder="NPSN sekolah asal" defaultValue={isEdit ? (currentRow as Record<string, unknown>)?.npsnAsalSekolah as string : ''} />
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

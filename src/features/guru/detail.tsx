@@ -1,5 +1,4 @@
-import { notFound } from '@tanstack/react-router'
-import { useParams, Link } from '@tanstack/react-router'
+import { notFound, useParams, Link } from '@tanstack/react-router'
 import { ArrowLeft, UserCircle, Phone, Mail, BookOpen, CalendarDays, Award } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

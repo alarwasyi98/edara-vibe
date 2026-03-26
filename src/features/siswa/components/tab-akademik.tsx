@@ -55,11 +55,11 @@ export function TabAkademik({ siswa }: TabAkademikProps) {
                         />
                         <Field
                             label='Sekolah Asal'
-                            value={(siswa as any).asalSekolah || '-'}
+                            value={(siswa as Student & { asalSekolah?: string }).asalSekolah || '-'}
                         />
                         <Field
                             label='NPSN Sekolah Asal'
-                            value={(siswa as any).npsnAsalSekolah || '-'}
+                            value={(siswa as Student & { npsnAsalSekolah?: string }).npsnAsalSekolah || '-'}
                         />
                         <Field
                             label='Kelas'

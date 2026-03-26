@@ -31,8 +31,6 @@ import {
 } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import {
-    ArrowUpCircle,
-    ArrowDownCircle,
     TrendingUp,
     TrendingDown,
     Wallet,

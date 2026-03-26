@@ -1,6 +1,7 @@
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
+/* eslint-disable no-duplicate-imports */
+import type { ChartConfig } from '@/components/ui/chart'
 import {
-  ChartConfig,
   ChartContainer,
   ChartLegend,
   ChartLegendContent,

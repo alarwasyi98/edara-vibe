@@ -70,7 +70,7 @@ const sppStatusSchema = z.union([
 ])
 export type FinanceStatus = z.infer<typeof sppStatusSchema>
 
-const studentFinanceRecordSchema = z.object({
+export const studentFinanceRecordSchema = z.object({
     id: z.string(),
     studentId: z.string(),
     bulan: z.string(), // "2025-07"

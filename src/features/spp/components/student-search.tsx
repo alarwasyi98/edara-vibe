@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Check, ChevronsUpDown, UserRound, X } from 'lucide-react'
+import { ChevronsUpDown, UserRound, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -142,9 +142,7 @@ export function StudentSearch({ value, onChange }: StudentSearchProps) {
                                     <Badge variant='outline' className='text-xs shrink-0'>
                                         {student.kelas}
                                     </Badge>
-                                    {value?.id === student.id && (
-                                        <Check className='h-4 w-4 text-primary shrink-0' />
-                                    )}
+
                                 </CommandItem>
                             ))}
                         </CommandGroup>

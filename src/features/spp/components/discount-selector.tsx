@@ -26,19 +26,19 @@ interface DiscountSelectorProps {
  * - Diskon nominal boleh banyak
  * - Total diskon tidak melebihi subtotal
  */
-function calculateAppliedAmount(discount: Discount, subtotal: number, appliedList: AppliedDiscount[]): number {
-    if (discount.tipe === 'persentase') {
-        // Ambil % terbesar saja yang berlaku
-        const maxPct = Math.max(
-            discount.nilai,
-            ...appliedList.filter(d => d.tipe === 'persentase').map(d => d.nilai)
-        )
-        if (discount.nilai < maxPct) return 0
-        return Math.round(subtotal * (discount.nilai / 100))
-    }
-    // Nominal: langsung dikurangi
-    return discount.nilai
-}
+// function calculateAppliedAmount(discount: Discount, subtotal: number, appliedList: AppliedDiscount[]): number {
+//     if (discount.tipe === 'persentase') {
+//         // Ambil % terbesar saja yang berlaku
+//         const maxPct = Math.max(
+//             discount.nilai,
+//             ...appliedList.filter(d => d.tipe === 'persentase').map(d => d.nilai)
+//         )
+//         if (discount.nilai < maxPct) return 0
+//         return Math.round(subtotal * (discount.nilai / 100))
+//     }
+//     // Nominal: langsung dikurangi
+//     return discount.nilai
+// }
 
 export function DiscountSelector({ subtotal, applied, onChange }: DiscountSelectorProps) {
     const [open, setOpen] = React.useState(false)
@@ -54,7 +54,7 @@ export function DiscountSelector({ subtotal, applied, onChange }: DiscountSelect
         }
         // Cek konflik: sudah ada diskon persentase yg lebih besar
         if (discount.tipe === 'persentase') {
-            const existingPct = applied.filter(a => a.tipe === 'persentase')
+            // const existingPct = applied.filter(a => a.tipe === 'persentase')
             // Jika sudah ada yang lebih besar, ganti
             const newList = applied.filter(a => a.tipe !== 'persentase')
             const appliedAmount = Math.round(subtotal * (discount.nilai / 100))
