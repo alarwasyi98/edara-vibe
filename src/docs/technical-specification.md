@@ -1,9 +1,10 @@
-# EDARA — Technical Specification
-
-**Version:** 2.0.0
-**Date:** 31 Maret 2026
-**Status:** Final for Phase 1 Development
-**Audience:** AI Planning Systems & Development Team
+---
+name: technical-specification
+description: Technical Specification for EDARA
+status: draft
+modified: 2026-04-12
+version: 2.0.0
+---
 
 **Changelog dari v1.0.0:**
 
