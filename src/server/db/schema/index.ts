@@ -3,14 +3,21 @@
  *
  * All Drizzle table definitions are re-exported from this file.
  * Drizzle Kit and the db instance both point here.
- *
- * As schema tables are added in Steps 4-6, they will be exported
- * from their respective files and re-exported here.
- *
- * Example (after Step 4):
- *   export * from './schools'
- *   export * from './users'
- *   export * from './academic-years'
  */
 
-// Schema exports will be added incrementally in Steps 4-6
+// Step 4: Core Tenant Schema
+export * from './schools'
+export * from './users'
+export * from './academic-years'
+
+// Step 5: Operational Schema
+export * from './teachers'
+export * from './students'
+export * from './classes'
+export * from './enrollments'
+
+// Step 6: Financial & Log Schema
+export * from './spp'
+export * from './cashflow'
+export * from './events'
+export * from './logs'
