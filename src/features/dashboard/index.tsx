@@ -62,7 +62,7 @@ export function Dashboard() {
 
   return (
     <>
-      <Header>
+      <Header fixed>
         <Search />
         <div className='ms-auto flex items-center space-x-4'>
           <ThemeSwitch />
@@ -137,7 +137,7 @@ export function Dashboard() {
                     </CardDescription>
                   </div>
                   <Select value={sppTimeRange} onValueChange={setSppTimeRange}>
-                    <SelectTrigger className="w-[120px]">
+                    <SelectTrigger className="w-30">
                       <SelectValue placeholder="Pilih rentang" />
                     </SelectTrigger>
                     <SelectContent>
