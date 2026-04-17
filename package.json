@@ -3,6 +3,11 @@
   "private": false,
   "version": "0.33.1",
   "type": "module",
+  "pnpm": {
+    "overrides": {
+      "rollup": "4.60.0"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
