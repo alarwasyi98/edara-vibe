@@ -2,8 +2,8 @@
 name: better-auth-migration-spec
 description: Canonical source of truth for replacing Clerk with Better Auth in EDARA
 status: ready-for-implementation
-modified: 2026-04-20
-version: 1.1.0
+modified: 2026-04-21
+version: 1.2.0
 ---
 
 # Better Auth Migration Spec
@@ -238,32 +238,176 @@ Recommended location:
 
 ### 8.3 Route Mount
 
-Mount Better Auth handlers under:
+Mount Better Auth handlers at `/api/auth/$` — the `$` is TanStack Start's rest catch-all that handles all auth sub-routes.
 
-- `/api/auth/*`
+File: `src/routes/api/auth/$.ts`
 
-Recommended file:
+```ts
+import { auth } from '@/lib/auth'
+import { createFileRoute } from '@tanstack/react-router'
 
-- `src/routes/api/auth/$.ts`
+export const Route = createFileRoute('/api/auth/$')({
+    server: {
+        handlers: {
+            GET: async ({ request }: { request: Request }) => {
+                return await auth.handler(request)
+            },
+            POST: async ({ request }: { request: Request }) => {
+                return await auth.handler(request)
+            },
+        },
+    },
+})
+```
 
-### 8.4 Session Helpers
+### 8.3.1 oRPC Integration Pattern
 
-Create thin helpers so the rest of the app depends on EDARA auth abstractions, not raw provider APIs.
+Based on [oRPC Better Auth integration](https://orpc.dev/docs/integrations/better-auth), integrate session validation into oRPC via middleware.
 
-Recommended helper set:
+**Step 1: Define context with headers**
 
-- `getSession()`
-- `requireSession()`
-- `getUserAssignments(userId)`
-- `getPrimaryAssignment(userId)` or equivalent selection rule
-- `getCurrentAssignment()`
-- `requireAssignment()`
+```ts
+// src/server/routers/context.ts
+import { os } from '@orpc/server'
 
-These helpers should:
+export const base = os.$context<{ headers: Headers }>()
+```
 
-1. read the Better Auth session from headers/cookies
-2. resolve EDARA assignment records from `user_school_assignments`
-3. return a normalized auth context
+**Step 2: Create auth middleware**
+
+```ts
+// src/server/routers/middlewares/auth.ts
+import { auth } from '@/lib/auth' // Better Auth instance
+import { base } from '../context'
+import { ORPCError } from '@orpc/server'
+
+export const authMiddleware = base.middleware(async ({ context, next }) => {
+  const sessionData = await auth.api.getSession({
+    headers: context.headers,
+  })
+
+  if (!sessionData?.session || !sessionData?.user) {
+    throw new ORPCError('UNAUTHORIZED')
+  }
+
+  return next({
+    context: {
+      session: sessionData.session,
+      user: sessionData.user
+    },
+  })
+})
+```
+
+**Step 3: Create authorized base**
+
+```ts
+// src/server/routers/authorized.ts
+import { base } from './context'
+import { authMiddleware } from './middlewares/auth'
+
+export const authorized = base.use(authMiddleware)
+```
+
+**Usage in procedures:**
+
+```ts
+import { authorized } from './authorized'
+
+export const protectedProcedure = authorized.handler(({ context }) => {
+  // context.session and context.user are guaranteed to be defined
+})
+```
+
+This pattern provides type-safe session injection across all oRPC procedures.
+
+### 8.4 Session Helpers (Updated)
+
+Create helper functions for TanStack Start server functions.
+
+**Session helpers** (`src/lib/auth.functions.ts`):
+
+```ts
+import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeaders } from "@tanstack/react-start/server";
+import { auth } from "@/lib/auth";
+
+export const getSession = createServerFn({ method: "GET" }).handler(async () => {
+    const headers = getRequestHeaders();
+    const session = await auth.api.getSession({ headers });
+    return session;
+});
+
+export const requireSession = createServerFn({ method: "GET" }).handler(async () => {
+    const headers = getRequestHeaders();
+    const session = await auth.api.getSession({ headers });
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+    return session;
+});
+```
+
+**Route protection with beforeLoad:**
+
+```ts
+// src/routes/_protected.tsx
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import { getSession } from '@/lib/auth.functions'
+
+export const Route = createFileRoute('/_protected')({
+  beforeLoad: async ({ location }) => {
+    const session = await getSession();
+    if (!session) {
+      throw redirect({
+        to: "/auth/sign-in",
+        search: { redirect: location.href },
+      });
+    }
+    return { user: session.user };
+  },
+  component: () => <Outlet />,
+})
+```
+
+### 8.4.1 Frontend Client SDK
+
+For client-side session access, use [better-auth/react](https://better-auth.com/docs/client/react) to avoid "flash of wrong content" issues.
+
+```ts
+import { AuthProvider } from "better-auth/react"
+
+// Wrap your app with the provider
+function App() {
+  return (
+    <AuthProvider>
+      <YourApp />
+    </AuthProvider>
+  )
+}
+```
+
+Then use the `useSession` hook:
+
+```ts
+import { useSession, SignOutButton } from "better-auth/react"
+
+function UserAvatar() {
+  const { data: session, isLoading } = useSession()
+  
+  if (isLoading) return <Skeleton />
+  if (!session) return <SignInButton />
+  
+  return (
+    <div>
+      <img src={session.user.image} />
+      <SignOutButton />
+    </div>
+  )
+}
+```
+
+The client SDK handles caching, loading states, and automatic session refresh.
 
 ### 8.5 Session Cookie Baseline
 
@@ -764,7 +908,9 @@ During implementation or immediately after the auth foundation lands, align:
 - [Better Auth TanStack Start Integration](https://better-auth.com/docs/integrations/tanstack)
 - [Better Auth Drizzle Adapter](https://better-auth.com/docs/adapters/drizzle)
 - [Better Auth Organization Plugin](https://better-auth.com/docs/plugins/organization)
+- [Better Auth Client SDK (React)](https://better-auth.com/docs/client/react)
 - [Better Auth LLMs.txt](https://better-auth.com/llms.txt)
+- [oRPC + Better Auth Integration](https://orpc.dev/docs/integrations/better-auth)
 ---
 
 **End of Canonical Spec**
