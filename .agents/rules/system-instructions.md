@@ -11,7 +11,7 @@ File ini mendefinisikan aturan mutlak, konteks arsitektur, dan standar pengodean
 - **Nama Proyek:** EDARA (Sistem Administrasi Madrasah Multi-Tenant)
 - **Fase Saat Ini:** Phase 1 (Migrasi dari Mock ke Real Backend)
 - **Frontend:** React 19, TanStack Start (Mode Vite SPA - **TIDAK ADA SSR** untuk Phase 1), TanStack Router, TanStack Query, Zustand, Tailwind CSS v4, shadcn/ui.
-- **Backend:** TanStack Start Server (hanya sebagai API), oRPC, Clerk SDK.
+- **Backend:** TanStack Start Server (hanya sebagai API), oRPC, Better Auth SDK.
 - **Database:** Neon Serverless PostgreSQL, Drizzle ORM, pg-boss (Colocated - berjalan di proses server yang sama).
 
 ## 2. Aturan Arsitektur Mutlak (Berdasarkan ADR)
@@ -24,7 +24,7 @@ Semua implementasi **TIDAK BOLEH** melanggar keputusan berikut:
 4. **Append-Only Transactions (ADR-04):** Tabel `payment_transactions` TIDAK boleh di-UPDATE atau di-DELETE di level aplikasi. Koreksi wajib menggunakan transaksi baru bertipe `reversal`.
 5. **Activity Logs Terpusat (ADR-05):** Jangan gunakan query manual `db.insert(activityLogs)` di dalam blok mutasi. Wajib gunakan middleware `withActivityLog` pada oRPC procedure.
 6. **Mata Pelajaran JSON (ADR-06):** Kolom `mataPelajaran` pada tabel `teachers` menggunakan JSON Array, bukan _junction table_.
-7. **Skema Autentikasi (C7):** Auth menggunakan Clerk. Role dan unit assignment diupdate secara server-side via Clerk Management API (`updateUserMetadata`), BUKAN simulasi lokal.
+7. **Skema Autentikasi (C7):** Auth menggunakan Better Auth. Role dan unit assignment dikelola via EDARA `user_school_assignments` table, BUKAN simulasi lokal.
 
 ## 3. Standar Kode & Keamanan (CRITICAL)
 

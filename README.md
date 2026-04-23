@@ -36,7 +36,7 @@
 | **Calendar** | [react-big-calendar](https://github.com/vazco/react-big-calendar) | Calendar view for events |
 | **Backend** | [TanStack Start](https://tanstack.com/start) | Full-stack framework (SPA Phase 1, SSR Phase 2) |
 | **API** | [oRPC](https://orc.js.org/) | Type-safe RPC layer |
-| **Auth** | [Clerk](https://clerk.com/) ^5.x | Auth JWT validation, user management |
+| **Auth** | [Better Auth](https://better-auth.com/) | Auth with email/password, sessions |
 | **ORM** | [Drizzle ORM](https://orm.drizzle.team/) | Type-safe SQL query builder |
 | **Jobs** | [pg-boss](https://github.com/tgriesser/pg-boss) | PostgreSQL-native job queue |
 | **Database** | [Neon](https://neon.tech/) (PostgreSQL) | Serverless PostgreSQL |
@@ -69,7 +69,7 @@ SPP payment status (paid/partial/unpaid) is never stored — derived via SQL agg
 - Node.js ^20.x
 - pnpm ^9.x
 - PostgreSQL (Neon) account
-- Clerk account
+- Better Auth account (or use email/password)
 
 ### Installation
 
@@ -93,10 +93,9 @@ Edit `.env` and add your credentials:
 # Database (Neon)
 DATABASE_URL="postgresql://user:pass@host.neon.tech/db?sslmode=require"
 
-# Clerk Authentication
-CLERK_PUBLISHABLE_KEY="pk_test_..."
-CLERK_SECRET_KEY="sk_test_..."
-CLERK_JWT_KEY="..."
+# Better Auth
+BETTER_AUTH_SECRET="your-secret-key-here"
+BETTER_AUTH_URL="http://localhost:3000"
 ```
 
 ### Running the Project
