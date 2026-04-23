@@ -25,7 +25,7 @@ function SignInPage() {
     try {
       await signInEmail({ email: data.email, password: data.password })
       navigate({ to: '/' })
-    } catch (error) {
+    } catch {
       setError('root', { message: 'Invalid credentials' })
     }
   }

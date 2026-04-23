@@ -3,7 +3,7 @@ import { authorized } from '../authorized'
 import { db } from '@/server/db'
 import { userSchoolAssignments } from '@/server/db/schema/users'
 
-export const listUsersWithAssignments = authorized.handler(async ({ context }) => {
+export const listUsersWithAssignments = authorized.handler(async () => {
   const assignments = await db.query.userSchoolAssignments.findMany({
     with: {
       school: true,
@@ -20,7 +20,7 @@ export const assignUserToSchool = authorized
     unitId?: string
     role: 'super_admin' | 'kepala_sekolah' | 'admin_tu' | 'bendahara'
   }) => data)
-  .handler(async ({ context, data }) => {
+  .handler(async ({ data }) => {
     return await db.insert(userSchoolAssignments).values({
       userId: data.userId,
       schoolId: data.schoolId,
@@ -31,7 +31,7 @@ export const assignUserToSchool = authorized
 
 export const toggleAssignment = authorized
   .inputValidator((data: { assignmentId: string; isActive: boolean }) => data)
-  .handler(async ({ context, data }) => {
+  .handler(async ({ data }) => {
     return await db.update(userSchoolAssignments)
       .set({ isActive: data.isActive })
       .where(eq(userSchoolAssignments.id, data.assignmentId))

@@ -26,7 +26,7 @@ function SignUpPage() {
     try {
       await signUpEmail({ email: data.email, password: data.password, name: data.name })
       navigate({ to: '/auth/sign-in' })
-    } catch (error) {
+    } catch {
       setError('root', { message: 'Sign up failed' })
     }
   }
