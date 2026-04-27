@@ -39,6 +39,8 @@ out/
 # Caches
 .eslintcache
 .tanstack/
+.worktrees/
+.playwright-mcp/
 
 ### Windows ###
 # Windows thumbnail cache files
@@ -65,3 +67,5 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+# CocoIndex Code (ccc)
+/.cocoindex_code/

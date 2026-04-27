@@ -283,7 +283,7 @@ export function ManajemenSPP() {
                         <Button variant='outline' className='gap-1.5' onClick={() => setDialog('export')}>
                             <Download size={16} /> Eksport
                         </Button>
-                        <Button className='gap-1.5' onClick={() => navigate({ to: '/spp/tambah-pembayaran' })}>
+                        <Button className='gap-1.5' onClick={() => navigate({ to: '/spp/add-payment' })}>
                             <Receipt size={16} /> Tambah
                         </Button>
                     </div>

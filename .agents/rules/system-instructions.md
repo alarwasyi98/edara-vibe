@@ -11,7 +11,7 @@ File ini mendefinisikan aturan mutlak, konteks arsitektur, dan standar pengodean
 - **Nama Proyek:** EDARA (Sistem Administrasi Madrasah Multi-Tenant)
 - **Fase Saat Ini:** Phase 1 (Migrasi dari Mock ke Real Backend)
 - **Frontend:** React 19, TanStack Start (Mode Vite SPA - **TIDAK ADA SSR** untuk Phase 1), TanStack Router, TanStack Query, Zustand, Tailwind CSS v4, shadcn/ui.
-- **Backend:** TanStack Start Server (hanya sebagai API), oRPC, Clerk SDK.
+- **Backend:** TanStack Start Server (hanya sebagai API), oRPC, Better Auth SDK.
 - **Database:** Neon Serverless PostgreSQL, Drizzle ORM, pg-boss (Colocated - berjalan di proses server yang sama).
 
 ## 2. Aturan Arsitektur Mutlak (Berdasarkan ADR)
@@ -24,7 +24,7 @@ Semua implementasi **TIDAK BOLEH** melanggar keputusan berikut:
 4. **Append-Only Transactions (ADR-04):** Tabel `payment_transactions` TIDAK boleh di-UPDATE atau di-DELETE di level aplikasi. Koreksi wajib menggunakan transaksi baru bertipe `reversal`.
 5. **Activity Logs Terpusat (ADR-05):** Jangan gunakan query manual `db.insert(activityLogs)` di dalam blok mutasi. Wajib gunakan middleware `withActivityLog` pada oRPC procedure.
 6. **Mata Pelajaran JSON (ADR-06):** Kolom `mataPelajaran` pada tabel `teachers` menggunakan JSON Array, bukan _junction table_.
-7. **Skema Autentikasi (C7):** Auth menggunakan Clerk. Role dan unit assignment diupdate secara server-side via Clerk Management API (`updateUserMetadata`), BUKAN simulasi lokal.
+7. **Skema Autentikasi (C7):** Auth menggunakan Better Auth. Role dan unit assignment dikelola via EDARA `user_school_assignments` table, BUKAN simulasi lokal.
 
 ## 3. Standar Kode & Keamanan (CRITICAL)
 
@@ -47,14 +47,6 @@ Semua implementasi **TIDAK BOLEH** melanggar keputusan berikut:
 - Aktifkan strict mode. Dilarang menggunakan `any` (gunakan `unknown` jika perlu).
 - Gunakan tipe kembalian eksplisit untuk fungsi publik.
 - Ekspor interface/type yang bisa digunakan ulang ke folder `types/` atau di samping skema Drizzle.
-
-## 4. Konteks Fase 1 Saat Ini (Audit Remediation)
-
-AI Agent harus membantu menavigasi kode dari _mock-heavy state_ menuju _real backend state_.
-
-- **Abaikan Fitur Luar Cakupan:** Jangan ubah, buat, atau sarankan kode untuk modul `ppdb` dan `alumni`. Fokus pada fitur inti MVP (Guru, Siswa, Kelas, SPP, Cashflow, Kalender).
-- **Hapus Delay Palsu:** Hapus fungsi `sleep()` atau `mock-access-token` saat me-refactor file. Ganti dengan panggilan oRPC asli.
-- **Testing Coverage:** Logika bisnis krusial (terutama formating keuangan dan perhitungan SPP) harus disertai dengan `vitest` unit tests.
 
 ---
 
