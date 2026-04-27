@@ -67,3 +67,5 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+# CocoIndex Code (ccc)
+/.cocoindex_code/
