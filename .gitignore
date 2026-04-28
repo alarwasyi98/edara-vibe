@@ -18,6 +18,7 @@ dist/
 dist-ssr/
 build/
 out/
+.output/
 
 # Local env files
 .env
