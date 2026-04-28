@@ -5,6 +5,93 @@
 
 ---
 
+## Session 16 — 2026-04-29: Step 8 — Better Auth Server Setup
+
+**Branch:** `backup/step0-plan-update`
+**Commit:** (pending — all changes staged, not yet committed)
+
+### What Happened
+Executed all 6 sub-tasks of Step 8 (Better Auth Server Setup):
+
+| Sub-task | Description | Status |
+|----------|-------------|--------|
+| 8.1 | Move `src/lib/auth.ts` → `src/server/auth/index.ts` + update imports | ✅ |
+| 8.2 | Fix FK: `userSchoolAssignments.userId` varchar(255) → uuid with FK to `user.id` | ✅ |
+| 8.3 | Fix migration drift: `clerk_user_id` → `user_id` in SQL, rename index | ✅ |
+| 8.4 | Normalize role constants: `admin`→`super_admin`, `tata_usaha`→`admin_tu` | ✅ |
+| 8.5 | Setup `.env` / `.env.local`: add `BETTER_AUTH_SECRET`/`BETTER_AUTH_URL`, remove Clerk vars | ✅ |
+| 8.6 | Verify: `tsc --noEmit` zero errors, dev server starts on :3000 | ✅ |
+
+### Files Changed
+- `src/server/auth/index.ts` — NEW: Better Auth server config (moved from `src/lib/auth.ts`)
+- `src/lib/auth.ts` — DELETED (moved to server/auth)
+- `src/server/routers/middlewares/auth.ts` — Updated import path
+- `src/server/db/schema/users.ts` — `userId` changed from `varchar(255)` to `uuid` with FK to `user.id`, added user relation
+- `drizzle/0000_init_tenant_operational_schema.sql` — `clerk_user_id` → `user_id`, index renamed
+- `drizzle/0002_next_power_pack.sql` — Added ALTER COLUMN + FK constraint for user_school_assignments
+- `src/lib/constants.ts` — ROLES: `ADMIN`→`SUPER_ADMIN`, `TATA_USAHA`→`ADMIN_TU`; labels updated
+- `src/config/rbac.ts` — Permission matrix keys: `admin`→`super_admin`, `tata_usaha`→`admin_tu`
+- `src/hooks/use-rbac.ts` — Mock role: `'admin'`→`'super_admin'`
+- `src/features/users/data/users.ts` — Mock roles aligned with DB enum
+- `src/features/users/data/schema.ts` — Zod schema aligned with DB enum
+- `src/features/users/data/data.ts` — Role labels/values aligned with DB enum
+- `.env` — Cleaned: removed Clerk vars, added Better Auth vars
+- `.env.local` — Same cleanup
+
+### Verification
+- `tsc --noEmit` → 0 errors ✅
+- `vite dev` → localhost:3000 ready in ~4s ✅
+- `grep` for old role names → 0 matches ✅
+
+---
+
+## Session 15 — 2026-04-29: Step 0 — TanStack Start SPA Migration
+
+**Branch:** `backup/step0-plan-update`
+**Commits:** `c6bb610` (docs) → `2247d7b` (feat)
+
+### What Happened
+Identified that the implementation plan was missing a critical prerequisite: migrating from plain Vite SPA to TanStack Start SPA mode. Steps 9 (auth API route) and 12 (oRPC API route) require server-side API routes via Nitro, which only TanStack Start provides.
+
+### Phase 1: Plan Update (`c6bb610`)
+- Added **Section 2.5 — Step 0** to `docs/implementation-plan.md` with 9 sub-tasks
+- Updated dependency graph: Step 0 → Step 8 → Step 9 → Step 10 → Step 11
+- Updated Steps 8, 9, 12 to reference Step 0 as dependency
+- Updated Appendix A (PRD traceability), B (dependency graph), C (known issues)
+- Total steps: 40 → 41
+
+### Phase 2: Execution (`2247d7b`)
+Migrated from `@tanstack/react-router` + plain Vite to `@tanstack/react-start` SPA mode:
+
+| File | Action |
+|------|--------|
+| `src/client.tsx` | Created — `hydrateRoot(document, <StartClient />)` |
+| `src/server.ts` | Created — `createServerEntry` with Nitro handler |
+| `src/router.tsx` | Created — `getRouter()` factory + QueryClient context |
+| `src/routes/__root.tsx` | Rewritten — full HTML document + `head()` with meta/OG/fonts |
+| `vite.config.ts` | Updated — `tanstackStart({ spa: true })` + `nitro()` + `tsconfigPaths` |
+| `package.json` | Updated — `@tanstack/react-start` + `nitro` to deps, removed `@rsbuild/core` |
+| `index.html` | Deleted — replaced by `__root.tsx` `head()` |
+| `src/main.tsx` | Deleted — Start manages entry points |
+| `.gitignore` | Updated — added `.output/` |
+
+### Research Findings
+- TanStack Query + Table are framework-agnostic (no migration benefit from Start)
+- Start adds: server functions, API routes, SSR, Nitro runtime
+- SPA mode (`spa: { enabled: true }`) gives server runtime WITHOUT SSR
+- oRPC makes `createServerFn` redundant (both provide type-safe RPC)
+- `@vitejs/plugin-react-swc` works with Start (despite docs showing non-SWC)
+
+### Verification
+- `pnpm install` ✅
+- `vite dev` → localhost:3000 ✅
+- `tsc --noEmit` → 0 errors ✅
+
+### Decisions
+- See ADR-007 in decisions.md
+
+---
+
 ## Session 14 — 2026-04-26: Finalisasi SPA Auth & PR ke `dev`
 
 **Branch:** `feat/auth`
@@ -173,11 +260,17 @@ Initial project stabilization. Cleaned up legacy code, established project struc
 | 6 | Generate Drizzle Migrations | ✅ Done |
 | 7 | RLS Policies & Constraints | ✅ Done |
 
+### Section 2.5 — TanStack Start SPA Migration
+
+| Step | Description | Status |
+|------|------------|--------|
+| 0 | Vite SPA → TanStack Start SPA mode | ✅ Done |
+
 ### Section 3 — Auth Backend & Middleware
 
 | Step | Description | Status |
 |------|------------|--------|
-| 8 | Better Auth Server Setup | 🔄 ~40% |
+| 8 | Better Auth Server Setup | ✅ Done |
 | 9 | Auth API Route Handler | ❌ Not Started |
 | 10 | oRPC Auth Middleware Stack | ❌ Not Started |
 | 11 | Frontend Auth Flow & Stores | ❌ Not Started |

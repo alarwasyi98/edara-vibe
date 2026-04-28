@@ -19,9 +19,9 @@ import {
   timestamp,
   uniqueIndex,
   uuid,
-  varchar,
 } from 'drizzle-orm/pg-core'
 import { schools, schoolUnits } from './schools'
+import { user } from './auth'
 
 // ─── Enums ───────────────────────────────────────────────
 
@@ -38,7 +38,9 @@ export const userSchoolAssignments = pgTable(
   'user_school_assignments',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    userId: varchar('user_id', { length: 255 }).notNull(),
+    userId: uuid('user_id')
+      .references(() => user.id)
+      .notNull(),
     schoolId: uuid('school_id')
       .references(() => schools.id)
       .notNull(),
@@ -63,6 +65,10 @@ export const userSchoolAssignments = pgTable(
 export const userSchoolAssignmentsRelations = relations(
   userSchoolAssignments,
   ({ one }) => ({
+    user: one(user, {
+      fields: [userSchoolAssignments.userId],
+      references: [user.id],
+    }),
     school: one(schools, {
       fields: [userSchoolAssignments.schoolId],
       references: [schools.id],

@@ -15,7 +15,7 @@
 | 1. Stabilization & Infrastructure | 1–3 | ✅ Done |
 | 2. Database Schema & RLS | 4–7 | ✅ Done |
 | 2.5. TanStack Start SPA Migration | 0 | ❌ Not Started |
-| 3. Auth Backend & Middleware | 8–11 | 🔄 Step 8 ~40% |
+| 3. Auth Backend & Middleware | 8–11 | 🔄 Step 8 ✅, Steps 9-11 not started |
 | 4. oRPC Foundation & Root Router | 12–13 | ❌ Not Started |
 | 5. Tenant & Org Structure | 14–15 | ❌ Not Started |
 | 6. Academic Year Management | 16–17 | ❌ Not Started |
@@ -140,7 +140,7 @@
 
 > **Refs:** AUTH-01–05, C7, C9, ADR-01, Better Auth Migration Spec (all 8 phases)
 
-### Step 8: Better Auth Server Setup 🔄 (~40%)
+### Step 8: Better Auth Server Setup ✅
 
 - **Task:** Complete Better Auth server configuration. Move `src/lib/auth.ts` → `src/server/auth/index.ts`. Configure email/password provider, session cookie settings (HTTP-only, secure in production, 8hr expiry per AUTH-01), Drizzle adapter. Fix `userSchoolAssignments.userId` to add FK reference to `user.id`. Verify auth schema includes all fields Better Auth needs (password hash is stored in `account` table by Better Auth internally). Fix Drizzle migration drift (`clerk_user_id` → `user_id` in SQL).
 - **Files (10):**

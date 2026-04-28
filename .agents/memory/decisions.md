@@ -137,3 +137,22 @@
   - No server-side session validation in Phase 1 SPA
   - Client checks session on route navigation
   - Backend oRPC will validate session tokens when implemented
+## ADR-007: TanStack Start SPA Mode Migration
+
+- **Date:** 2026-04-29
+- **Status:** Active
+- **Context:** Implementation plan Steps 9 and 12 require server-side API routes (`/api/auth/$`, `/api/rpc/$`) which need a server runtime. Plain Vite SPA has no server. TanStack Start provides Nitro server runtime while supporting SPA mode (no SSR).
+- **Decision:** Migrate from `@tanstack/react-router` + plain Vite to `@tanstack/react-start` in SPA mode (`spa: { enabled: true }`). This gives server API routes without SSR complexity.
+- **Consequences:**
+  - `main.tsx` and `index.html` removed — Start manages entry points
+  - `src/client.tsx` replaces `main.tsx` (`hydrateRoot(document, <StartClient />)`)
+  - `src/server.ts` created (`createServerEntry` for Nitro)
+  - `src/router.tsx` exports `getRouter()` factory function (not singleton)
+  - `__root.tsx` renders full HTML document (`<html><head><body>`) with `<HeadContent />` and `<Scripts />`
+  - `vite.config.ts` uses `tanstackStart()` from `@tanstack/react-start/plugin/vite` + `nitro()` from `nitro/vite`
+  - `pnpm run build` → `vite build` (builds client + Nitro server)
+  - `pnpm run start` → `node .output/server/index.mjs`
+  - `@tanstack/react-start` and `nitro` moved from devDependencies to dependencies
+  - `@tanstack/router-plugin` kept (tanstackStart includes it but explicit dep doesn't conflict)
+  - API routes now possible via `createFileRoute` with `server.handlers`
+

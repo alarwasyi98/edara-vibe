@@ -1,3 +1,15 @@
+/**
+ * Better Auth Server Configuration
+ *
+ * This is the server-side Better Auth instance. It MUST only be imported
+ * from server-side code (API routes, oRPC middleware, etc.).
+ *
+ * DO NOT import this from client-side code — it pulls in database
+ * dependencies that cannot be bundled for the browser.
+ *
+ * @see docs/implementation-plan.md — Step 8
+ */
+
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { db } from '@/server/db'

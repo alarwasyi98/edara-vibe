@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth'
+import { auth } from '@/server/auth'
 import { base } from '../context'
 import { ORPCError } from '@orpc/server'
 
