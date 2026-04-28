@@ -16,9 +16,9 @@
 --
 -- SQL Escape Hatch: This file contains DDL that cannot be expressed
 -- in Drizzle ORM's schema API (partial unique indexes, RLS policies).
--- See: src/docs/reconciliation-log.md for decision documentation.
+-- See: .agents/memory/log.md for decision documentation.
 --
--- @see technical-specification.md §4.2 (L1247-L1280)
+-- @see docs/prd.md — Data Architecture (RLS & Indexes)
 -- =============================================================================
 
 -- ─────────────────────────────────────────────────────────────────────────────

@@ -9,7 +9,7 @@
  *
  * ADR-07: All monetary columns use numeric(15,2).
  *
- * @see technical-specification.md L1082–1130
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations } from 'drizzle-orm'

@@ -6,7 +6,7 @@
  * Business Rule B13: Past events with "ongoing" status are NOT
  * auto-updated by the system. Admin must manually update to "completed".
  *
- * @see technical-specification.md L1136–1181
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations } from 'drizzle-orm'

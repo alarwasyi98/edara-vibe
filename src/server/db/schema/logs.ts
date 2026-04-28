@@ -7,7 +7,7 @@
  * - No auto-deletion for Phase 1 MVP (C8).
  * - Indexes on (unit_id) and (created_at) for query performance.
  *
- * @see technical-specification.md L1220–1244
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations } from 'drizzle-orm'

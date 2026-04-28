@@ -58,7 +58,7 @@ SPP payment status (paid/partial/unpaid) is never stored — derived via SQL agg
 `payment_transactions` has no `updated_at` column and no UPDATE/DELETE permissions at the application layer. Corrections use reversal transactions referencing the original transaction ID.
 
 > [!INFO]
-> For full technical specification details, see: [Technical Specification](src/docs/technical-specification.md)
+> For full product specification details, see: [Product Requirements (PRD)](docs/PRD.md)
 
 ---
 
@@ -157,9 +157,7 @@ pnpm lint
 │   │   ├── routers/    # oRPC routers
 │   │   ├── middleware/# Auth, RLS, RBAC
 │   │   └── jobs/       # pg-boss workers
-│   ├── stores/           # Zustand stores
-│   └── docs/            # Technical specs (canonical source)
-│       └── technical-specification.md
+│   └── stores/           # Zustand stores
 ├── .github/              # GitHub configs
 ├── AGENTS.md             # AI agent activation contract
 ├── package.json
@@ -261,6 +259,6 @@ This project is licensed under the [ISC License](LICENSE).
 ## Documentation Links
 
 - [Product Requirements (PRD)](docs/PRD.md) — Feature specs, data architecture, API design
-- [Technical Specification](src/docs/technical-specification.md) — Full canonical system spec (includes UI specs)
 - [Implementation Plan](docs/implementation-plan.md) — Step-by-step implementation with progress
+- [Feature Stories](docs/features-stories.md) — User stories with UX/UI considerations
 - [Naming Dictionary](docs/naming-dictionary.json) — Indonesian ↔ English identifier mapping

@@ -6,7 +6,7 @@
  * ADR-06: `mata_pelajaran` is stored as a JSON array string (e.g. '["Matematika","IPA"]'),
  * NOT a junction table. This is sufficient for Phase 1 filter/display needs.
  *
- * @see technical-specification.md L774–804
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations } from 'drizzle-orm'

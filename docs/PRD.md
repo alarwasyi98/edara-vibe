@@ -1,6 +1,6 @@
 # Product Requirements Document — EDARA
 
-> Canonical product specification. Extracted from `src/docs/technical-specification.md` and `src/docs/features-stories.md`.
+> Canonical product specification. Consolidated from original technical specification and feature stories.
 > Auth references updated from Clerk to Better Auth per migration decision (C7).
 
 ---

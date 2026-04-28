@@ -7,7 +7,7 @@
  * - `unit_id` nullable: super_admin operates at school-wide level (B10)
  * - Multiple assignments per user allowed for admin_tu/bendahara (B10)
  *
- * @see technical-specification.md L1186–1215
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations } from 'drizzle-orm'

@@ -17,7 +17,7 @@
  * - C4: Soft-cancel via status column ('active'/'cancelled')
  * - C5: billing_month as VARCHAR(7) "YYYY-MM" with CHECK constraint
  *
- * @see technical-specification.md L937–1076
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations, sql } from 'drizzle-orm'

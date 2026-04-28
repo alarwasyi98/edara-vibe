@@ -8,7 +8,7 @@
  *   a year = UPDATE class_id (not INSERT new), with history logged.
  * - B11: Students are never deleted — only enrollment status changes.
  *
- * @see technical-specification.md L877–931
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations } from 'drizzle-orm'

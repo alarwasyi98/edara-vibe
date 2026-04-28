@@ -14,9 +14,10 @@
 
 | Document | Path | Purpose |
 |----------|------|---------|
-| Technical Specification | `src/docs/technical-specification.md` | Full PRD — features, schemas, API, UI specs |
-| Feature Stories | `src/docs/features-stories.md` | User stories with UX/UI considerations (Indonesian) |
-| Better Auth Migration Spec | `src/docs/better-auth-migration-spec.md` | Canonical Clerk → Better Auth migration spec |
+| Product Requirements (PRD) | `docs/prd.md` | Features, schemas, API, security, infrastructure |
+| Feature Stories | `docs/features-stories.md` | User stories with UX/UI considerations (Indonesian) |
+| Better Auth Migration Spec | `docs/better-auth-migration-spec.md` | Canonical Clerk → Better Auth migration spec |
+| Implementation Plan | `docs/implementation-plan.md` | Step-wise task plan with progress tracking |
 | Naming Dictionary | `docs/naming-dictionary.json` | Indonesian ↔ English identifier mapping |
 
 ## Library Documentation
@@ -53,10 +54,11 @@
 
 | Document | Path | Superseded By |
 |----------|------|--------------|
-| Earlier migration plan | `docs/superpowers/plans/2026-04-21-better-auth-migration.md` | `src/docs/better-auth-migration-spec.md` |
-| Original migration design | `docs/superpowers/specs/2026-04-18-clerk-to-betterauth-migration-design.md` | `src/docs/better-auth-migration-spec.md` |
-| Original implementation plan | `docs/superpowers/specs/2026-04-19-better-auth-implementation-plan.md` | `src/docs/better-auth-migration-spec.md` |
-| Reconciliation audit | `src/docs/reconciliation-audit.md` | `.agents/memory/project.md` |
-| Reconciliation log | `src/docs/reconciliation-log.md` | `.agents/memory/log.md` |
-| Reconciliation plan | `src/docs/reconciliation-plan.md` | `docs/implementation-plan.md` |
-| System instructions | `.agents/rules/system-instructions.md` | `.agents/memory/system.md` + `.agents/rules/coding-standards.md` |
+| Earlier migration plan | _(deleted)_ | `docs/better-auth-migration-spec.md` |
+| Original migration design | _(deleted)_ | `docs/better-auth-migration-spec.md` |
+| Original implementation plan | _(deleted)_ | `docs/better-auth-migration-spec.md` |
+| Reconciliation audit | _(deleted)_ | `.agents/memory/project.md` |
+| Reconciliation log | _(deleted)_ | `.agents/memory/log.md` |
+| Reconciliation plan | _(deleted)_ | `docs/implementation-plan.md` |
+| Technical specification | _(deleted)_ | `docs/prd.md` |
+| System instructions | _(deleted)_ | `.agents/memory/system.md` + `.agents/rules/coding-standards.md` |

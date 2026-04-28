@@ -1,6 +1,6 @@
 # Implementation Plan — EDARA
 
-> Step-wise task plan for Phase 1 MVP. Extracted from `src/docs/reconciliation-plan.md`.
+> Step-wise task plan for Phase 1 MVP. Consolidated from original reconciliation plan.
 > Auth references updated from Clerk to Better Auth per migration decision (C7).
 > Progress status reflects current state as of Session 14 (2026-04-26).
 

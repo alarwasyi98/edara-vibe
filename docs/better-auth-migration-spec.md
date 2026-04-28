@@ -796,9 +796,9 @@ This phase manages EDARA access records, not password reset, profile editing, or
 | ---- | -------------------------------------------- | -------------------------------------- |
 | 7.1  | Update setup and env docs                    | `README.md`, `.env.example`            |
 | 7.2  | Update architecture rules referencing Clerk  | `.agents/rules/system-instructions.md` |
-| 7.3  | Update technical specification auth sections | `src/docs/technical-specification.md`  |
-| 7.4  | Update reconciliation plan auth steps        | `src/docs/reconciliation-plan.md`      |
-| 7.5  | Log implementation outcomes                  | `src/docs/reconciliation-log.md`       |
+| 7.3  | Update PRD auth sections                     | `docs/prd.md`                          |
+| 7.4  | Update implementation plan auth steps        | `docs/implementation-plan.md`          |
+| 7.5  | Log implementation outcomes                  | `.agents/memory/log.md`               |
 
 **Priority**
 
@@ -896,9 +896,9 @@ During implementation or immediately after the auth foundation lands, align:
 
 - `README.md`
 - `.agents/rules/system-instructions.md`
-- `src/docs/technical-specification.md`
-- `src/docs/reconciliation-plan.md`
-- `src/docs/reconciliation-log.md`
+- `docs/prd.md`
+- `docs/implementation-plan.md`
+- `.agents/memory/log.md`
 
 ---
 

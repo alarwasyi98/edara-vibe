@@ -72,9 +72,8 @@ Run in order: `format:check` → `typecheck` → `lint --max-warnings 10` → `b
 |----------|------|
 | Product Requirements | `docs/PRD.md` |
 | Implementation Plan | `docs/implementation-plan.md` |
-| Technical Specification | `src/docs/technical-specification.md` |
-| Feature Stories | `src/docs/features-stories.md` |
-| Better Auth Migration | `src/docs/better-auth-migration-spec.md` |
+| Feature Stories | `docs/features-stories.md` |
+| Better Auth Migration | `docs/better-auth-migration-spec.md` |
 | Naming Dictionary | `docs/naming-dictionary.json` |
 
 ## After Your Session
