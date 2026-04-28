@@ -153,18 +153,100 @@ Initial project stabilization. Cleaned up legacy code, established project struc
 
 ## Milestone Tracker
 
+> Re-evaluated 2026-04-28 against PRD, ADRs, Memory, Rules, and Feature Stories.
+> Source of truth: `docs/implementation-plan.md` (11 sections, 40 steps).
+
+### Section 1 — Stabilization & Infrastructure
+
 | Step | Description | Status |
 |------|------------|--------|
-| 1 | Out-of-scope cleanup (PPDB, Alumni) | ✅ Done |
-| 2 | Backend dependencies installation | ✅ Done |
-| 3 | Database & Drizzle config | ✅ Done |
-| 4 | Core schema (Tenant, Unit, Academic Year) | ✅ Done |
-| 5 | Operational schema (Teachers, Students, Classes) | ✅ Done |
-| 6 | Financial schema (SPP, Cashflow, Events, Logs) | ✅ Done |
-| 7 | RLS setup | ✅ Done |
-| 8 | Auth integration & route guards | 🔄 In Progress (~40%) |
-| 9 | Server middleware (auth context, RLS) | ❌ Not Started |
-| 10 | Activity log middleware | ❌ Not Started |
-| 11 | oRPC root router setup | ❌ Not Started |
-| 12 | pg-boss configuration | ❌ Not Started |
-| 13–27 | Domain migrations (Dashboard → Reports) | ❌ Not Started |
+| 1 | Fix Build & Lint Errors | ✅ Done |
+| 2 | Configure Path Aliases & Project Structure | ✅ Done |
+| 3 | Stabilize Dev Server & Bundle | ✅ Done |
+
+### Section 2 — Database Schema & RLS
+
+| Step | Description | Status |
+|------|------------|--------|
+| 4 | Core & Auth Schema | ✅ Done |
+| 5 | Operational Schema | ✅ Done |
+| 6 | Generate Drizzle Migrations | ✅ Done |
+| 7 | RLS Policies & Constraints | ✅ Done |
+
+### Section 3 — Auth Backend & Middleware
+
+| Step | Description | Status |
+|------|------------|--------|
+| 8 | Better Auth Server Setup | 🔄 ~40% |
+| 9 | Auth API Route Handler | ❌ Not Started |
+| 10 | oRPC Auth Middleware Stack | ❌ Not Started |
+| 11 | Frontend Auth Flow & Stores | ❌ Not Started |
+
+### Section 4 — oRPC Foundation & Root Router
+
+| Step | Description | Status |
+|------|------------|--------|
+| 12 | oRPC Server Setup & Root Router | ❌ Not Started |
+| 13 | Shared Validators & API Utilities | ❌ Not Started |
+
+### Section 5 — Tenant & Org Structure
+
+| Step | Description | Status |
+|------|------------|--------|
+| 14 | Tenant & Unit API Routers | ❌ Not Started |
+| 15 | Tenant Frontend — Unit Management & Switcher | ❌ Not Started |
+
+### Section 6 — Academic Year Management
+
+| Step | Description | Status |
+|------|------------|--------|
+| 16 | Academic Year API Router | ❌ Not Started |
+| 17 | Academic Year Frontend | ❌ Not Started |
+
+### Section 7 — Dashboard & Activity Log
+
+| Step | Description | Status |
+|------|------------|--------|
+| 18 | Dashboard API Router | ❌ Not Started |
+| 19 | Dashboard Frontend | ❌ Not Started |
+
+### Section 8 — Teacher Management
+
+| Step | Description | Status |
+|------|------------|--------|
+| 20 | Teacher API Router | ❌ Not Started |
+| 21 | Teacher Frontend — Table & CRUD | ❌ Not Started |
+| 22 | Teacher Bulk Import & Export | ❌ Not Started |
+
+### Section 9 — Class & Student Management
+
+| Step | Description | Status |
+|------|------------|--------|
+| 23 | Class API Router | ❌ Not Started |
+| 24 | Class Frontend | ❌ Not Started |
+| 25 | Student API Router | ❌ Not Started |
+| 26 | Student Frontend — List & Registration | ❌ Not Started |
+| 27 | Student Detail Page & Status Transitions | ❌ Not Started |
+
+### Section 10 — SPP Payment System
+
+| Step | Description | Status |
+|------|------------|--------|
+| 28 | SPP Configuration API Router | ❌ Not Started |
+| 29 | SPP Configuration Frontend | ❌ Not Started |
+| 30 | SPP Payment Recording API | ❌ Not Started |
+| 31 | SPP Payment Recording Frontend | ❌ Not Started |
+| 32 | SPP Monitoring API — Payment Matrix & Arrears | ❌ Not Started |
+| 33 | SPP Monitoring Frontend — Payment Matrix | ❌ Not Started |
+| 34 | SPP Bill Auto-Generation Job | ❌ Not Started |
+
+### Section 11 — Cashflow, Events & Export
+
+| Step | Description | Status |
+|------|------------|--------|
+| 35 | Cashflow API Router | ❌ Not Started |
+| 36 | Cashflow Frontend | ❌ Not Started |
+| 37 | Events API Router | ❌ Not Started |
+| 38 | Events Frontend — Table & Calendar | ❌ Not Started |
+| 39 | User Management & RBAC Frontend | ❌ Not Started |
+| 40 | Student Bulk Import & Final Polish | ❌ Not Started |
