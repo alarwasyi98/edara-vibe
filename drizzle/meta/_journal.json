@@ -15,6 +15,13 @@
       "when": 1776063983226,
       "tag": "0001_rls_and_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777052793907,
+      "tag": "0002_next_power_pack",
+      "breakpoints": true
     }
   ]
 }

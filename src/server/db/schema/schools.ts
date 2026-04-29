@@ -4,7 +4,7 @@
  * Root tenant tables for multi-tenancy (ADR-02).
  * `schools` = yayasan (foundation), `school_units` = unit pendidikan (MI/MTs/MA/etc).
  *
- * @see technical-specification.md L714–741
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations } from 'drizzle-orm'

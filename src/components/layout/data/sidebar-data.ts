@@ -80,7 +80,7 @@ export const sidebarData: SidebarData = {
             },
             {
               title: 'Penugasan',
-              url: '/teachers/penugasan',
+              url: '/teachers/assignments',
             },
           ],
         },
@@ -104,11 +104,11 @@ title: 'Kalender Kegiatan',
             },
             {
               title: 'Jenis Bayar',
-              url: '/spp/jenis-bayar',
+              url: '/spp/payment-types',
             },
             {
               title: 'Diskon & Subsidi',
-              url: '/spp/diskon',
+              url: '/spp/discounts',
             },
             {
               title: 'Laporan',
@@ -130,7 +130,7 @@ title: 'Kalender Kegiatan',
             },
             {
               title: 'Kategori',
-              url: '/cashflow/kategori',
+              url: '/cashflow/categories',
             },
             {
               title: 'Laporan',

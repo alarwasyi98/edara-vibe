@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ClerkRouteRouteImport } from './routes/clerk/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
@@ -22,8 +21,6 @@ import { Route as authSignIn2RouteImport } from './routes/(auth)/sign-in-2'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
-import { Route as ClerkAuthenticatedRouteRouteImport } from './routes/clerk/_authenticated/route'
-import { Route as ClerkauthRouteRouteImport } from './routes/clerk/(auth)/route'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedTeachersIndexRouteImport } from './routes/_authenticated/teachers/index'
@@ -34,31 +31,24 @@ import { Route as AuthenticatedEventsIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedClassesIndexRouteImport } from './routes/_authenticated/classes/index'
 import { Route as AuthenticatedCashflowIndexRouteImport } from './routes/_authenticated/cashflow/index'
 import { Route as AuthenticatedAcademicYearsIndexRouteImport } from './routes/_authenticated/academic-years/index'
-import { Route as ClerkAuthenticatedUserManagementRouteImport } from './routes/clerk/_authenticated/user-management'
-import { Route as ClerkauthSignUpRouteImport } from './routes/clerk/(auth)/sign-up'
-import { Route as ClerkauthSignInRouteImport } from './routes/clerk/(auth)/sign-in'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthenticatedTeachersPerformaRouteImport } from './routes/_authenticated/teachers/performa'
-import { Route as AuthenticatedTeachersPenugasanRouteImport } from './routes/_authenticated/teachers/penugasan'
+import { Route as AuthenticatedTeachersAssignmentsRouteImport } from './routes/_authenticated/teachers/assignments'
 import { Route as AuthenticatedTeachersIdRouteImport } from './routes/_authenticated/teachers/$id'
 import { Route as AuthenticatedStudentsIdRouteImport } from './routes/_authenticated/students/$id'
-import { Route as AuthenticatedSppTambahPembayaranRouteImport } from './routes/_authenticated/spp/tambah-pembayaran'
+import { Route as AuthenticatedSppPaymentTypesRouteImport } from './routes/_authenticated/spp/payment-types'
 import { Route as AuthenticatedSppLaporanRouteImport } from './routes/_authenticated/spp/laporan'
-import { Route as AuthenticatedSppJenisBayarRouteImport } from './routes/_authenticated/spp/jenis-bayar'
-import { Route as AuthenticatedSppDiskonRouteImport } from './routes/_authenticated/spp/diskon'
+import { Route as AuthenticatedSppDiscountsRouteImport } from './routes/_authenticated/spp/discounts'
+import { Route as AuthenticatedSppAddPaymentRouteImport } from './routes/_authenticated/spp/add-payment'
 import { Route as AuthenticatedSppStudentIdRouteImport } from './routes/_authenticated/spp/$studentId'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 import { Route as AuthenticatedCashflowLaporanRouteImport } from './routes/_authenticated/cashflow/laporan'
-import { Route as AuthenticatedCashflowKategoriRouteImport } from './routes/_authenticated/cashflow/kategori'
-import { Route as AuthenticatedCashflowArusKasRouteImport } from './routes/_authenticated/cashflow/arus-kas'
+import { Route as AuthenticatedCashflowCategoriesRouteImport } from './routes/_authenticated/cashflow/categories'
+import { Route as AuthenticatedCashflowCashFlowRouteImport } from './routes/_authenticated/cashflow/cash-flow'
 import { Route as AuthenticatedCashflowAkunRouteImport } from './routes/_authenticated/cashflow/akun'
 
-const ClerkRouteRoute = ClerkRouteRouteImport.update({
-  id: '/clerk',
-  path: '/clerk',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
@@ -118,14 +108,6 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ClerkAuthenticatedRouteRoute = ClerkAuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => ClerkRouteRoute,
-} as any)
-const ClerkauthRouteRoute = ClerkauthRouteRouteImport.update({
-  id: '/(auth)',
-  getParentRoute: () => ClerkRouteRoute,
-} as any)
 const AuthenticatedSettingsRouteRoute =
   AuthenticatedSettingsRouteRouteImport.update({
     id: '/settings',
@@ -184,21 +166,10 @@ const AuthenticatedAcademicYearsIndexRoute =
     path: '/academic-years/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const ClerkAuthenticatedUserManagementRoute =
-  ClerkAuthenticatedUserManagementRouteImport.update({
-    id: '/user-management',
-    path: '/user-management',
-    getParentRoute: () => ClerkAuthenticatedRouteRoute,
-  } as any)
-const ClerkauthSignUpRoute = ClerkauthSignUpRouteImport.update({
-  id: '/sign-up',
-  path: '/sign-up',
-  getParentRoute: () => ClerkauthRouteRoute,
-} as any)
-const ClerkauthSignInRoute = ClerkauthSignInRouteImport.update({
-  id: '/sign-in',
-  path: '/sign-in',
-  getParentRoute: () => ClerkauthRouteRoute,
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedTeachersPerformaRoute =
   AuthenticatedTeachersPerformaRouteImport.update({
@@ -206,10 +177,10 @@ const AuthenticatedTeachersPerformaRoute =
     path: '/teachers/performa',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedTeachersPenugasanRoute =
-  AuthenticatedTeachersPenugasanRouteImport.update({
-    id: '/teachers/penugasan',
-    path: '/teachers/penugasan',
+const AuthenticatedTeachersAssignmentsRoute =
+  AuthenticatedTeachersAssignmentsRouteImport.update({
+    id: '/teachers/assignments',
+    path: '/teachers/assignments',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedTeachersIdRoute = AuthenticatedTeachersIdRouteImport.update({
@@ -222,10 +193,10 @@ const AuthenticatedStudentsIdRoute = AuthenticatedStudentsIdRouteImport.update({
   path: '/students/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSppTambahPembayaranRoute =
-  AuthenticatedSppTambahPembayaranRouteImport.update({
-    id: '/spp/tambah-pembayaran',
-    path: '/spp/tambah-pembayaran',
+const AuthenticatedSppPaymentTypesRoute =
+  AuthenticatedSppPaymentTypesRouteImport.update({
+    id: '/spp/payment-types',
+    path: '/spp/payment-types',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSppLaporanRoute = AuthenticatedSppLaporanRouteImport.update({
@@ -233,17 +204,18 @@ const AuthenticatedSppLaporanRoute = AuthenticatedSppLaporanRouteImport.update({
   path: '/spp/laporan',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSppJenisBayarRoute =
-  AuthenticatedSppJenisBayarRouteImport.update({
-    id: '/spp/jenis-bayar',
-    path: '/spp/jenis-bayar',
+const AuthenticatedSppDiscountsRoute =
+  AuthenticatedSppDiscountsRouteImport.update({
+    id: '/spp/discounts',
+    path: '/spp/discounts',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedSppDiskonRoute = AuthenticatedSppDiskonRouteImport.update({
-  id: '/spp/diskon',
-  path: '/spp/diskon',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
+const AuthenticatedSppAddPaymentRoute =
+  AuthenticatedSppAddPaymentRouteImport.update({
+    id: '/spp/add-payment',
+    path: '/spp/add-payment',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSppStudentIdRoute =
   AuthenticatedSppStudentIdRouteImport.update({
     id: '/spp/$studentId',
@@ -274,16 +246,16 @@ const AuthenticatedCashflowLaporanRoute =
     path: '/cashflow/laporan',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedCashflowKategoriRoute =
-  AuthenticatedCashflowKategoriRouteImport.update({
-    id: '/cashflow/kategori',
-    path: '/cashflow/kategori',
+const AuthenticatedCashflowCategoriesRoute =
+  AuthenticatedCashflowCategoriesRouteImport.update({
+    id: '/cashflow/categories',
+    path: '/cashflow/categories',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedCashflowArusKasRoute =
-  AuthenticatedCashflowArusKasRouteImport.update({
-    id: '/cashflow/arus-kas',
-    path: '/cashflow/arus-kas',
+const AuthenticatedCashflowCashFlowRoute =
+  AuthenticatedCashflowCashFlowRouteImport.update({
+    id: '/cashflow/cash-flow',
+    path: '/cashflow/cash-flow',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedCashflowAkunRoute =
@@ -295,7 +267,6 @@ const AuthenticatedCashflowAkunRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
-  '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
@@ -308,24 +279,22 @@ export interface FileRoutesByFullPath {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/cashflow/akun': typeof AuthenticatedCashflowAkunRoute
-  '/cashflow/arus-kas': typeof AuthenticatedCashflowArusKasRoute
-  '/cashflow/kategori': typeof AuthenticatedCashflowKategoriRoute
+  '/cashflow/cash-flow': typeof AuthenticatedCashflowCashFlowRoute
+  '/cashflow/categories': typeof AuthenticatedCashflowCategoriesRoute
   '/cashflow/laporan': typeof AuthenticatedCashflowLaporanRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/spp/$studentId': typeof AuthenticatedSppStudentIdRoute
-  '/spp/diskon': typeof AuthenticatedSppDiskonRoute
-  '/spp/jenis-bayar': typeof AuthenticatedSppJenisBayarRoute
+  '/spp/add-payment': typeof AuthenticatedSppAddPaymentRoute
+  '/spp/discounts': typeof AuthenticatedSppDiscountsRoute
   '/spp/laporan': typeof AuthenticatedSppLaporanRoute
-  '/spp/tambah-pembayaran': typeof AuthenticatedSppTambahPembayaranRoute
+  '/spp/payment-types': typeof AuthenticatedSppPaymentTypesRoute
   '/students/$id': typeof AuthenticatedStudentsIdRoute
   '/teachers/$id': typeof AuthenticatedTeachersIdRoute
-  '/teachers/penugasan': typeof AuthenticatedTeachersPenugasanRoute
+  '/teachers/assignments': typeof AuthenticatedTeachersAssignmentsRoute
   '/teachers/performa': typeof AuthenticatedTeachersPerformaRoute
-  '/clerk/sign-in': typeof ClerkauthSignInRoute
-  '/clerk/sign-up': typeof ClerkauthSignUpRoute
-  '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/academic-years/': typeof AuthenticatedAcademicYearsIndexRoute
   '/cashflow/': typeof AuthenticatedCashflowIndexRoute
   '/classes/': typeof AuthenticatedClassesIndexRoute
@@ -337,7 +306,6 @@ export interface FileRoutesByFullPath {
   '/users/': typeof AuthenticatedUsersIndexRoute
 }
 export interface FileRoutesByTo {
-  '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
@@ -350,24 +318,22 @@ export interface FileRoutesByTo {
   '/503': typeof errors503Route
   '/': typeof AuthenticatedIndexRoute
   '/cashflow/akun': typeof AuthenticatedCashflowAkunRoute
-  '/cashflow/arus-kas': typeof AuthenticatedCashflowArusKasRoute
-  '/cashflow/kategori': typeof AuthenticatedCashflowKategoriRoute
+  '/cashflow/cash-flow': typeof AuthenticatedCashflowCashFlowRoute
+  '/cashflow/categories': typeof AuthenticatedCashflowCategoriesRoute
   '/cashflow/laporan': typeof AuthenticatedCashflowLaporanRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/spp/$studentId': typeof AuthenticatedSppStudentIdRoute
-  '/spp/diskon': typeof AuthenticatedSppDiskonRoute
-  '/spp/jenis-bayar': typeof AuthenticatedSppJenisBayarRoute
+  '/spp/add-payment': typeof AuthenticatedSppAddPaymentRoute
+  '/spp/discounts': typeof AuthenticatedSppDiscountsRoute
   '/spp/laporan': typeof AuthenticatedSppLaporanRoute
-  '/spp/tambah-pembayaran': typeof AuthenticatedSppTambahPembayaranRoute
+  '/spp/payment-types': typeof AuthenticatedSppPaymentTypesRoute
   '/students/$id': typeof AuthenticatedStudentsIdRoute
   '/teachers/$id': typeof AuthenticatedTeachersIdRoute
-  '/teachers/penugasan': typeof AuthenticatedTeachersPenugasanRoute
+  '/teachers/assignments': typeof AuthenticatedTeachersAssignmentsRoute
   '/teachers/performa': typeof AuthenticatedTeachersPerformaRoute
-  '/clerk/sign-in': typeof ClerkauthSignInRoute
-  '/clerk/sign-up': typeof ClerkauthSignUpRoute
-  '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/academic-years': typeof AuthenticatedAcademicYearsIndexRoute
   '/cashflow': typeof AuthenticatedCashflowIndexRoute
   '/classes': typeof AuthenticatedClassesIndexRoute
@@ -381,10 +347,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/clerk': typeof ClerkRouteRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
-  '/clerk/(auth)': typeof ClerkauthRouteRouteWithChildren
-  '/clerk/_authenticated': typeof ClerkAuthenticatedRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/otp': typeof authOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
@@ -397,24 +360,22 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503Route
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/cashflow/akun': typeof AuthenticatedCashflowAkunRoute
-  '/_authenticated/cashflow/arus-kas': typeof AuthenticatedCashflowArusKasRoute
-  '/_authenticated/cashflow/kategori': typeof AuthenticatedCashflowKategoriRoute
+  '/_authenticated/cashflow/cash-flow': typeof AuthenticatedCashflowCashFlowRoute
+  '/_authenticated/cashflow/categories': typeof AuthenticatedCashflowCategoriesRoute
   '/_authenticated/cashflow/laporan': typeof AuthenticatedCashflowLaporanRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/spp/$studentId': typeof AuthenticatedSppStudentIdRoute
-  '/_authenticated/spp/diskon': typeof AuthenticatedSppDiskonRoute
-  '/_authenticated/spp/jenis-bayar': typeof AuthenticatedSppJenisBayarRoute
+  '/_authenticated/spp/add-payment': typeof AuthenticatedSppAddPaymentRoute
+  '/_authenticated/spp/discounts': typeof AuthenticatedSppDiscountsRoute
   '/_authenticated/spp/laporan': typeof AuthenticatedSppLaporanRoute
-  '/_authenticated/spp/tambah-pembayaran': typeof AuthenticatedSppTambahPembayaranRoute
+  '/_authenticated/spp/payment-types': typeof AuthenticatedSppPaymentTypesRoute
   '/_authenticated/students/$id': typeof AuthenticatedStudentsIdRoute
   '/_authenticated/teachers/$id': typeof AuthenticatedTeachersIdRoute
-  '/_authenticated/teachers/penugasan': typeof AuthenticatedTeachersPenugasanRoute
+  '/_authenticated/teachers/assignments': typeof AuthenticatedTeachersAssignmentsRoute
   '/_authenticated/teachers/performa': typeof AuthenticatedTeachersPerformaRoute
-  '/clerk/(auth)/sign-in': typeof ClerkauthSignInRoute
-  '/clerk/(auth)/sign-up': typeof ClerkauthSignUpRoute
-  '/clerk/_authenticated/user-management': typeof ClerkAuthenticatedUserManagementRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/_authenticated/academic-years/': typeof AuthenticatedAcademicYearsIndexRoute
   '/_authenticated/cashflow/': typeof AuthenticatedCashflowIndexRoute
   '/_authenticated/classes/': typeof AuthenticatedClassesIndexRoute
@@ -429,7 +390,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/clerk'
     | '/settings'
     | '/forgot-password'
     | '/otp'
@@ -442,24 +402,22 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/cashflow/akun'
-    | '/cashflow/arus-kas'
-    | '/cashflow/kategori'
+    | '/cashflow/cash-flow'
+    | '/cashflow/categories'
     | '/cashflow/laporan'
     | '/errors/$error'
     | '/settings/account'
     | '/settings/appearance'
     | '/spp/$studentId'
-    | '/spp/diskon'
-    | '/spp/jenis-bayar'
+    | '/spp/add-payment'
+    | '/spp/discounts'
     | '/spp/laporan'
-    | '/spp/tambah-pembayaran'
+    | '/spp/payment-types'
     | '/students/$id'
     | '/teachers/$id'
-    | '/teachers/penugasan'
+    | '/teachers/assignments'
     | '/teachers/performa'
-    | '/clerk/sign-in'
-    | '/clerk/sign-up'
-    | '/clerk/user-management'
+    | '/api/auth/$'
     | '/academic-years/'
     | '/cashflow/'
     | '/classes/'
@@ -471,7 +429,6 @@ export interface FileRouteTypes {
     | '/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/clerk'
     | '/forgot-password'
     | '/otp'
     | '/sign-in'
@@ -484,24 +441,22 @@ export interface FileRouteTypes {
     | '/503'
     | '/'
     | '/cashflow/akun'
-    | '/cashflow/arus-kas'
-    | '/cashflow/kategori'
+    | '/cashflow/cash-flow'
+    | '/cashflow/categories'
     | '/cashflow/laporan'
     | '/errors/$error'
     | '/settings/account'
     | '/settings/appearance'
     | '/spp/$studentId'
-    | '/spp/diskon'
-    | '/spp/jenis-bayar'
+    | '/spp/add-payment'
+    | '/spp/discounts'
     | '/spp/laporan'
-    | '/spp/tambah-pembayaran'
+    | '/spp/payment-types'
     | '/students/$id'
     | '/teachers/$id'
-    | '/teachers/penugasan'
+    | '/teachers/assignments'
     | '/teachers/performa'
-    | '/clerk/sign-in'
-    | '/clerk/sign-up'
-    | '/clerk/user-management'
+    | '/api/auth/$'
     | '/academic-years'
     | '/cashflow'
     | '/classes'
@@ -514,10 +469,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_authenticated'
-    | '/clerk'
     | '/_authenticated/settings'
-    | '/clerk/(auth)'
-    | '/clerk/_authenticated'
     | '/(auth)/forgot-password'
     | '/(auth)/otp'
     | '/(auth)/sign-in'
@@ -530,24 +482,22 @@ export interface FileRouteTypes {
     | '/(errors)/503'
     | '/_authenticated/'
     | '/_authenticated/cashflow/akun'
-    | '/_authenticated/cashflow/arus-kas'
-    | '/_authenticated/cashflow/kategori'
+    | '/_authenticated/cashflow/cash-flow'
+    | '/_authenticated/cashflow/categories'
     | '/_authenticated/cashflow/laporan'
     | '/_authenticated/errors/$error'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/spp/$studentId'
-    | '/_authenticated/spp/diskon'
-    | '/_authenticated/spp/jenis-bayar'
+    | '/_authenticated/spp/add-payment'
+    | '/_authenticated/spp/discounts'
     | '/_authenticated/spp/laporan'
-    | '/_authenticated/spp/tambah-pembayaran'
+    | '/_authenticated/spp/payment-types'
     | '/_authenticated/students/$id'
     | '/_authenticated/teachers/$id'
-    | '/_authenticated/teachers/penugasan'
+    | '/_authenticated/teachers/assignments'
     | '/_authenticated/teachers/performa'
-    | '/clerk/(auth)/sign-in'
-    | '/clerk/(auth)/sign-up'
-    | '/clerk/_authenticated/user-management'
+    | '/api/auth/$'
     | '/_authenticated/academic-years/'
     | '/_authenticated/cashflow/'
     | '/_authenticated/classes/'
@@ -561,7 +511,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  ClerkRouteRoute: typeof ClerkRouteRouteWithChildren
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authOtpRoute: typeof authOtpRoute
   authSignInRoute: typeof authSignInRoute
@@ -572,17 +521,11 @@ export interface RootRouteChildren {
   errors404Route: typeof errors404Route
   errors500Route: typeof errors500Route
   errors503Route: typeof errors503Route
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/clerk': {
-      id: '/clerk'
-      path: '/clerk'
-      fullPath: '/clerk'
-      preLoaderRoute: typeof ClerkRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -667,20 +610,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/clerk/_authenticated': {
-      id: '/clerk/_authenticated'
-      path: ''
-      fullPath: '/clerk'
-      preLoaderRoute: typeof ClerkAuthenticatedRouteRouteImport
-      parentRoute: typeof ClerkRouteRoute
-    }
-    '/clerk/(auth)': {
-      id: '/clerk/(auth)'
-      path: ''
-      fullPath: '/clerk'
-      preLoaderRoute: typeof ClerkauthRouteRouteImport
-      parentRoute: typeof ClerkRouteRoute
-    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -751,26 +680,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAcademicYearsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/clerk/_authenticated/user-management': {
-      id: '/clerk/_authenticated/user-management'
-      path: '/user-management'
-      fullPath: '/clerk/user-management'
-      preLoaderRoute: typeof ClerkAuthenticatedUserManagementRouteImport
-      parentRoute: typeof ClerkAuthenticatedRouteRoute
-    }
-    '/clerk/(auth)/sign-up': {
-      id: '/clerk/(auth)/sign-up'
-      path: '/sign-up'
-      fullPath: '/clerk/sign-up'
-      preLoaderRoute: typeof ClerkauthSignUpRouteImport
-      parentRoute: typeof ClerkauthRouteRoute
-    }
-    '/clerk/(auth)/sign-in': {
-      id: '/clerk/(auth)/sign-in'
-      path: '/sign-in'
-      fullPath: '/clerk/sign-in'
-      preLoaderRoute: typeof ClerkauthSignInRouteImport
-      parentRoute: typeof ClerkauthRouteRoute
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/teachers/performa': {
       id: '/_authenticated/teachers/performa'
@@ -779,11 +694,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTeachersPerformaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/teachers/penugasan': {
-      id: '/_authenticated/teachers/penugasan'
-      path: '/teachers/penugasan'
-      fullPath: '/teachers/penugasan'
-      preLoaderRoute: typeof AuthenticatedTeachersPenugasanRouteImport
+    '/_authenticated/teachers/assignments': {
+      id: '/_authenticated/teachers/assignments'
+      path: '/teachers/assignments'
+      fullPath: '/teachers/assignments'
+      preLoaderRoute: typeof AuthenticatedTeachersAssignmentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/teachers/$id': {
@@ -800,11 +715,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStudentsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/spp/tambah-pembayaran': {
-      id: '/_authenticated/spp/tambah-pembayaran'
-      path: '/spp/tambah-pembayaran'
-      fullPath: '/spp/tambah-pembayaran'
-      preLoaderRoute: typeof AuthenticatedSppTambahPembayaranRouteImport
+    '/_authenticated/spp/payment-types': {
+      id: '/_authenticated/spp/payment-types'
+      path: '/spp/payment-types'
+      fullPath: '/spp/payment-types'
+      preLoaderRoute: typeof AuthenticatedSppPaymentTypesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/spp/laporan': {
@@ -814,18 +729,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSppLaporanRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/spp/jenis-bayar': {
-      id: '/_authenticated/spp/jenis-bayar'
-      path: '/spp/jenis-bayar'
-      fullPath: '/spp/jenis-bayar'
-      preLoaderRoute: typeof AuthenticatedSppJenisBayarRouteImport
+    '/_authenticated/spp/discounts': {
+      id: '/_authenticated/spp/discounts'
+      path: '/spp/discounts'
+      fullPath: '/spp/discounts'
+      preLoaderRoute: typeof AuthenticatedSppDiscountsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/spp/diskon': {
-      id: '/_authenticated/spp/diskon'
-      path: '/spp/diskon'
-      fullPath: '/spp/diskon'
-      preLoaderRoute: typeof AuthenticatedSppDiskonRouteImport
+    '/_authenticated/spp/add-payment': {
+      id: '/_authenticated/spp/add-payment'
+      path: '/spp/add-payment'
+      fullPath: '/spp/add-payment'
+      preLoaderRoute: typeof AuthenticatedSppAddPaymentRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/spp/$studentId': {
@@ -863,18 +778,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCashflowLaporanRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/cashflow/kategori': {
-      id: '/_authenticated/cashflow/kategori'
-      path: '/cashflow/kategori'
-      fullPath: '/cashflow/kategori'
-      preLoaderRoute: typeof AuthenticatedCashflowKategoriRouteImport
+    '/_authenticated/cashflow/categories': {
+      id: '/_authenticated/cashflow/categories'
+      path: '/cashflow/categories'
+      fullPath: '/cashflow/categories'
+      preLoaderRoute: typeof AuthenticatedCashflowCategoriesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/cashflow/arus-kas': {
-      id: '/_authenticated/cashflow/arus-kas'
-      path: '/cashflow/arus-kas'
-      fullPath: '/cashflow/arus-kas'
-      preLoaderRoute: typeof AuthenticatedCashflowArusKasRouteImport
+    '/_authenticated/cashflow/cash-flow': {
+      id: '/_authenticated/cashflow/cash-flow'
+      path: '/cashflow/cash-flow'
+      fullPath: '/cashflow/cash-flow'
+      preLoaderRoute: typeof AuthenticatedCashflowCashFlowRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/cashflow/akun': {
@@ -909,18 +824,18 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedCashflowAkunRoute: typeof AuthenticatedCashflowAkunRoute
-  AuthenticatedCashflowArusKasRoute: typeof AuthenticatedCashflowArusKasRoute
-  AuthenticatedCashflowKategoriRoute: typeof AuthenticatedCashflowKategoriRoute
+  AuthenticatedCashflowCashFlowRoute: typeof AuthenticatedCashflowCashFlowRoute
+  AuthenticatedCashflowCategoriesRoute: typeof AuthenticatedCashflowCategoriesRoute
   AuthenticatedCashflowLaporanRoute: typeof AuthenticatedCashflowLaporanRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedSppStudentIdRoute: typeof AuthenticatedSppStudentIdRoute
-  AuthenticatedSppDiskonRoute: typeof AuthenticatedSppDiskonRoute
-  AuthenticatedSppJenisBayarRoute: typeof AuthenticatedSppJenisBayarRoute
+  AuthenticatedSppAddPaymentRoute: typeof AuthenticatedSppAddPaymentRoute
+  AuthenticatedSppDiscountsRoute: typeof AuthenticatedSppDiscountsRoute
   AuthenticatedSppLaporanRoute: typeof AuthenticatedSppLaporanRoute
-  AuthenticatedSppTambahPembayaranRoute: typeof AuthenticatedSppTambahPembayaranRoute
+  AuthenticatedSppPaymentTypesRoute: typeof AuthenticatedSppPaymentTypesRoute
   AuthenticatedStudentsIdRoute: typeof AuthenticatedStudentsIdRoute
   AuthenticatedTeachersIdRoute: typeof AuthenticatedTeachersIdRoute
-  AuthenticatedTeachersPenugasanRoute: typeof AuthenticatedTeachersPenugasanRoute
+  AuthenticatedTeachersAssignmentsRoute: typeof AuthenticatedTeachersAssignmentsRoute
   AuthenticatedTeachersPerformaRoute: typeof AuthenticatedTeachersPerformaRoute
   AuthenticatedAcademicYearsIndexRoute: typeof AuthenticatedAcademicYearsIndexRoute
   AuthenticatedCashflowIndexRoute: typeof AuthenticatedCashflowIndexRoute
@@ -936,18 +851,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedCashflowAkunRoute: AuthenticatedCashflowAkunRoute,
-  AuthenticatedCashflowArusKasRoute: AuthenticatedCashflowArusKasRoute,
-  AuthenticatedCashflowKategoriRoute: AuthenticatedCashflowKategoriRoute,
+  AuthenticatedCashflowCashFlowRoute: AuthenticatedCashflowCashFlowRoute,
+  AuthenticatedCashflowCategoriesRoute: AuthenticatedCashflowCategoriesRoute,
   AuthenticatedCashflowLaporanRoute: AuthenticatedCashflowLaporanRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedSppStudentIdRoute: AuthenticatedSppStudentIdRoute,
-  AuthenticatedSppDiskonRoute: AuthenticatedSppDiskonRoute,
-  AuthenticatedSppJenisBayarRoute: AuthenticatedSppJenisBayarRoute,
+  AuthenticatedSppAddPaymentRoute: AuthenticatedSppAddPaymentRoute,
+  AuthenticatedSppDiscountsRoute: AuthenticatedSppDiscountsRoute,
   AuthenticatedSppLaporanRoute: AuthenticatedSppLaporanRoute,
-  AuthenticatedSppTambahPembayaranRoute: AuthenticatedSppTambahPembayaranRoute,
+  AuthenticatedSppPaymentTypesRoute: AuthenticatedSppPaymentTypesRoute,
   AuthenticatedStudentsIdRoute: AuthenticatedStudentsIdRoute,
   AuthenticatedTeachersIdRoute: AuthenticatedTeachersIdRoute,
-  AuthenticatedTeachersPenugasanRoute: AuthenticatedTeachersPenugasanRoute,
+  AuthenticatedTeachersAssignmentsRoute: AuthenticatedTeachersAssignmentsRoute,
   AuthenticatedTeachersPerformaRoute: AuthenticatedTeachersPerformaRoute,
   AuthenticatedAcademicYearsIndexRoute: AuthenticatedAcademicYearsIndexRoute,
   AuthenticatedCashflowIndexRoute: AuthenticatedCashflowIndexRoute,
@@ -962,52 +877,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface ClerkauthRouteRouteChildren {
-  ClerkauthSignInRoute: typeof ClerkauthSignInRoute
-  ClerkauthSignUpRoute: typeof ClerkauthSignUpRoute
-}
-
-const ClerkauthRouteRouteChildren: ClerkauthRouteRouteChildren = {
-  ClerkauthSignInRoute: ClerkauthSignInRoute,
-  ClerkauthSignUpRoute: ClerkauthSignUpRoute,
-}
-
-const ClerkauthRouteRouteWithChildren = ClerkauthRouteRoute._addFileChildren(
-  ClerkauthRouteRouteChildren,
-)
-
-interface ClerkAuthenticatedRouteRouteChildren {
-  ClerkAuthenticatedUserManagementRoute: typeof ClerkAuthenticatedUserManagementRoute
-}
-
-const ClerkAuthenticatedRouteRouteChildren: ClerkAuthenticatedRouteRouteChildren =
-  {
-    ClerkAuthenticatedUserManagementRoute:
-      ClerkAuthenticatedUserManagementRoute,
-  }
-
-const ClerkAuthenticatedRouteRouteWithChildren =
-  ClerkAuthenticatedRouteRoute._addFileChildren(
-    ClerkAuthenticatedRouteRouteChildren,
-  )
-
-interface ClerkRouteRouteChildren {
-  ClerkauthRouteRoute: typeof ClerkauthRouteRouteWithChildren
-  ClerkAuthenticatedRouteRoute: typeof ClerkAuthenticatedRouteRouteWithChildren
-}
-
-const ClerkRouteRouteChildren: ClerkRouteRouteChildren = {
-  ClerkauthRouteRoute: ClerkauthRouteRouteWithChildren,
-  ClerkAuthenticatedRouteRoute: ClerkAuthenticatedRouteRouteWithChildren,
-}
-
-const ClerkRouteRouteWithChildren = ClerkRouteRoute._addFileChildren(
-  ClerkRouteRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  ClerkRouteRoute: ClerkRouteRouteWithChildren,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authOtpRoute: authOtpRoute,
   authSignInRoute: authSignInRoute,
@@ -1018,7 +889,17 @@ const rootRouteChildren: RootRouteChildren = {
   errors404Route: errors404Route,
   errors500Route: errors500Route,
   errors503Route: errors503Route,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

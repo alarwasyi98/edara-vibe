@@ -30,7 +30,7 @@ const readWrite: Permission[] = ['read', 'create', 'update']
 const none: Permission[] = []
 
 export const rolePermissions: Record<Role, Record<Module, Permission[]>> = {
-    admin: {
+    super_admin: {
         dashboard: allPermissions,
         siswa: allPermissions,
         kelas: allPermissions,
@@ -60,7 +60,7 @@ export const rolePermissions: Record<Role, Record<Module, Permission[]>> = {
         settings: readOnly,
     },
 
-    tata_usaha: {
+    admin_tu: {
         dashboard: readOnly,
         siswa: allPermissions,
         kelas: allPermissions,

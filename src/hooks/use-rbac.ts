@@ -11,7 +11,7 @@ import { type Role } from '@/lib/constants'
  * Mock: role user aktif. Pada integrasi backend, ini diambil dari Clerk/session.
  * Ubah default role di sini untuk testing RBAC.
  */
-const MOCK_CURRENT_ROLE: Role = 'admin'
+const MOCK_CURRENT_ROLE: Role = 'super_admin'
 
 /**
  * Hook untuk mengecek permission RBAC pada modul tertentu.

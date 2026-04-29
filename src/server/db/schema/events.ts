@@ -6,7 +6,7 @@
  * Business Rule B13: Past events with "ongoing" status are NOT
  * auto-updated by the system. Admin must manually update to "completed".
  *
- * @see technical-specification.md L1136–1181
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations } from 'drizzle-orm'
@@ -62,7 +62,7 @@ export const schoolEvents = pgTable(
     location: varchar('location', { length: 255 }),
     description: text('description'),
     status: eventStatusEnum('status').default('scheduled').notNull(),
-    createdBy: varchar('created_by', { length: 255 }).notNull(), // clerkUserId
+    createdBy: varchar('created_by', { length: 255 }).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },

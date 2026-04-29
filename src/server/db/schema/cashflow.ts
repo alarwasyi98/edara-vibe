@@ -9,7 +9,7 @@
  *
  * ADR-07: All monetary columns use numeric(15,2).
  *
- * @see technical-specification.md L1082–1130
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations } from 'drizzle-orm'
@@ -70,7 +70,7 @@ export const cashflowTransactions = pgTable(
     sppPaymentId: uuid('spp_payment_id').references(
       () => paymentTransactions.id,
     ), // B12: auto-link opsional
-    recordedBy: varchar('recorded_by', { length: 255 }).notNull(), // clerkUserId
+    recordedBy: varchar('recorded_by', { length: 255 }).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (t) => ({

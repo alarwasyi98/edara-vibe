@@ -27,7 +27,7 @@ CREATE TABLE "schools" (
 --> statement-breakpoint
 CREATE TABLE "user_school_assignments" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"clerk_user_id" varchar(255) NOT NULL,
+	"user_id" uuid NOT NULL,
 	"school_id" uuid NOT NULL,
 	"unit_id" uuid,
 	"role" "user_role" NOT NULL,
@@ -291,8 +291,8 @@ ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_school_id_schools_id_f
 ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_unit_id_school_units_id_fk" FOREIGN KEY ("unit_id") REFERENCES "public"."school_units"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "school_units_school_idx" ON "school_units" USING btree ("school_id");--> statement-breakpoint
 CREATE INDEX "user_assignments_school_idx" ON "user_school_assignments" USING btree ("school_id");--> statement-breakpoint
-CREATE INDEX "user_assignments_clerk_idx" ON "user_school_assignments" USING btree ("clerk_user_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "user_assignment_unique" ON "user_school_assignments" USING btree ("clerk_user_id","school_id","unit_id");--> statement-breakpoint
+CREATE INDEX "user_assignments_user_idx" ON "user_school_assignments" USING btree ("user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "user_assignment_unique" ON "user_school_assignments" USING btree ("user_id","school_id","unit_id");--> statement-breakpoint
 CREATE INDEX "academic_years_unit_idx" ON "academic_years" USING btree ("unit_id");--> statement-breakpoint
 CREATE INDEX "teachers_school_unit_idx" ON "teachers" USING btree ("school_id","unit_id");--> statement-breakpoint
 CREATE INDEX "teachers_nik_idx" ON "teachers" USING btree ("nik");--> statement-breakpoint

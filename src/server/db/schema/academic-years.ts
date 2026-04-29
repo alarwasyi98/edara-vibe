@@ -12,7 +12,7 @@
  * in Drizzle ORM's schema API. It is implemented in the custom
  * migration file (Step 7: drizzle-kit generate --custom).
  *
- * @see technical-specification.md L747–768
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations } from 'drizzle-orm'

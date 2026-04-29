@@ -36,7 +36,7 @@
 | **Calendar** | [react-big-calendar](https://github.com/vazco/react-big-calendar) | Calendar view for events |
 | **Backend** | [TanStack Start](https://tanstack.com/start) | Full-stack framework (SPA Phase 1, SSR Phase 2) |
 | **API** | [oRPC](https://orc.js.org/) | Type-safe RPC layer |
-| **Auth** | [Clerk](https://clerk.com/) ^5.x | Auth JWT validation, user management |
+| **Auth** | [Better Auth](https://better-auth.com/) | Auth with email/password, sessions |
 | **ORM** | [Drizzle ORM](https://orm.drizzle.team/) | Type-safe SQL query builder |
 | **Jobs** | [pg-boss](https://github.com/tgriesser/pg-boss) | PostgreSQL-native job queue |
 | **Database** | [Neon](https://neon.tech/) (PostgreSQL) | Serverless PostgreSQL |
@@ -58,7 +58,7 @@ SPP payment status (paid/partial/unpaid) is never stored — derived via SQL agg
 `payment_transactions` has no `updated_at` column and no UPDATE/DELETE permissions at the application layer. Corrections use reversal transactions referencing the original transaction ID.
 
 > [!INFO]
-> For full technical specification details, see: [Technical Specification](src/docs/technical-specification.md)
+> For full product specification details, see: [Product Requirements (PRD)](docs/PRD.md)
 
 ---
 
@@ -69,7 +69,7 @@ SPP payment status (paid/partial/unpaid) is never stored — derived via SQL agg
 - Node.js ^20.x
 - pnpm ^9.x
 - PostgreSQL (Neon) account
-- Clerk account
+- Better Auth account (or use email/password)
 
 ### Installation
 
@@ -93,10 +93,9 @@ Edit `.env` and add your credentials:
 # Database (Neon)
 DATABASE_URL="postgresql://user:pass@host.neon.tech/db?sslmode=require"
 
-# Clerk Authentication
-CLERK_PUBLISHABLE_KEY="pk_test_..."
-CLERK_SECRET_KEY="sk_test_..."
-CLERK_JWT_KEY="..."
+# Better Auth
+BETTER_AUTH_SECRET="your-secret-key-here"
+BETTER_AUTH_URL="http://localhost:3000"
 ```
 
 ### Running the Project
@@ -120,6 +119,19 @@ pnpm lint
 ## Project Structure
 
 ```
+├── .agents/                # AI agent memory & rules
+│   ├── memory/            # Layered memory system
+│   │   ├── system.md     # Tech stack, constraints, conventions
+│   │   ├── project.md    # Feature inventory, status, gotchas
+│   │   ├── decisions.md  # ADR log with rationale
+│   │   ├── log.md        # Session log (what happened)
+│   │   └── graph.md      # Dependency/relationship map
+│   ├── external/          # External memory sources
+│   └── rules/            # Coding standards, commit conventions
+├── docs/                   # Project documentation
+│   ├── PRD.md            # Product Requirements Document
+│   ├── implementation-plan.md
+│   └── naming-dictionary.json
 ├── src/
 │   ├── components/          # Reusable UI components
 │   │   ├── layout/        # App shell, sidebar, header
@@ -145,12 +157,9 @@ pnpm lint
 │   │   ├── routers/    # oRPC routers
 │   │   ├── middleware/# Auth, RLS, RBAC
 │   │   └── jobs/       # pg-boss workers
-│   ├── stores/           # Zustand stores
-│   └── docs/            # Documentation
-│       ├── technical-specification.md
-│       ├── reconciliation-plan.md
-│       └── reconciliation-log.md
+│   └── stores/           # Zustand stores
 ├── .github/              # GitHub configs
+├── AGENTS.md             # AI agent activation contract
 ├── package.json
 └── README.md
 ```
@@ -174,7 +183,7 @@ pnpm lint
 | **Events Calendar** | Table and calendar views for school activities |
 | **Export Reports** | Excel/PDF generation via background jobs |
 
-For feature specifications, see: [Technical Specification - Feature Specifications](src/docs/technical-specification.md#3-feature-specifications)
+For feature specifications, see: [PRD - Feature Specifications](docs/PRD.md#3-feature-specifications)
 
 ---
 
@@ -182,13 +191,13 @@ For feature specifications, see: [Technical Specification - Feature Specificatio
 
 ### Current Sprint
 
-The project follows a staged reconciliation plan from Mock/Vite SPA toward TanStack Start + oRPC + Drizzle ORM.
+The project follows a staged implementation plan from Mock/Vite SPA toward TanStack Start + oRPC + Drizzle ORM.
 
-- **Current Phase**: Section 1 (Stabilization & Basic Infrastructure)
-- **Progress**: Step 3 of 34 completed (8%)
-- **Next Target**: Step 4 (Core Tenant Schema Definition)
+- **Completed**: Section 1 (Stabilization) + Section 2 (DB Schema & RLS) — Steps 1–7
+- **In Progress**: Section 3 (Auth & API) — Step 8 (Better Auth integration, ~40%)
+- **Next Target**: Step 9 (oRPC Auth Middleware)
 
-For full plan, see: [Reconciliation Plan](src/docs/reconciliation-plan.md)
+For full plan, see: [Implementation Plan](docs/implementation-plan.md)
 
 ### Branch Strategy
 
@@ -249,6 +258,7 @@ This project is licensed under the [ISC License](LICENSE).
 
 ## Documentation Links
 
-- [Technical Specification](src/docs/technical-specification.md) — Full system spec
-- [Implementation/Reconciliation Plan](src/docs/reconciliation-plan.md) — Step-by-step implementation
-- [Current Sprint](src/docs/reconciliation-log.md) — Progress tracking
+- [Product Requirements (PRD)](docs/PRD.md) — Feature specs, data architecture, API design
+- [Implementation Plan](docs/implementation-plan.md) — Step-by-step implementation with progress
+- [Feature Stories](docs/features-stories.md) — User stories with UX/UI considerations
+- [Naming Dictionary](docs/naming-dictionary.json) — Indonesian ↔ English identifier mapping

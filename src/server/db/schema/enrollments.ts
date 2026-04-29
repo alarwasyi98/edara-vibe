@@ -8,7 +8,7 @@
  *   a year = UPDATE class_id (not INSERT new), with history logged.
  * - B11: Students are never deleted — only enrollment status changes.
  *
- * @see technical-specification.md L877–931
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations } from 'drizzle-orm'
@@ -84,7 +84,7 @@ export const enrollmentStatusHistory = pgTable('enrollment_status_history', {
     .notNull(),
   fromStatus: enrollmentStatusEnum('from_status').notNull(),
   toStatus: enrollmentStatusEnum('to_status').notNull(),
-  changedBy: varchar('changed_by', { length: 255 }).notNull(), // clerkUserId
+  changedBy: varchar('changed_by', { length: 255 }).notNull(),
   reason: text('reason'),
   metadata: jsonb('metadata'), // { fromClassId, toClassId, destinationSchool, etc. }
   changedAt: timestamp('changed_at').defaultNow().notNull(),

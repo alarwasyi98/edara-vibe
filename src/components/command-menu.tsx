@@ -87,8 +87,8 @@ export function CommandMenu() {
               Tambah Guru
             </CommandItem>
             <CommandItem
-              value='tambah-pembayaran'
-              onSelect={() => runCommand(() => navigate({ to: '/spp' }))}
+              value='add-payment'
+              onSelect={() => runCommand(() => navigate({ to: '/spp/add-payment' }))}
             >
               <CreditCard className='mr-2 h-4 w-4' />
               Tambah Pembayaran

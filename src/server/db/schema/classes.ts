@@ -4,7 +4,7 @@
  * Class definitions per academic year and unit.
  * Each class belongs to one academic year and optionally has a homeroom teacher.
  *
- * @see technical-specification.md L846–871
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations } from 'drizzle-orm'

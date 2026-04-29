@@ -43,18 +43,18 @@ export const tenants: Tenant[] = [
 // ──────────────────────────────────────────────
 
 export const ROLES = {
-  ADMIN: 'admin',
+  SUPER_ADMIN: 'super_admin',
   KEPALA_SEKOLAH: 'kepala_sekolah',
-  TATA_USAHA: 'tata_usaha',
+  ADMIN_TU: 'admin_tu',
   BENDAHARA: 'bendahara',
 } as const
 
 export type Role = (typeof ROLES)[keyof typeof ROLES]
 
 export const roleLabels: Record<Role, string> = {
-  admin: 'Admin',
+  super_admin: 'Super Admin',
   kepala_sekolah: 'Kepala Sekolah',
-  tata_usaha: 'Tata Usaha',
+  admin_tu: 'Admin TU',
   bendahara: 'Bendahara',
 }
 

@@ -7,7 +7,7 @@
  * Business Rule B4: NISN is unique per school, not globally.
  * Implemented via composite unique index (nisn, school_id).
  *
- * @see technical-specification.md L810–840
+ * @see docs/prd.md — Data Architecture
  */
 
 import { relations } from 'drizzle-orm'
