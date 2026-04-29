@@ -1,6 +1,11 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
+import {
+  QueryClient,
+  QueryClientProvider,
+  dehydrate,
+  hydrate,
+} from '@tanstack/react-query'
 import { routeTree } from './routeTree.gen'
-import { QueryClient } from '@tanstack/react-query'
 
 export function createRouter() {
   const queryClient = new QueryClient({
@@ -16,6 +21,15 @@ export function createRouter() {
     context: { queryClient },
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
+    dehydrate: () => ({
+      queryClientState: dehydrate(queryClient),
+    }),
+    hydrate: (dehydrated) => {
+      hydrate(queryClient, dehydrated.queryClientState)
+    },
+    Wrap: ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    ),
   })
 }
 

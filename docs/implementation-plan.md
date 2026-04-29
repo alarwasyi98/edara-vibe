@@ -15,7 +15,7 @@
 | 1. Stabilization & Infrastructure | 1–3 | ✅ Done |
 | 2. Database Schema & RLS | 4–7 | ✅ Done |
 | 2.5. TanStack Start SPA Migration | 0 | ❌ Not Started |
-| 3. Auth Backend & Middleware | 8–11 | 🔄 Step 8 ✅, Steps 9-11 not started |
+| 3. Auth Backend & Middleware | 8–11 | 🔄 Steps 8–10 ✅, Step 11 not started |
 | 4. oRPC Foundation & Root Router | 12–13 | ❌ Not Started |
 | 5. Tenant & Org Structure | 14–15 | ❌ Not Started |
 | 6. Academic Year Management | 16–17 | ❌ Not Started |
@@ -161,7 +161,7 @@
   3. Run `pnpm build` — must pass
 - **Rollback:** `git checkout -- src/server/auth/ src/lib/auth.ts src/server/db/schema/users.ts`
 
-### Step 9: Auth API Route Handler
+### Step 9: Auth API Route Handler ✅
 
 - **Task:** Create the Better Auth HTTP handler route. Since ADR-01 forbids SSR/`createServerFn`, mount Better Auth as an API route that the SPA can call. Create `src/routes/api/auth/$.ts` as a catch-all route that delegates to `auth.handler` using TanStack Start's `createFileRoute` with `server.handlers` (enabled by Step 0's Nitro migration). This is the runtime entry point that makes Better Auth functional (currently dead code).
 - **Files (3):**
@@ -175,7 +175,7 @@
   3. Run `pnpm build` — must pass
 - **Rollback:** Delete `src/routes/api/auth/$.ts`.
 
-### Step 10: oRPC Auth Middleware Stack
+### Step 10: oRPC Auth Middleware Stack ✅
 
 - **Task:** Build the complete oRPC middleware chain per the migration spec: `context.ts` → `auth.ts` (session validation) → `requireUnitContext.ts` (resolve assignment + set RLS) → `requireRole.ts` (RBAC check) → `withActivityLog.ts` (centralized logging per ADR-05). Update `authorized.ts` to include full `AuthContext` with EDARA fields (`userId`, `email`, `schoolId`, `unitId`, `role`, `assignmentId`). The `requireUnitContext` middleware must call `resolveAssignment()` and execute `SET LOCAL app.current_school = schoolId; SET LOCAL app.current_unit = unitId` on the database connection for RLS (ADR-02).
 - **Files (9):**
@@ -862,7 +862,7 @@ Section 1–2 (Done) ──→ Section 2.5 (TanStack Start SPA) ──→ Sectio
 | 1 | No oRPC routers exist | Step 12 |
 | 2 | All frontend uses mock data | Steps 15–40 (progressive) |
 | 3 | No DB migrations pushed | Step 11 (User Instruction) |
-| 4 | Better Auth server is dead code | Step 9 |
+| 4 | Better Auth server is dead code | Step 9 ✅ |
 | 5 | `src/lib/auth.ts` wrong location | Step 8 |
 | 6 | `userSchoolAssignments.userId` missing FK | Step 8 |
 | 7 | Auth schema missing `hashedPassword` | Step 8 (verify — Better Auth stores in `account`) |
@@ -871,6 +871,6 @@ Section 1–2 (Done) ──→ Section 2.5 (TanStack Start SPA) ──→ Sectio
 | 10 | Drizzle migration drift | Step 8 |
 | 11 | Large chunk warning (581KB) | Step 3 (Done) |
 | 12 | Role name mismatch in constants | Step 11 |
-| 13 | `authorized.ts` missing EDARA fields | Step 10 |
+| 13 | `authorized.ts` missing EDARA fields | Step 10 ✅ |
 | 14 | Missing npm packages (xlsx, react-big-calendar) | Steps 22, 38 |
 | 15 | Mock auth store not connected | Step 11 |

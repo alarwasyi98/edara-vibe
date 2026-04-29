@@ -5,6 +5,71 @@
 
 ---
 
+## Session 17 — 2026-04-30: Step 9 — Auth API Route (Blockers Log)
+
+**Branch:** `backup/step0-plan-update`
+**Commit:** (pending — changes staged, not yet committed)
+
+### What Happened
+Implemented Step 9 (Auth API Route Handler) and encountered multiple blockers that required debugging and resolution before the route could function.
+
+### Blockers Encountered
+
+#### Blocker 1: `createAPIFileRoute` Does Not Exist in SPA Mode
+- **Problem:** Oracle agent recommended using `createAPIFileRoute('/api/auth/$')` for the auth catch-all handler, which is the documented pattern for TanStack Start API routes. However, this export does not exist in `@tanstack/react-start@1.167.50` when running in SPA mode.
+- **Root Cause:** TanStack Start SPA mode (`spa: { enabled: true }`) does not expose `createAPIFileRoute` — it only provides `createFileRoute` with `server.handlers` as the escape hatch for API routes.
+- **Resolution:** Used `createFileRoute('/api/auth/$')` with `server.handlers` property instead. This is the pattern used by t3-turbo and Better Auth CLI scaffolding.
+
+#### Blocker 2: `window is not defined` — SSR Module Evaluation
+- **Problem:** After creating the auth route, the dev server crashed with `ReferenceError: window is not defined` in `auth-client.ts`.
+- **Root Cause:** `auth-client.ts` used `window.location.origin` at module-level scope to set `baseURL`. TanStack Start evaluates ALL route modules on the server side (even in SPA mode) to build the route tree. This means any module imported by a route file gets executed in a Node.js context where `window` does not exist.
+- **Resolution:** Added a guard: `typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'` as the `baseURL` fallback.
+
+#### Blocker 3: `matchMedia is not a function` — Theme Provider SSR Crash
+- **Problem:** After fixing the window guard, the server crashed again with `TypeError: matchMedia is not a function` in `theme-provider.tsx`.
+- **Root Cause:** Same SSR module evaluation issue. `theme-provider.tsx` called `window.matchMedia('(prefers-color-scheme: dark)')` at module level to determine the default theme.
+- **Resolution:** Added SSR guard: `typeof window !== 'undefined' && typeof window.matchMedia === 'function'` before calling `matchMedia`.
+
+#### Blocker 4: TanStack Version Mismatch — `router.stores.matches.get()` Crash
+- **Problem:** After fixing SSR guards, the main page (`/`) returned HTTP 500 with error: `TypeError: router.stores.matches.get is not a function` at `ssr-server.js:142`.
+- **Root Cause:** `package.json` used caret ranges (`^1.x.x`) for TanStack packages, causing `pnpm` to resolve two different versions of `@tanstack/router-core`: v1.168.3 (from `react-router`) and v1.168.17 (from `react-start`). The `ssr-server.js` module expected the `.stores.matches.get()` API from v1.168.15+, but the router instance was created with v1.168.3 which uses a different internal API.
+- **Resolution:** Pinned ALL TanStack packages to exact versions (no caret):
+  - `@tanstack/react-router`: `1.168.25`
+  - `@tanstack/react-start`: `1.167.50`
+  - `@tanstack/router-devtools`: `1.166.13`
+  - Removed redundant devDeps: `@tanstack/router-plugin`, `@tanstack/start-client-core`, `@tanstack/start-server-core`
+  - After `pnpm install`, all packages resolve to single `router-core@1.168.17`
+
+#### Blocker 5: `QueryClientProvider` Duplication
+- **Problem:** `__root.tsx` wrapped children in `QueryClientProvider`, but `router.tsx` also wrapped via `Wrap` option — causing React context duplication warnings.
+- **Resolution:** Removed `QueryClientProvider` from `__root.tsx`, kept it only in `router.tsx`'s `Wrap` option (single source of truth).
+
+#### Blocker 6: Dev Server Process Management
+- **Problem:** After fixing all code issues, could not verify the fix because `curl` returned HTTP 000 (connection refused). Vite reported "ready" but port 3000 was not listening.
+- **Root Cause:** The bash tool kills processes after timeout. `pnpm dev` was started with a 20s timeout, Vite reported ready within that window, but the process was killed when the timeout expired. PowerShell `Start-Job` also failed because background jobs run in isolated process spaces that don't bind ports to the host.
+- **Resolution:** Used `[System.Diagnostics.Process]::Start()` to spawn a truly detached `cmd.exe /c pnpm dev` process. Vite bound to `[::1]:3000` (IPv6 localhost). Curl needed `http://[::1]:3000/` to connect.
+
+### Files Changed
+- `src/routes/api/auth/$.ts` — NEW: Better Auth catch-all handler using `createFileRoute` + `server.handlers`
+- `src/lib/auth-client.ts` — SSR guard for `window.location.origin`
+- `src/context/theme-provider.tsx` — SSR guard for `window.matchMedia`
+- `src/router.tsx` — Added `dehydrate`/`hydrate`/`Wrap` with QueryClientProvider
+- `src/routes/__root.tsx` — Removed duplicate QueryClientProvider
+- `package.json` — Pinned TanStack versions, removed redundant devDeps
+- `pnpm-lock.yaml` — Regenerated with pinned versions
+- `src/routeTree.gen.ts` — Regenerated to include `/api/auth/$` route
+
+### Verification
+- `/api/auth/ok` → `{"ok":true}` HTTP 200 ✅
+- `/` → Full HTML document HTTP 200 (4619 bytes) ✅
+- `tsc --noEmit` → 0 errors ✅
+- `vite dev` → starts on port 3000 ✅
+
+### Key Takeaway
+TanStack Start SPA mode is NOT a pure client-side SPA — it still evaluates route modules on the server to build the route tree and handle API routes via Nitro. Any module-level code that references browser APIs (`window`, `document`, `matchMedia`) will crash the server. All browser API usage must be guarded with `typeof window !== 'undefined'` checks or deferred to `useEffect`/runtime.
+
+---
+
 ## Session 16 — 2026-04-29: Step 8 — Better Auth Server Setup
 
 **Branch:** `backup/step0-plan-update`
@@ -271,7 +336,7 @@ Initial project stabilization. Cleaned up legacy code, established project struc
 | Step | Description | Status |
 |------|------------|--------|
 | 8 | Better Auth Server Setup | ✅ Done |
-| 9 | Auth API Route Handler | ❌ Not Started |
+| 9 | Auth API Route Handler | 🔄 In Progress (code done, commit pending) |
 | 10 | oRPC Auth Middleware Stack | ❌ Not Started |
 | 11 | Frontend Auth Flow & Stores | ❌ Not Started |
 

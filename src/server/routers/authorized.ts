@@ -1,7 +1,11 @@
 import { base } from './context'
-import { authMiddleware } from './middlewares/auth'
+import { authMiddleware, requireUnitContextMiddleware } from './middlewares'
+import type { Role } from '@/lib/constants'
+import type { db } from '@/server/db'
 
-export const authorized = base.use(authMiddleware)
+export const authorized = base
+  .use(authMiddleware)
+  .use(requireUnitContextMiddleware)
 
 export type AuthContext = {
   session: {
@@ -16,4 +20,9 @@ export type AuthContext = {
     email: string
     image?: string | null
   }
+  schoolId: string
+  unitId: string | null
+  role: Role
+  assignmentId: string | null
+  tx: typeof db
 }
