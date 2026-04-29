@@ -40,6 +40,7 @@ export function withActivityLog(meta: Omit<ActivityLogMeta, 'description'> & { d
         metadata: meta.metadata ?? null,
       })
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('[withActivityLog] Failed to write activity log:', err)
     }
 
