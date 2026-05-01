@@ -17,9 +17,9 @@
 | 2.5. TanStack Start SPA Migration | 0 | ✅ Done |
 | 3. Auth Backend & Middleware | 8–11 | ✅ Done |
 | 4. oRPC Foundation & Root Router | 12–13 | ✅ Done |
-| 5. Tenant & Org Structure | 14–15 | 🔶 In Progress (Step 14 ✅) |
-| 6. Academic Year Management | 16–17 | ❌ Not Started |
-| 7. Dashboard & Activity Log | 18–19 | ❌ Not Started |
+| 5. Tenant & Org Structure | 14–15 | ✅ Done |
+| 6. Academic Year Management | 16–17 | ✅ Done |
+| 7. Dashboard & Activity Log | 18–19 | 🔶 In Progress (Step 18 next) |
 | 8. Teacher Management | 20–22 | ❌ Not Started |
 | 9. Class & Student Management | 23–27 | ❌ Not Started |
 | 10. SPP Payment System | 28–34 | ❌ Not Started |
@@ -277,7 +277,7 @@
 - **User Instructions:** Run `pnpm build` — must pass.
 - **Rollback:** Delete new files, revert `app-router.ts`.
 
-### Step 15: Tenant Frontend — Unit Management & Switcher
+### Step 15: Tenant Frontend — Unit Management & Switcher ✅
 
 - **Task:** Wire Unit Management page and Unit Switcher to real API. Replace mock data in `tenant-store.ts` with oRPC calls. Create hooks: `useSchool()`, `useUnits()`, `useCreateUnit()`, `useUpdateUnit()`. Update Unit Grid to use `useUnits()`. Update Unit Switcher dropdown to use real unit list. Update Add/Edit Unit Side Drawer (480px per feature stories) to use `useCreateUnit()`/`useUpdateUnit()` with react-hook-form + Zod. Handle empty state per feature stories. Super admin context banner.
 - **Files (12):**
@@ -306,7 +306,7 @@
 
 > **Refs:** AY-01–04, Feature Stories §3 (Timeline, Form Modal, Activation Flow), B2 (exclusive activation)
 
-### Step 16: Academic Year API Router
+### Step 16: Academic Year API Router ✅
 
 - **Task:** Create `academicYearsRouter` with procedures: `list` (all years for unit, ordered by start_date DESC), `create` (with date overlap validation), `update`, `activate` (transaction: deactivate current → activate new, per AY-03/B2), `getActive` (current active year). Activation must use `db.transaction()` with `tx` inside (coding standard). The partial unique index `(unit_id) WHERE is_active = TRUE` enforces single-active at DB level. Register in `appRouter`.
 - **Files (5):**
@@ -319,7 +319,7 @@
 - **User Instructions:** Run `pnpm build` — must pass.
 - **Rollback:** Delete new files, revert `app-router.ts`.
 
-### Step 17: Academic Year Frontend
+### Step 17: Academic Year Frontend ✅
 
 - **Task:** Wire Academic Year page to real API. Create hooks: `useAcademicYears()`, `useCreateAcademicYear()`, `useActivateAcademicYear()`. Replace mock data with oRPC queries. Implement timeline UI (vertical, newest on top, active year has Forest border-left + "Aktif Saat Ini" label per feature stories). Implement Form Modal (name, date pickers, overlap validation). Implement Activation Flow (confirmation dialog → toast → CTA "Atur Kelas Sekarang →" per feature stories). Handle empty state.
 - **Files (10):**

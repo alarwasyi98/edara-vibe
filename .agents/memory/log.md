@@ -3,6 +3,203 @@
 > Layer 3: Episodic memory — what happened, when, and what changed.
 > Append new sessions at the top. Never delete old entries.
 
+## Current State Summary (as of Session 22)
+
+| Property | Value |
+|----------|-------|
+| Branch | `dev` (synced with main, doc updates unstaged) |
+| SHA | `d170c5f` (main), `0a4e848` (dev — sync commit) |
+| Last PR | #21 (feat: wire academic years frontend to live API) |
+| CI | Passing (format:check, typecheck, lint --max-warnings 10, build) |
+| Deployment | https://edara.vercel.app/ (working, login functional) |
+| Next Step | **Step 18: Dashboard API Router** (Section 7) |
+
+### Step 18 Context for Next Session
+
+**Goal:** Create `dashboardRouter` and `activityLogsRouter` with procedures for summary cards, cashflow chart, upcoming events, and recent activity.
+
+**What's Done (Section 6 complete):**
+- Academic Year API: list, getActive, create, update, activate (all working)
+- Academic Year Frontend: wired to live API with useQuery/useMutation, react-hook-form, loading states, activate flow
+
+**Next Step Requirements (Step 18, implementation-plan lines 349-362):**
+1. Create `dashboardRouter` with: `getSummaryCards`, `getCashflowChart`, `getUpcomingEvents`, `getRecentActivity`
+2. Create `activityLogsRouter` with: `list` (paginated, grouped by day)
+3. Register both in `appRouter`
+4. All dashboard queries are read-only, scoped by unit context
+
+**Files to Create/Modify:**
+- `src/server/routers/dashboard/index.ts` ← new: dashboardRouter
+- `src/server/routers/activity-logs/index.ts` ← new: activityLogsRouter
+- `src/lib/validators/dashboard.ts` ← new: dateRangeSchema for chart
+- `src/server/routers/app-router.ts (exists)` ← register both routers
+
+**Reference Patterns:**
+- Router structure: see `src/server/routers/academic-years/index.ts`
+- Middleware: `authorized` for reads, `tenantAdmin` for mutations
+- Pagination: `src/server/utils/pagination.ts`
+
+**Git Workflow Reminder:**
+1. Create feature branch from `dev` (e.g., `feature/step-18-dashboard-api`)
+2. Work on feature branch locally
+3. Merge feature branch locally into `dev` (do NOT push feature branch)
+4. **ASK user before pushing** dev and creating PR from dev → main
+5. After PR merge, sync dev back to main
+
+---
+
+## Session 22 — 2025-07-17: Step 17 Complete — Academic Year Frontend Wired to Live API
+
+**Branch:** `feature/step-17-wire-academic-years-frontend` (from `dev`, merged via PR #21 to main)
+**PR:** #21 (dev → main, squash-merged)
+**Final SHA:** `d170c5f` (main), `0a4e848` (dev synced via Method B merge)
+
+### What Happened
+Completed Step 17: wired the Academic Year frontend page to the live oRPC API. Replaced all mock `useState` data with `useQuery`/`useMutation` hooks. Converted form to react-hook-form + zodResolver. Added shared type definitions and status derivation logic. All CI gates passed. Merged to production via PR #21.
+
+### Files Created/Modified
+
+| File | Change |
+|------|--------|
+| `src/features/academic-years/types.ts` | NEW — `AcademicYearRecord` interface + `deriveStatus()` function |
+| `src/features/academic-years/index.tsx` | REWRITTEN — useQuery for data, useMutation for activate, loading skeletons, AlertDialog confirmation |
+| `src/features/academic-years/components/tahun-ajaran-dialog.tsx` | REWRITTEN — react-hook-form + zodResolver, create/update mutations, cache invalidation |
+| `src/features/academic-years/components/tahun-ajaran-row-actions.tsx` | UPDATED — removed delete action, kept edit + activate |
+
+### Key Decisions
+- **No separate hook files** — mutations/queries inlined in components (simpler for this scope, unlike the plan's suggested separate hook files)
+- **`deriveStatus()` utility** — derives UI status from `isActive` + `endDate` comparison (active/completed/upcoming)
+- **Removed delete action** — no delete API exists; only edit and activate remain
+- **Removed non-DB columns** — semester and keterangan columns removed from table (not in schema)
+- **Dates as `yyyy-MM-dd` strings** — submitted to API in ISO date format, displayed with `formatDate()` locale helper
+- **Method B sync** — used merge (not reset) because safety net blocked `git reset --hard`; content identical per `git diff --stat`
+
+### Verification
+- Prettier: ✅ pass
+- TypeScript (`tsc --noEmit`): ✅ zero errors
+- ESLint (`--max-warnings 10`): ✅ 0 errors, 2 known warnings
+- Vite build: ✅ built successfully
+- `git diff --stat main dev`: empty (branches synced)
+
+---
+
+## Session 21 — 2025-07-16: Hotfix — Disable Prerender for CI
+
+**Branch:** `hotfix/disable-prerender` (from `dev`, merged via PR #20 to main)
+**PR:** #20 (hotfix/disable-prerender → main, merged)
+**Final SHA:** `ae2058a` (main and dev synced)
+
+### What Happened
+CI pipeline failed after PR #19 merge because Nitro prerendering attempted to crawl routes during build, which requires a database connection (not available in CI). Created hotfix to disable prerendering entirely since EDARA is an SPA (no SSR/prerender needed).
+
+### Root Cause
+- Nitro's default `prerender` config attempted to crawl links and prerender routes during `pnpm build`
+- The build step in CI runs without `DATABASE_URL` being accessible to the Nitro prerender crawler
+- SPA mode does not benefit from prerendering — all routes are client-rendered
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `vite.config.ts` | Added `nitro: { prerender: { routes: [], crawlLinks: false } }` to disable prerendering |
+| `.github/workflows/ci.yml` | Added `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` env vars to build step |
+| `.gitignore` | Added `.vercel` directory |
+| `eslint.config.js` | Added `.vercel` to eslint ignores |
+
+### Key Decisions
+- **Prerendering disabled permanently** — SPA mode means all routes are client-rendered; prerendering adds no value and causes CI failures
+- **Env vars in CI** — Build step needs env vars because Nitro evaluates server code during build (even with prerender disabled, it still bundles server modules)
+- **Git workflow change** — User explicitly requested: "ASK me first if you want to push and create a PR". Future sessions must ask before pushing.
+- **Feature branches stay local** — User explicitly requested: "Do NOT push feature branches. Instead, merge locally to dev first then push as a PR"
+
+### Verification
+- CI pipeline passes: format:check ✅, typecheck ✅, lint ✅, build ✅
+- Vercel deployment succeeds
+- All feature/hotfix branches deleted after merge
+
+---
+
+## Session 20 — 2025-07-15: Steps 15–16 + Vercel Deployment Fix + White Flash Fix
+
+**Branch:** `feature/step-15-tenant-frontend-unit-management` (from `dev`, merged locally to dev)
+**PRs:** #18 (dev → main, Step 15), #19 (dev → main, Step 16 + Vercel fix + white flash fix)
+**SHA after #19:** `cbd8c46`
+
+### What Happened
+Implemented Step 15 (Tenant Frontend — Unit Management & Switcher) and Step 16 (Academic Year API Router). Also fixed Vercel deployment issues and white flash between page navigations.
+
+### Step 15: Tenant Frontend — Unit Management & Switcher
+
+#### Files Created
+
+| File | Purpose |
+|------|---------|
+| `src/features/settings/hooks/use-school.ts` | `useQuery(orpc.tenant.schools.get.queryOptions({}))` — fetches school with units relation |
+| `src/features/settings/hooks/use-units.ts` | Derives units array from `useSchool()` data via `useMemo` |
+| `src/features/settings/hooks/use-create-unit.ts` | `useMutation(orpc.tenant.units.create.mutationOptions({...}))` — invalidates `orpc.tenant.schools.key()` |
+| `src/features/settings/hooks/use-update-unit.ts` | `useMutation(orpc.tenant.units.update.mutationOptions({...}))` — invalidates `orpc.tenant.schools.key()` |
+| `src/features/settings/hooks/index.ts` | Barrel export for all settings hooks |
+
+#### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/features/settings/components/unit-grid.tsx` | Wired to `useUnits()` hook, replaced mock data |
+| `src/features/settings/components/unit-card.tsx` | Updated to use real data types from API |
+| `src/features/settings/components/unit-form-drawer.tsx` | Wired to `useCreateUnit()`/`useUpdateUnit()` with RHF + zodResolver(createUnitSchema) |
+| `src/stores/tenant-store.ts` | Rewritten to use oRPC data via `useSyncTenant` pattern |
+| `src/components/layout/tenant-switcher.tsx` | Wired to real unit list from Zustand store |
+
+#### Key Patterns Established
+- **Hook pattern:** `useQuery(orpc.X.queryOptions({}))` for reads, `useMutation(orpc.X.mutationOptions({...}))` for writes
+- **Cache invalidation:** Mutations invalidate `orpc.tenant.schools.key()` since units are read from school relation
+- **Form pattern:** react-hook-form + `zodResolver(schema)` + shadcn Form components
+- **Zustand sync:** `useSyncTenant` populates store from API; tenant-switcher reads from store
+
+### Step 16: Academic Year API Router
+
+#### Files Created
+
+| File | Purpose |
+|------|---------|
+| `src/server/routers/academic-years/index.ts` | 5 procedures: `listAcademicYears`, `getActiveAcademicYear`, `createAcademicYear`, `updateAcademicYear`, `activateAcademicYear` |
+| `src/lib/validators/academic-years.ts` | `createAcademicYearSchema` (name YYYY/YYYY regex, startDate, endDate with refine), `updateAcademicYearSchema` |
+
+#### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/server/routers/app-router.ts` | Registered `tenant.academicYears.{list, getActive, create, update, activate}` |
+
+#### API Design Details
+- **`listAcademicYears`** — uses `authorized` middleware, queries by `context.unitId`, ordered by `startDate DESC`
+- **`getActiveAcademicYear`** — returns active year or `null`
+- **`createAcademicYear`** — uses `tenantAdmin` (super_admin + kepala_sekolah), validates date overlap via `checkDateOverlap()` helper
+- **`updateAcademicYear`** — validates date overlap excluding self, checks `startDate < endDate`
+- **`activateAcademicYear`** — B2 exclusive activation: deactivates current active → activates target, all within RLS transaction (`context.tx`)
+- **Date overlap validation** — `checkDateOverlap()` uses `lte(startDate, endDate) AND gte(endDate, startDate)` pattern
+
+### Vercel Deployment Fix
+
+| Issue | Fix |
+|-------|-----|
+| Nitro preset not set | Added `nitro: { preset: 'vercel' }` to vite.config.ts |
+| `vercel.json` catch-all rewrite blocking `/api/*` | Deleted `vercel.json` entirely (Nitro handles routing) |
+| Better Auth `trustedOrigins` | Added `https://edara.vercel.app` to Better Auth config |
+
+### White Flash Fix
+
+| Issue | Fix |
+|-------|-----|
+| White flash between page navigations | Added `defaultPendingComponent` (Loader2 spinner), `defaultPendingMs: 200`, `defaultPendingMinMs: 300` to `src/router.tsx` |
+
+### Verification
+- `tsc --noEmit` → 0 errors ✅
+- `eslint` → 0 errors ✅
+- `pnpm build` → passes ✅
+- Vercel deployment → https://edara.vercel.app/ working ✅
+- Login flow → working end-to-end ✅
+
 ---
 
 ## Session 19 — 2025-07-15: Step 14 — Tenant & Unit API Routers
@@ -377,8 +574,8 @@ Initial project stabilization. Cleaned up legacy code, established project struc
 
 ## Milestone Tracker
 
-> Re-evaluated 2026-04-28 against PRD, ADRs, Memory, Rules, and Feature Stories.
-> Source of truth: `docs/implementation-plan.md` (11 sections, 40 steps).
+> Re-evaluated 2025-07-17 against PRD, ADRs, Memory, Rules, and Feature Stories.
+> Source of truth: `docs/implementation-plan.md` (12 sections, 41 steps including Step 0).
 
 ### Section 1 — Stabilization & Infrastructure
 
@@ -424,14 +621,14 @@ Initial project stabilization. Cleaned up legacy code, established project struc
 | Step | Description | Status |
 |------|------------|--------|
 | 14 | Tenant & Unit API Routers | ✅ Done |
-| 15 | Tenant Frontend — Unit Management & Switcher | ❌ Not Started |
+| 15 | Tenant Frontend — Unit Management & Switcher | ✅ Done |
 
 ### Section 6 — Academic Year Management
 
 | Step | Description | Status |
 |------|------------|--------|
-| 16 | Academic Year API Router | ❌ Not Started |
-| 17 | Academic Year Frontend | ❌ Not Started |
+| 16 | Academic Year API Router | ✅ Done |
+| 17 | Academic Year Frontend | ✅ Done |
 
 ### Section 7 — Dashboard & Activity Log
 
