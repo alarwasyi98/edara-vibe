@@ -19,7 +19,7 @@
 | 4. oRPC Foundation & Root Router | 12–13 | ✅ Done |
 | 5. Tenant & Org Structure | 14–15 | ✅ Done |
 | 6. Academic Year Management | 16–17 | ✅ Done |
-| 7. Dashboard & Activity Log | 18–19 | 🔶 In Progress (Step 18 done, Step 19 next) |
+| 7. Dashboard & Activity Log | 18–19 | ✅ Done |
 | 8. Teacher Management | 20–22 | ❌ Not Started |
 | 9. Class & Student Management | 23–27 | ❌ Not Started |
 | 10. SPP Payment System | 28–34 | ❌ Not Started |
@@ -362,7 +362,7 @@
 - **Rollback:** Delete new files, revert `app-router.ts`.
 - **Status:** ✅ Done (2026-05-04)
 
-### Step 19: Dashboard Frontend
+### Step 19: Dashboard Frontend ✅
 
 - **Task:** Wire Dashboard page to real API. Create hooks: `useSummaryCards()`, `useCashflowChart()`, `useUpcomingEvents()`, `useRecentActivity()`. Replace all mock data with oRPC queries. Implement 3-row layout per feature stories: Row 1 = 3 Summary Cards (Total Siswa Aktif, Total Guru Aktif, Pemasukan SPP Bulan Ini with delta badge). Row 2 = Left 60% Recharts BarChart (Forest=income, Amber=expense) + Right 40% upcoming events list. Row 3 = Activity log feed (10 entries, grouped per day). Handle loading skeletons and empty states.
 - **Files (12):**
@@ -378,12 +378,13 @@
   - `src/routes/_authenticated/index.tsx (exists)` ← wire to hooks
   - `src/features/dashboard/data/ (exists)` ← remove mock data
   - `src/lib/format.ts (exists)` ← ensure currency formatter uses decimal.js
-- **Step Dependencies:** Step 18
+- **Step Dependencies:** Step 18, Step 17 (academic year UI for context)
 - **User Instructions:**
   1. Seed some students, teachers, and transactions for meaningful dashboard data
   2. Run `pnpm dev` — verify all 3 rows render with real data
   3. Run `pnpm build` — must pass
 - **Rollback:** `git stash`
+- **Status:** ✅ Done (2026-05-04)
 
 ---
 

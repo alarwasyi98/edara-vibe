@@ -3,49 +3,113 @@
 > Layer 3: Episodic memory — what happened, when, and what changed.
 > Append new sessions at the top. Never delete old entries.
 
-## Current State Summary (as of Session 23)
+## Current State Summary (as of Session 24)
 
 | Property | Value |
 |----------|-------|
-| Branch | `feat/section-7-dashboard` (from dev, 1 commit ahead) |
-| SHA | `bf09f6c` (feat branch), `0a4e848` (dev) |
+| Branch | `feat/dashboard` (from dev, 2 commits ahead) |
+| SHA | `98efc7f` (feat branch), `0a4e848` (dev) |
 | Last PR | #21 (feat: wire academic years frontend to live API) |
 | CI | Passing (format:check, typecheck, lint --max-warnings 10, build) |
 | Deployment | https://edara.vercel.app/ (working, login functional) |
-| Next Step | **Step 19: Dashboard Frontend** (Section 7) |
+| Next Step | **Merge to dev, push, create PR to main** (Section 7 complete) |
 
-### Step 19 Context for Next Session
+### Section 7 Complete — Dashboard & Activity Log
 
-**Goal:** Wire Dashboard page to real API with hooks for summary cards, cashflow chart, upcoming events, and recent activity.
-
-**What's Done (Step 18 complete):**
-- Dashboard API: `getSummaryCards`, `getCashflowChart`, `getUpcomingEvents`, `getRecentActivity` (all working)
-- Activity Logs API: `list` (paginated, grouped by day)
+**What's Done:**
+- Step 18: Dashboard API Router (getSummaryCards, getCashflowChart, getUpcomingEvents, getRecentActivity)
+- Step 19: Dashboard Frontend (hooks, loading states, empty states, real data)
 - Both routers registered in `appRouter` under `tenant.dashboard` and `tenant.activityLogs`
 
-**Next Step Requirements (Step 19, implementation-plan lines 364-385):**
-1. Create hooks: `useSummaryCards()`, `useCashflowChart()`, `useUpcomingEvents()`, `useRecentActivity()`
-2. Wire 3-row layout: Row 1 = 3 Summary Cards, Row 2 = Chart + Events, Row 3 = Activity log
-3. Replace all mock data with oRPC queries
-4. Handle loading skeletons and empty states
-
-**Files to Create/Modify:**
-- `src/features/dashboard/hooks/use-summary-cards.ts` ← new: useQuery
-- `src/features/dashboard/hooks/use-cashflow-chart.ts` ← new: useQuery
-- `src/features/dashboard/hooks/use-upcoming-events.ts` ← new: useQuery
-- `src/features/dashboard/hooks/use-recent-activity.ts` ← new: useQuery
-- `src/features/dashboard/hooks/index.ts` ← new: barrel
-- `src/features/dashboard/components/summary-cards.tsx (exists)` ← wire to real data
-- `src/features/dashboard/components/cashflow-chart.tsx (exists)` ← wire to real data
-- `src/features/dashboard/components/upcoming-events.tsx (exists)` ← wire to real data
-- `src/features/dashboard/components/activity-log.tsx (exists)` ← wire to real data
-- `src/routes/_authenticated/index.tsx (exists)` ← wire to hooks
-- `src/features/dashboard/data/ (exists)` ← remove mock data
-
-**Git Workflow Reminder:**
-1. Continue on `feat/section-7-dashboard` branch
+**Next Actions:**
+1. Merge `feat/dashboard` locally into `dev`
 2. **ASK user before pushing** dev and creating PR from dev → main
 3. After PR merge, sync dev back to main
+4. Start Section 8 (Teacher Management)
+
+---
+
+## Session 24 — 2026-05-04: Steps 18–19 Complete — Dashboard & Activity Log (Section 7)
+
+**Branch:** `feat/dashboard` (from `dev`, 2 commits ahead)
+**Commits:** `d865ad7` (Step 18), `98efc7f` (Step 19)
+**Final SHA:** `98efc7f`
+
+### What Happened
+Completed Section 7: Dashboard & Activity Log. Implemented both backend API routers (Step 18) and frontend UI (Step 19). All dashboard data now fetched from live API with loading states and empty states.
+
+### Step 18: Dashboard API Router
+
+#### Files Created
+
+| File | Purpose |
+|------|---------|
+| `src/lib/validators/dashboard.ts` | Zod schemas: `cashflowChartSchema` (months param), `activityLogListSchema` (pagination) |
+| `src/server/routers/dashboard/index.ts` | 4 procedures: `getSummaryCards`, `getCashflowChart`, `getUpcomingEvents`, `getRecentActivity` |
+| `src/server/routers/activity-logs/index.ts` | 1 procedure: `listActivityLogs` (paginated, grouped by day) |
+
+#### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/server/routers/app-router.ts` | Registered `tenant.dashboard.{getSummaryCards, getCashflowChart, getUpcomingEvents, getRecentActivity}` and `tenant.activityLogs.{list}` |
+
+#### API Design Details
+
+**Dashboard Router (`tenant.dashboard`):**
+- **`getSummaryCards`** — returns: `totalActiveStudents` (enrollments with status='active' in active academic year), `totalActiveTeachers` (teachers with isActive=true), `sppIncomeThisMonth` (SUM of payment_transactions with type='payment' for current month), `sppIncomeDeltaPercent` (percentage change vs previous month, computed with decimal.js)
+- **`getCashflowChart`** — input: `months` (default 6), returns: array of `{ month: 'YYYY-MM', income: string, expense: string }` aggregated from cashflow_transactions, grouped by month and type
+- **`getUpcomingEvents`** — returns: next 5 events where `startDate >= NOW()` and status='scheduled', ordered by startDate ASC
+- **`getRecentActivity`** — returns: last 10 activity_logs for the unit, ordered by createdAt DESC
+
+**Activity Logs Router (`tenant.activityLogs`):**
+- **`listActivityLogs`** — input: pagination params, returns: paginated result with logs grouped by day (SQL `date(created_at)` as grouping key), each group contains array of log entries
+
+### Step 19: Dashboard Frontend
+
+#### Files Created
+
+| File | Purpose |
+|------|---------|
+| `src/features/dashboard/hooks/use-summary-cards.ts` | `useQuery(orpc.tenant.dashboard.getSummaryCards.queryOptions({}))` |
+| `src/features/dashboard/hooks/use-cashflow-chart.ts` | `useQuery(orpc.tenant.dashboard.getCashflowChart.queryOptions({ months }))` |
+| `src/features/dashboard/hooks/use-upcoming-events.ts` | `useQuery(orpc.tenant.dashboard.getUpcomingEvents.queryOptions({}))` |
+| `src/features/dashboard/hooks/use-recent-activity.ts` | `useQuery(orpc.tenant.dashboard.getRecentActivity.queryOptions({}))` |
+| `src/features/dashboard/hooks/index.ts` | Barrel export for all dashboard hooks |
+
+#### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/features/dashboard/index.tsx` | Wired to real hooks, replaced mock data, added loading skeletons and empty states |
+| `src/features/dashboard/components/overview.tsx` | Rewritten to use `useCashflowChart()`, changed from AreaChart to BarChart, added loading/empty states |
+| `src/lib/format.ts` | Added `relative` format option to `formatDate()` for activity log timestamps |
+
+#### Key Implementation Details
+
+**Dashboard Layout:**
+- Row 1: 3 Summary Cards (Total Siswa Aktif, Total Guru Aktif, Penerimaan SPP Bulan Ini with delta badge)
+- Row 2: Left 60% = Cashflow BarChart (income/expense), Right 40% = Recent Payments (kept as placeholder)
+- Row 3: Left 50% = Activity Log (last 10 entries with relative timestamps), Right 50% = Upcoming Events (next 5 events)
+
+**Loading States:**
+- Summary cards: 3 skeleton cards with spinner
+- Activity log: centered spinner
+- Upcoming events: centered spinner
+- Cashflow chart: centered spinner
+
+**Empty States:**
+- Activity log: "Belum ada aktivitas"
+- Upcoming events: "Tidak ada kegiatan mendatang"
+- Cashflow chart: "Belum ada data arus kas"
+
+**Relative Time Formatting:**
+- `formatDate(date, 'relative')` returns: "baru saja", "X menit lalu", "X jam lalu", "X hari lalu", "X minggu lalu", "X bulan lalu", "X tahun lalu"
+
+### Verification
+- `tsc --noEmit` → 0 errors ✅
+- `eslint --max-warnings 10` → 0 errors, 11 warnings (baseline) ✅
+- `lsp_diagnostics` on all dashboard files → clean ✅
 
 ---
 
@@ -686,7 +750,7 @@ Initial project stabilization. Cleaned up legacy code, established project struc
 | Step | Description | Status |
 |------|------------|--------|
 | 18 | Dashboard API Router | ✅ Done |
-| 19 | Dashboard Frontend | ❌ Not Started |
+| 19 | Dashboard Frontend | ✅ Done |
 
 ### Section 8 — Teacher Management
 
