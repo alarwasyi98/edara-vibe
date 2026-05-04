@@ -17,9 +17,9 @@
 | 2.5. TanStack Start SPA Migration | 0 | ✅ Done |
 | 3. Auth Backend & Middleware | 8–11 | ✅ Done |
 | 4. oRPC Foundation & Root Router | 12–13 | ✅ Done |
-| 5. Tenant & Org Structure | 14–15 | 🔶 In Progress (Step 14 ✅) |
-| 6. Academic Year Management | 16–17 | ❌ Not Started |
-| 7. Dashboard & Activity Log | 18–19 | ❌ Not Started |
+| 5. Tenant & Org Structure | 14–15 | ✅ Done |
+| 6. Academic Year Management | 16–17 | ✅ Done |
+| 7. Dashboard & Activity Log | 18–19 | ✅ Done |
 | 8. Teacher Management | 20–22 | ❌ Not Started |
 | 9. Class & Student Management | 23–27 | ❌ Not Started |
 | 10. SPP Payment System | 28–34 | ❌ Not Started |
@@ -277,7 +277,7 @@
 - **User Instructions:** Run `pnpm build` — must pass.
 - **Rollback:** Delete new files, revert `app-router.ts`.
 
-### Step 15: Tenant Frontend — Unit Management & Switcher
+### Step 15: Tenant Frontend — Unit Management & Switcher ✅
 
 - **Task:** Wire Unit Management page and Unit Switcher to real API. Replace mock data in `tenant-store.ts` with oRPC calls. Create hooks: `useSchool()`, `useUnits()`, `useCreateUnit()`, `useUpdateUnit()`. Update Unit Grid to use `useUnits()`. Update Unit Switcher dropdown to use real unit list. Update Add/Edit Unit Side Drawer (480px per feature stories) to use `useCreateUnit()`/`useUpdateUnit()` with react-hook-form + Zod. Handle empty state per feature stories. Super admin context banner.
 - **Files (12):**
@@ -306,7 +306,7 @@
 
 > **Refs:** AY-01–04, Feature Stories §3 (Timeline, Form Modal, Activation Flow), B2 (exclusive activation)
 
-### Step 16: Academic Year API Router
+### Step 16: Academic Year API Router ✅
 
 - **Task:** Create `academicYearsRouter` with procedures: `list` (all years for unit, ordered by start_date DESC), `create` (with date overlap validation), `update`, `activate` (transaction: deactivate current → activate new, per AY-03/B2), `getActive` (current active year). Activation must use `db.transaction()` with `tx` inside (coding standard). The partial unique index `(unit_id) WHERE is_active = TRUE` enforces single-active at DB level. Register in `appRouter`.
 - **Files (5):**
@@ -319,7 +319,7 @@
 - **User Instructions:** Run `pnpm build` — must pass.
 - **Rollback:** Delete new files, revert `app-router.ts`.
 
-### Step 17: Academic Year Frontend
+### Step 17: Academic Year Frontend ✅
 
 - **Task:** Wire Academic Year page to real API. Create hooks: `useAcademicYears()`, `useCreateAcademicYear()`, `useActivateAcademicYear()`. Replace mock data with oRPC queries. Implement timeline UI (vertical, newest on top, active year has Forest border-left + "Aktif Saat Ini" label per feature stories). Implement Form Modal (name, date pickers, overlap validation). Implement Activation Flow (confirmation dialog → toast → CTA "Atur Kelas Sekarang →" per feature stories). Handle empty state.
 - **Files (10):**
@@ -346,7 +346,7 @@
 
 > **Refs:** DASH-01–05, Feature Stories §4 (3-row layout, summary cards with delta, chart, activity log)
 
-### Step 18: Dashboard API Router
+### Step 18: Dashboard API Router ✅
 
 - **Task:** Create `dashboardRouter` with procedures: `getSummaryCards` (total active students, total active teachers, SPP income this month — with delta vs previous month), `getCashflowChart` (6-month grouped bar data for Recharts), `getUpcomingEvents` (next 5 events where `start_date >= NOW()`), `getRecentActivity` (last 10 activity_logs). Also create `activityLogsRouter` with `list` (paginated, grouped by day). All dashboard queries are read-only, scoped by unit context. Register both in `appRouter`.
 - **Files (7):**
@@ -360,8 +360,9 @@
 - **Step Dependencies:** Step 13 (routers), Step 16 (academic year for context)
 - **User Instructions:** Run `pnpm build` — must pass.
 - **Rollback:** Delete new files, revert `app-router.ts`.
+- **Status:** ✅ Done (2026-05-04)
 
-### Step 19: Dashboard Frontend
+### Step 19: Dashboard Frontend ✅
 
 - **Task:** Wire Dashboard page to real API. Create hooks: `useSummaryCards()`, `useCashflowChart()`, `useUpcomingEvents()`, `useRecentActivity()`. Replace all mock data with oRPC queries. Implement 3-row layout per feature stories: Row 1 = 3 Summary Cards (Total Siswa Aktif, Total Guru Aktif, Pemasukan SPP Bulan Ini with delta badge). Row 2 = Left 60% Recharts BarChart (Forest=income, Amber=expense) + Right 40% upcoming events list. Row 3 = Activity log feed (10 entries, grouped per day). Handle loading skeletons and empty states.
 - **Files (12):**
@@ -377,12 +378,13 @@
   - `src/routes/_authenticated/index.tsx (exists)` ← wire to hooks
   - `src/features/dashboard/data/ (exists)` ← remove mock data
   - `src/lib/format.ts (exists)` ← ensure currency formatter uses decimal.js
-- **Step Dependencies:** Step 18
+- **Step Dependencies:** Step 18, Step 17 (academic year UI for context)
 - **User Instructions:**
   1. Seed some students, teachers, and transactions for meaningful dashboard data
   2. Run `pnpm dev` — verify all 3 rows render with real data
   3. Run `pnpm build` — must pass
 - **Rollback:** `git stash`
+- **Status:** ✅ Done (2026-05-04)
 
 ---
 
