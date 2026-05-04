@@ -34,8 +34,26 @@ export function formatRupiahShort(amount: number): string {
  * Format tanggal ke format Indonesia.
  * @example formatDate(new Date('2026-07-05')) → "5 Juli 2026"
  */
-export function formatDate(date: Date | string): string {
+export function formatDate(date: Date | string, format: 'full' | 'relative' = 'full'): string {
     const d = typeof date === 'string' ? new Date(date) : date
+    
+    if (format === 'relative') {
+        const now = new Date()
+        const diffMs = now.getTime() - d.getTime()
+        const diffSec = Math.floor(diffMs / 1000)
+        const diffMin = Math.floor(diffSec / 60)
+        const diffHour = Math.floor(diffMin / 60)
+        const diffDay = Math.floor(diffHour / 24)
+
+        if (diffSec < 60) return 'baru saja'
+        if (diffMin < 60) return `${diffMin} menit lalu`
+        if (diffHour < 24) return `${diffHour} jam lalu`
+        if (diffDay < 7) return `${diffDay} hari lalu`
+        if (diffDay < 30) return `${Math.floor(diffDay / 7)} minggu lalu`
+        if (diffDay < 365) return `${Math.floor(diffDay / 30)} bulan lalu`
+        return `${Math.floor(diffDay / 365)} tahun lalu`
+    }
+
     return new Intl.DateTimeFormat('id-ID', {
         day: 'numeric',
         month: 'long',

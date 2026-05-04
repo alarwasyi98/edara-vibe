@@ -1,16 +1,12 @@
-import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import {
   GraduationCap,
   UserCheck,
   Receipt,
-  AlertTriangle,
   Activity,
   CalendarClock,
-  CreditCard,
-  UserPlus,
-  BookOpen,
   MoreHorizontal,
+  Loader2,
 } from 'lucide-react'
 import {
   Card,
@@ -19,7 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -36,29 +31,21 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { StatCard } from '@/components/shared/stat-card'
 import { useTenant } from '@/hooks/use-tenant'
-import { formatRupiah } from '@/lib/format'
+import { formatRupiah, formatDate } from '@/lib/format'
 import { SppCollectionChart } from './components/overview'
 import { RecentPayments } from './components/recent-sales'
-import { Analytics } from './components/analytics'
-
-const activityLog = [
-  { id: 1, icon: CreditCard, user: 'Admin Keuangan', action: 'mencatat pembayaran SPP atas nama Ahmad Fauzi', time: '2 menit lalu' },
-  { id: 2, icon: UserPlus, user: 'Admin Tata Usaha', action: 'menambahkan siswa baru: Rizky Ramadhan (VII-B)', time: '15 menit lalu' },
-  { id: 3, icon: CreditCard, user: 'Admin Keuangan', action: 'mencatat pembayaran Daftar Ulang atas nama Siti Aisyah', time: '42 menit lalu' },
-  { id: 4, icon: BookOpen, user: 'Admin Akademik', action: 'memperbarui data kelas IX-A', time: '1 jam lalu' },
-  { id: 5, icon: UserPlus, user: 'Admin Tata Usaha', action: 'menambahkan siswa baru: Nur Fadilah (VIII-C)', time: '2 jam lalu' },
-]
-
-const upcomingEvents = [
-  { id: 1, title: 'Rapat Wali Murid', date: '16 Maret 2026', desc: 'Pembahasan perkembangan akademik semester genap' },
-  { id: 2, title: 'Batas Akhir Pembayaran SPP', date: '20 Maret 2026', desc: 'Tenggat pembayaran SPP bulan Maret 2026' },
-  { id: 3, title: 'Ujian Tengah Semester', date: '25 Maret 2026', desc: 'UTS Semester Genap 2025/2026 seluruh kelas' },
-  { id: 4, title: 'Peringatan Hari Pendidikan', date: '2 Mei 2026', desc: 'Upacara dan kegiatan peringatan Hardiknas' },
-]
+import {
+  useSummaryCards,
+  useUpcomingEvents,
+  useRecentActivity,
+} from './hooks'
 
 export function Dashboard() {
   const { activeAssignment } = useTenant()
-  const [sppTimeRange, setSppTimeRange] = useState('12')
+  
+  const summaryCards = useSummaryCards()
+  const upcomingEvents = useUpcomingEvents()
+  const recentActivity = useRecentActivity()
 
   return (
     <>
@@ -89,67 +76,62 @@ export function Dashboard() {
             </TabsList>
           </div>
           <TabsContent value='overview' className='space-y-4'>
-            <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-              <StatCard
-                title='Total Siswa Aktif'
-                value='248'
-                trend={{ value: '+12 bulan ini', positive: true }}
-                description='3 rombel baru'
-                icon={
-                  <GraduationCap className='h-4 w-4 text-muted-foreground' />
-                }
-              />
-              <StatCard
-                title='Guru & Staff'
-                value='32'
-                trend={{ value: '+2 semester ini', positive: true }}
-                description='28 aktif mengajar'
-                icon={
-                  <UserCheck className='h-4 w-4 text-muted-foreground' />
-                }
-              />
-              <StatCard
-                title='Penerimaan SPP Bulan Ini'
-                value={formatRupiah(38600000)}
-                trend={{ value: '+8.2%', positive: true }}
-                description='vs bulan lalu'
-                icon={
-                  <Receipt className='h-4 w-4 text-muted-foreground' />
-                }
-              />
-              <StatCard
-                title='Tunggakan SPP'
-                value={formatRupiah(12450000)}
-                trend={{ value: '18 siswa', positive: false }}
-                description='perlu tindak lanjut'
-                icon={
-                  <AlertTriangle className='h-4 w-4 text-muted-foreground' />
-                }
-              />
+            <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+              {summaryCards.isLoading ? (
+                <>
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i} className="flex items-center justify-center h-32">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </Card>
+                  ))}
+                </>
+              ) : summaryCards.data ? (
+                <>
+                  <StatCard
+                    title='Total Siswa Aktif'
+                    value={summaryCards.data.totalActiveStudents.toString()}
+                    icon={
+                      <GraduationCap className='h-4 w-4 text-muted-foreground' />
+                    }
+                  />
+                  <StatCard
+                    title='Total Guru Aktif'
+                    value={summaryCards.data.totalActiveTeachers.toString()}
+                    icon={
+                      <UserCheck className='h-4 w-4 text-muted-foreground' />
+                    }
+                  />
+                  <StatCard
+                    title='Penerimaan SPP Bulan Ini'
+                    value={formatRupiah(parseFloat(summaryCards.data.sppIncomeThisMonth))}
+                    trend={
+                      summaryCards.data.sppIncomeDeltaPercent
+                        ? {
+                            value: `${parseFloat(summaryCards.data.sppIncomeDeltaPercent) > 0 ? '+' : ''}${parseFloat(summaryCards.data.sppIncomeDeltaPercent).toFixed(1)}%`,
+                            positive: parseFloat(summaryCards.data.sppIncomeDeltaPercent) > 0,
+                          }
+                        : undefined
+                    }
+                    description='vs bulan lalu'
+                    icon={
+                      <Receipt className='h-4 w-4 text-muted-foreground' />
+                    }
+                  />
+                </>
+              ) : null}
             </div>
             <div className='grid grid-cols-1 gap-4 lg:grid-cols-7'>
               <Card className='col-span-1 lg:col-span-4'>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <div className="space-y-1">
-                    <CardTitle>Penerimaan SPP</CardTitle>
+                    <CardTitle>Arus Kas</CardTitle>
                     <CardDescription>
-                      Total penerimaan SPP bulanan tahun ajaran 2025/2026
+                      Pemasukan dan pengeluaran 6 bulan terakhir
                     </CardDescription>
                   </div>
-                  <Select value={sppTimeRange} onValueChange={setSppTimeRange}>
-                    <SelectTrigger className="w-30">
-                      <SelectValue placeholder="Pilih rentang" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 Bulan</SelectItem>
-                      <SelectItem value="3">3 Bulan</SelectItem>
-                      <SelectItem value="6">6 Bulan</SelectItem>
-                      <SelectItem value="12">1 Tahun</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </CardHeader>
                 <CardContent className='ps-2 pt-4'>
-                  <SppCollectionChart timeRange={sppTimeRange} />
+                  <SppCollectionChart />
                 </CardContent>
               </Card>
               <Card className='col-span-1 lg:col-span-3'>
@@ -180,7 +162,6 @@ export function Dashboard() {
               </Card>
             </div>
 
-            {/* Log Aktivitas & Kegiatan Mendatang */}
             <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
               <Card>
                 <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
@@ -205,22 +186,34 @@ export function Dashboard() {
                   </DropdownMenu>
                 </CardHeader>
                 <CardContent>
-                  <ul className='space-y-3'>
-                    {activityLog.map((log) => (
-                      <li key={log.id} className='flex items-start gap-3'>
-                        <div className='mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted'>
-                          <log.icon className='h-3.5 w-3.5 text-muted-foreground' />
-                        </div>
-                        <div className='min-w-0'>
-                          <p className='text-sm'>
-                            <span className='font-medium'>{log.user}</span>{' '}
-                            <span className='text-muted-foreground'>{log.action}</span>
-                          </p>
-                          <p className='text-xs text-muted-foreground'>{log.time}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                  {recentActivity.isLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : recentActivity.data && recentActivity.data.length > 0 ? (
+                    <ul className='space-y-3'>
+                      {recentActivity.data.map((log) => (
+                        <li key={log.id} className='flex items-start gap-3'>
+                          <div className='mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted'>
+                            <Activity className='h-3.5 w-3.5 text-muted-foreground' />
+                          </div>
+                          <div className='min-w-0'>
+                            <p className='text-sm'>
+                              <span className='font-medium'>{log.actorName}</span>{' '}
+                              <span className='text-muted-foreground'>{log.description}</span>
+                            </p>
+                            <p className='text-xs text-muted-foreground'>
+                              {formatDate(log.createdAt, 'relative')}
+                            </p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      Belum ada aktivitas
+                    </p>
+                  )}
                 </CardContent>
               </Card>
 
@@ -247,25 +240,35 @@ export function Dashboard() {
                   </DropdownMenu>
                 </CardHeader>
                 <CardContent>
-                  <ul className='space-y-3'>
-                    {upcomingEvents.map((ev) => (
-                      <li key={ev.id} className='flex items-start gap-3'>
-                        <div className='mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted'>
-                          <CalendarClock className='h-3.5 w-3.5 text-muted-foreground' />
-                        </div>
-                        <div className='min-w-0'>
-                          <p className='text-sm font-medium'>{ev.title}</p>
-                          <p className='text-xs text-muted-foreground'>{ev.date} · {ev.desc}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                  {upcomingEvents.isLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : upcomingEvents.data && upcomingEvents.data.length > 0 ? (
+                    <ul className='space-y-3'>
+                      {upcomingEvents.data.map((ev) => (
+                        <li key={ev.id} className='flex items-start gap-3'>
+                          <div className='mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted'>
+                            <CalendarClock className='h-3.5 w-3.5 text-muted-foreground' />
+                          </div>
+                          <div className='min-w-0'>
+                            <p className='text-sm font-medium'>{ev.name}</p>
+                            <p className='text-xs text-muted-foreground'>
+                              {ev.startDate ? formatDate(ev.startDate) : 'Tanggal belum ditentukan'}
+                              {ev.location && ` · ${ev.location}`}
+                            </p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      Tidak ada kegiatan mendatang
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-          <TabsContent value='analytics' className='space-y-4'>
-            <Analytics />
           </TabsContent>
         </Tabs>
       </Main>

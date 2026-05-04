@@ -1,37 +1,21 @@
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
-/* eslint-disable no-duplicate-imports */
-import type { ChartConfig } from '@/components/ui/chart'
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Legend } from 'recharts'
+import { Loader2 } from 'lucide-react'
 import {
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
+  type ChartConfig,
 } from '@/components/ui/chart'
-
-const data = [
-  { name: 'Jul', lunas: 25000000, menunggak: 3500000 },
-  { name: 'Ags', lunas: 28000000, menunggak: 4100000 },
-  { name: 'Sep', lunas: 32000000, menunggak: 3200000 },
-  { name: 'Okt', lunas: 26000000, menunggak: 3800000 },
-  { name: 'Nov', lunas: 28500000, menunggak: 3000000 },
-  { name: 'Des', lunas: 31000000, menunggak: 3700000 },
-  { name: 'Jan', lunas: 38000000, menunggak: 4300000 },
-  { name: 'Feb', lunas: 35000000, menunggak: 3600000 },
-  { name: 'Mar', lunas: 31400000, menunggak: 5000000 },
-  { name: 'Apr', lunas: 30200000, menunggak: 3000000 },
-  { name: 'Mei', lunas: 34800000, menunggak: 3000000 },
-  { name: 'Jun', lunas: 38200000, menunggak: 3000000 },
-]
+import { useCashflowChart } from '../hooks'
 
 const chartConfig = {
-  lunas: {
-    label: 'Lunas',
-    color: 'var(--chart-1)',
+  income: {
+    label: 'Pemasukan',
+    color: 'hsl(var(--chart-1))',
   },
-  menunggak: {
-    label: 'Menunggak',
-    color: 'var(--chart-2)',
+  expense: {
+    label: 'Pengeluaran',
+    color: 'hsl(var(--chart-2))',
   },
 } satisfies ChartConfig
 
@@ -41,26 +25,37 @@ function formatAxisValue(value: number): string {
   return `${value}`
 }
 
-export function SppCollectionChart({ timeRange = '12' }: { timeRange?: string }) {
-  const range = parseInt(timeRange, 10) || 12
-  const filteredData = data.slice(-range)
+export function SppCollectionChart() {
+  const { data, isLoading } = useCashflowChart(6)
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[350px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[350px]">
+        <p className="text-sm text-muted-foreground">Belum ada data arus kas</p>
+      </div>
+    )
+  }
+
+  const chartData = data.map((item) => ({
+    month: item.month,
+    income: parseFloat(item.income),
+    expense: parseFloat(item.expense),
+  }))
 
   return (
     <ChartContainer config={chartConfig} className="h-[350px] w-full">
-      <AreaChart data={filteredData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-        <defs>
-          <linearGradient id="fillLunas" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="var(--color-lunas)" stopOpacity={0.8} />
-            <stop offset="95%" stopColor="var(--color-lunas)" stopOpacity={0.1} />
-          </linearGradient>
-          <linearGradient id="fillMenunggak" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="var(--color-menunggak)" stopOpacity={0.8} />
-            <stop offset="95%" stopColor="var(--color-menunggak)" stopOpacity={0.1} />
-          </linearGradient>
-        </defs>
+      <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <XAxis
-          dataKey="name"
+          dataKey="month"
           tickLine={false}
           axisLine={false}
           tickMargin={8}
@@ -76,22 +71,18 @@ export function SppCollectionChart({ timeRange = '12' }: { timeRange?: string })
           cursor={false}
           content={<ChartTooltipContent indicator="dot" />}
         />
-        <ChartLegend content={<ChartLegendContent />} />
-        <Area
-          type="monotone"
-          dataKey="menunggak"
-          stackId="1"
-          stroke="var(--color-menunggak)"
-          fill="url(#fillMenunggak)"
+        <Legend />
+        <Bar
+          dataKey="income"
+          fill="var(--color-income)"
+          radius={[4, 4, 0, 0]}
         />
-        <Area
-          type="monotone"
-          dataKey="lunas"
-          stackId="1"
-          stroke="var(--color-lunas)"
-          fill="url(#fillLunas)"
+        <Bar
+          dataKey="expense"
+          fill="var(--color-expense)"
+          radius={[4, 4, 0, 0]}
         />
-      </AreaChart>
+      </BarChart>
     </ChartContainer>
   )
 }
