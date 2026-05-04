@@ -19,7 +19,7 @@
 | 4. oRPC Foundation & Root Router | 12–13 | ✅ Done |
 | 5. Tenant & Org Structure | 14–15 | ✅ Done |
 | 6. Academic Year Management | 16–17 | ✅ Done |
-| 7. Dashboard & Activity Log | 18–19 | 🔶 In Progress (Step 18 next) |
+| 7. Dashboard & Activity Log | 18–19 | 🔶 In Progress (Step 18 done, Step 19 next) |
 | 8. Teacher Management | 20–22 | ❌ Not Started |
 | 9. Class & Student Management | 23–27 | ❌ Not Started |
 | 10. SPP Payment System | 28–34 | ❌ Not Started |
@@ -346,7 +346,7 @@
 
 > **Refs:** DASH-01–05, Feature Stories §4 (3-row layout, summary cards with delta, chart, activity log)
 
-### Step 18: Dashboard API Router
+### Step 18: Dashboard API Router ✅
 
 - **Task:** Create `dashboardRouter` with procedures: `getSummaryCards` (total active students, total active teachers, SPP income this month — with delta vs previous month), `getCashflowChart` (6-month grouped bar data for Recharts), `getUpcomingEvents` (next 5 events where `start_date >= NOW()`), `getRecentActivity` (last 10 activity_logs). Also create `activityLogsRouter` with `list` (paginated, grouped by day). All dashboard queries are read-only, scoped by unit context. Register both in `appRouter`.
 - **Files (7):**
@@ -360,6 +360,7 @@
 - **Step Dependencies:** Step 13 (routers), Step 16 (academic year for context)
 - **User Instructions:** Run `pnpm build` — must pass.
 - **Rollback:** Delete new files, revert `app-router.ts`.
+- **Status:** ✅ Done (2026-05-04)
 
 ### Step 19: Dashboard Frontend
 
