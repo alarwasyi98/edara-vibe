@@ -18,6 +18,13 @@ import {
   updateAcademicYear,
   activateAcademicYear,
 } from './academic-years'
+import {
+  getSummaryCards,
+  getCashflowChart,
+  getUpcomingEvents,
+  getRecentActivity,
+} from './dashboard'
+import { listActivityLogs } from './activity-logs'
 
 export const appRouter = {
   admin: {
@@ -44,6 +51,15 @@ export const appRouter = {
       create: createAcademicYear,
       update: updateAcademicYear,
       activate: activateAcademicYear,
+    },
+    dashboard: {
+      getSummaryCards,
+      getCashflowChart,
+      getUpcomingEvents,
+      getRecentActivity,
+    },
+    activityLogs: {
+      list: listActivityLogs,
     },
   },
 }
