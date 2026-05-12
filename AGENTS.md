@@ -63,8 +63,8 @@ Run in order: `format:check` → `typecheck` → `lint --max-warnings 10` → `b
 ## Current Status
 
 - **Phase:** Phase 1 — Migration from Mock to Real Backend
-- **Progress:** Steps 1–7 done, Step 8 in progress (~40%)
-- **Next:** Scaffold backend auth server, regenerate Drizzle migrations
+- **Progress:** Sections 1–7 are complete through Step 19, and Section 8 Step 20 is complete (teacher backend API is live; teacher frontend is still mock-backed)
+- **Next:** Continue Section 8 with Step 21 — wire Teacher Management frontend to the live API, while keeping AI memory files aligned with the real codebase state
 
 ## Documentation Map
 
