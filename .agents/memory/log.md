@@ -3,29 +3,78 @@
 > Layer 3: Episodic memory — what happened, when, and what changed.
 > Append new sessions at the top. Never delete old entries.
 
-## Current State Summary (as of Session 24)
+## Current State Summary (as of Session 26)
 
 | Property | Value |
 |----------|-------|
-| Branch | `feat/dashboard` (from dev, 2 commits ahead) |
-| SHA | `98efc7f` (feat branch), `0a4e848` (dev) |
+| Branch | Do not trust this file for live branch state; verify with `git status` / `git log` |
+| SHA | Verify current SHA from git before acting on branch-sensitive work |
 | Last PR | #21 (feat: wire academic years frontend to live API) |
 | CI | Passing (format:check, typecheck, lint --max-warnings 10, build) |
 | Deployment | https://edara.vercel.app/ (working, login functional) |
-| Next Step | **Merge to dev, push, create PR to main** (Section 7 complete) |
+| Next Step | **Section 8 Step 21 — wire Teacher Management frontend to the live API** and keep AI memory files aligned with the real codebase state |
 
-### Section 7 Complete — Dashboard & Activity Log
+### Current Implementation Snapshot
 
 **What's Done:**
-- Step 18: Dashboard API Router (getSummaryCards, getCashflowChart, getUpcomingEvents, getRecentActivity)
-- Step 19: Dashboard Frontend (hooks, loading states, empty states, real data)
-- Both routers registered in `appRouter` under `tenant.dashboard` and `tenant.activityLogs`
+- Sections 1–7 are complete through Step 19
+- Live today: auth runtime, tenant/school-unit flows, academic years, dashboard, activity logs, and the teacher backend API
+- Remaining migration areas still using mock-backed frontend and/or missing domain routers: teacher frontend, classes, students, SPP, cashflow, and events
 
 **Next Actions:**
-1. Merge `feat/dashboard` locally into `dev`
-2. **ASK user before pushing** dev and creating PR from dev → main
-3. After PR merge, sync dev back to main
-4. Start Section 8 (Teacher Management)
+1. Treat `docs/implementation-plan.md`, `AGENTS.md`, `.agents/memory/project.md`, and this log as the AI-facing source of truth for feature status
+2. Verify branch/SHA directly from git before doing branch-sensitive work
+3. Continue Section 8 with Step 21 (Teacher frontend rewiring)
+
+---
+
+## Session 26 — 2026-05-12: Section 8 Step 20 — Teacher API
+
+**Scope:** Implement the first live Teacher Management backend slice and keep AI memory aligned with the new status.
+
+### What Happened
+Added the tenant-scoped teacher API under `tenant.teachers`, created shared teacher validators, and registered CRUD-style procedures for `list`, `getById`, `create`, `update`, and `deactivate`. The implementation follows the current oRPC/Drizzle backend patterns, keeps teacher records scoped by `schoolId` + `unitId`, supports `ilike` search plus employment-status/subject filters, and uses soft-delete via `isActive = false`.
+
+### Files Updated
+
+| File | Change |
+|------|--------|
+| `src/lib/validators/teachers.ts` | Added teacher list/create/update Zod schemas for the live API contract |
+| `src/server/routers/teachers/index.ts` | Added tenant-scoped teacher procedures with pagination, filtering, soft-delete, and activity-log middleware |
+| `src/server/routers/app-router.ts` | Registered `tenant.teachers` endpoints |
+| `AGENTS.md` | Updated current status to reflect Step 20 complete and Step 21 next |
+| `.agents/memory/project.md` | Updated feature inventory and milestone status for Teacher Management |
+| `.agents/memory/log.md` | Recorded this session and advanced the top-level state summary |
+
+### Verification
+- `pnpm format:check`
+- `pnpm typecheck`
+- `rtk lint --max-warnings 10`
+- `pnpm build`
+
+All commands passed. Lint remains at the existing baseline of 10 warnings; no new errors were introduced.
+
+---
+
+## Session 25 — 2026-05-12: AI Memory Alignment Pass
+
+**Scope:** Documentation-only update. No product code changed.
+
+### What Happened
+Corrected stale AI-facing memory so future agents no longer treat the repo as pre-auth, pre-oRPC, or fully mock-backed. Aligned `AGENTS.md`, `.agents/memory/project.md`, and the top summary of this log with the verified codebase state.
+
+### Files Updated
+
+| File | Change |
+|------|--------|
+| `AGENTS.md` | Updated Current Status to show Sections 1–7 complete through Step 19 and Section 8 as next |
+| `.agents/memory/project.md` | Rewrote stale progress, feature inventory, gotchas, and auth migration notes to match live code reality |
+| `.agents/memory/log.md` | Updated top-level summary to stop presenting stale branch workflow as current source of truth |
+
+### Verified State Captured
+- Live: auth runtime, tenant/unit flows, academic years, dashboard, activity logs
+- Still pending/live-migration work: teachers, classes, students, SPP, cashflow, events
+- Branch/SHA state should be read from git, not inferred from AI memory files
 
 ---
 

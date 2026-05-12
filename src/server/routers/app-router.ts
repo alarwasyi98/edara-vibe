@@ -25,6 +25,13 @@ import {
   getRecentActivity,
 } from './dashboard'
 import { listActivityLogs } from './activity-logs'
+import {
+  createTeacher,
+  deactivateTeacher,
+  getTeacherById,
+  listTeachers,
+  updateTeacher,
+} from './teachers'
 
 export const appRouter = {
   admin: {
@@ -60,6 +67,13 @@ export const appRouter = {
     },
     activityLogs: {
       list: listActivityLogs,
+    },
+    teachers: {
+      list: listTeachers,
+      getById: getTeacherById,
+      create: createTeacher,
+      update: updateTeacher,
+      deactivate: deactivateTeacher,
     },
   },
 }

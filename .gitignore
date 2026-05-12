@@ -71,8 +71,10 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-# CocoIndex Code (ccc)
+
+# OCS
 /.cocoindex_code/
+.sisyphus/
 
 # Vercel build output
 .vercel
