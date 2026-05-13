@@ -3,28 +3,80 @@
 > Layer 3: Episodic memory — what happened, when, and what changed.
 > Append new sessions at the top. Never delete old entries.
 
-## Current State Summary (as of Session 26)
+## Current State Summary (as of Session 27)
 
 | Property | Value |
 |----------|-------|
 | Branch | Do not trust this file for live branch state; verify with `git status` / `git log` |
 | SHA | Verify current SHA from git before acting on branch-sensitive work |
 | Last PR | #21 (feat: wire academic years frontend to live API) |
-| CI | Passing (format:check, typecheck, lint --max-warnings 10, build) |
+| CI | Teacher Step 21 code gates pass locally (`test:run`, `typecheck`, `lint`); local build remains env-blocked at prerender without `DATABASE_URL` |
 | Deployment | https://edara.vercel.app/ (working, login functional) |
-| Next Step | **Section 8 Step 21 — wire Teacher Management frontend to the live API** and keep AI memory files aligned with the real codebase state |
+| Next Step | **Advance to the next planned migration step after Teacher Management frontend wiring**; Teacher import/export is still intentionally deferred |
 
 ### Current Implementation Snapshot
 
 **What's Done:**
 - Sections 1–7 are complete through Step 19
-- Live today: auth runtime, tenant/school-unit flows, academic years, dashboard, activity logs, and the teacher backend API
-- Remaining migration areas still using mock-backed frontend and/or missing domain routers: teacher frontend, classes, students, SPP, cashflow, and events
+- Live today: auth runtime, tenant/school-unit flows, academic years, dashboard, activity logs, and Teacher Management list/detail/create/update/deactivate flows
+- Remaining migration areas still using mock-backed frontend and/or missing domain routers: classes, students, SPP, cashflow, and events
+- Teacher import/export is deliberately left unavailable until a later step
 
 **Next Actions:**
 1. Treat `docs/implementation-plan.md`, `AGENTS.md`, `.agents/memory/project.md`, and this log as the AI-facing source of truth for feature status
 2. Verify branch/SHA directly from git before doing branch-sensitive work
-3. Continue Section 8 with Step 21 (Teacher frontend rewiring)
+3. Start the next migration milestone after Teacher Step 21, while keeping the teacher import/export deferment explicit
+
+---
+
+## Session 27 — 2026-05-13: Section 8 Step 21 — Teacher Frontend Wired to Live API
+
+**Scope:** Audit Step 20, complete Step 21 against the real teacher feature cluster, verify the live migration, and align AI memory with the resulting codebase state.
+
+### What Happened
+Confirmed Step 20 backend work was already complete, then rewired Teacher Management frontend from mock data to the live `tenant.teachers.*` API in the current repo structure. The list page now uses live paginated/filterable teacher data, the detail page uses `getById`, and create/update/deactivate flows use real mutations with invalidation and Indonesian toast handling. Teacher import/export was intentionally not implemented in Step 21; those actions now stay visible only as explicitly unavailable placeholders so the UI does not imply a live bulk workflow.
+
+An Oracle review was used before finalizing. Its follow-up fixes tightened the migration by reusing shared validator exports from `src/lib/validators/teachers.ts`, preserving unknown live `mataPelajaran` values in edit mode, generating subject filter options from live data, disabling deactivate for already-inactive teachers, disabling misleading local sorting on the live table, and moving the add/edit form shell to the requested side-sheet pattern.
+
+### Files Updated
+
+| File | Change |
+|------|--------|
+| `src/features/teachers/data/schema.ts` | Added live teacher contracts, shared route-search schema/defaults, normalization helpers, status derivation, edit-form mapping, and dynamic subject-option builder while retaining legacy mock schema exports for compatibility |
+| `src/features/teachers/data/schema.test.ts` | Added regression tests for route defaults, subject normalization, active/inactive derivation, edit-form defaults, and custom live subject preservation |
+| `src/routes/_authenticated/teachers/index.tsx` | Switched route search validation to the shared teacher route-search schema |
+| `src/features/teachers/hooks/use-teachers.ts` | Added live teacher list query hook |
+| `src/features/teachers/hooks/use-teacher-by-id.ts` | Added live teacher detail query hook |
+| `src/features/teachers/hooks/use-create-teacher.ts` | Added live create mutation hook with toasts and list invalidation |
+| `src/features/teachers/hooks/use-update-teacher.ts` | Added live update mutation hook with list/detail invalidation |
+| `src/features/teachers/hooks/use-deactivate-teacher.ts` | Added live deactivate mutation hook with list/detail invalidation |
+| `src/features/teachers/hooks/teacher-query-cache.ts` | Centralized teacher list/detail invalidation helpers |
+| `src/features/teachers/hooks/index.ts` | Added barrel exports for teacher hooks |
+| `src/features/teachers/index.tsx` | Replaced mock teacher source with live list query and mounted live dialog set |
+| `src/features/teachers/detail.tsx` | Replaced mock detail lookup with live `useTeacherById` flow and real-field rendering |
+| `src/features/teachers/components/teacher-table.tsx` | Rewired to live server-side pagination/filter state, inactive toggle, live totals, inactive row styling, and dynamic subject filter options |
+| `src/features/teachers/components/teacher-columns.tsx` | Replaced mock-only columns with live teacher fields and disabled misleading local sorting |
+| `src/features/teachers/components/teacher-provider.tsx` | Updated provider state to use live `TeacherRecord` rows and `deactivate` dialog state |
+| `src/features/teachers/components/teacher-row-actions.tsx` | Rewired actions to live teacher rows, renamed destructive action to deactivate, and disabled it for already-inactive teachers |
+| `src/features/teachers/components/teacher-action-buttons.tsx` | Kept add live while marking import/export as unavailable placeholders |
+| `src/features/teachers/components/teacher-dialogs.tsx` | Added live deactivate confirmation dialog and converted import/export dialogs into explicit unavailable placeholders |
+| `src/features/teachers/components/teacher-add-dialog.tsx` | Rewrote add/edit flow to RHF + Zod live form, shared validators, side-sheet UI, live subject preservation, and real create/update mutations |
+| `src/lib/validators/teachers.ts` | Exported reusable teacher enum/value schemas for frontend validator reuse |
+| `.agents/memory/project.md` | Updated project memory to reflect Step 21 completion |
+| `.agents/memory/log.md` | Recorded this session and advanced the top-level state summary |
+
+### Verification
+- `lsp_diagnostics` on `src/features/teachers` → clean
+- `pnpm test:run` → pass (3 files, 16 tests)
+- `pnpm typecheck` → pass
+- `pnpm lint` → pass with 10 existing warnings, no new errors
+- `pnpm build` → app compiled and bundled, but prerender failed because the local workspace has no `DATABASE_URL` / runtime DB env for Neon
+
+### Resulting State
+- Step 20 backend audit verdict: complete
+- Step 21 frontend wiring verdict: complete for list/detail/create/update/deactivate
+- Teacher import/export remains intentionally deferred and visibly unavailable
+- Remaining migrations still center on classes, students, SPP, cashflow, and events
 
 ---
 

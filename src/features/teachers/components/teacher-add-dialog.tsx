@@ -1,223 +1,610 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { toast } from 'sonner'
-import { UserCircle, BookOpen, Save, CalendarIcon } from 'lucide-react'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
+import { BookOpen, CalendarIcon, Loader2, Save, UserCircle } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Calendar } from '@/components/ui/calendar'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import {
+    createTeacherSchema,
+    teacherEmploymentStatusSchema,
+    teacherGenderSchema,
+    teacherSubjectSchema,
+    updateTeacherSchema,
+} from '@/lib/validators/teachers'
+import {
+    buildTeacherSubjectOptions,
+    mapTeacherToEditFormDefaults,
+    teacherEmploymentStatusOptions,
+    type TeacherEmploymentStatus,
+    type TeacherGender,
+    type TeacherRecord,
+} from '../data/schema'
+import { useCreateTeacher, useUpdateTeacher } from '../hooks'
 import { useTeacher } from './teacher-provider'
 
-export function TeacherAddDialog() {
-    const { open, setOpen } = useTeacher()
-    const [loading, setLoading] = useState(false)
-    const [activeTab, setActiveTab] = useState('identitas')
-    const [tanggalLahir, setTanggalLahir] = useState<Date | undefined>()
+const teacherFormSchema = z.object({
+    namaLengkap: createTeacherSchema.shape.namaLengkap,
+    nik: createTeacherSchema.shape.nik,
+    nip: z.string().trim().max(50, 'NIP maksimal 50 karakter'),
+    tempatLahir: z.string().trim().max(100, 'Tempat lahir maksimal 100 karakter'),
+    tanggalLahir: z.date().optional(),
+    jenisKelamin: teacherGenderSchema,
+    statusKepegawaian: teacherEmploymentStatusSchema,
+    mataPelajaran: z.array(teacherSubjectSchema).default([]),
+    tanggalBergabung: z.date({ required_error: 'Tanggal bergabung wajib diisi' }),
+    nomorHp: z.string().trim().max(20, 'Nomor HP maksimal 20 karakter'),
+    alamat: z.string().trim().max(1000, 'Alamat maksimal 1000 karakter'),
+    photoUrl: z.union([
+        z.literal(''),
+        z.string().trim().url('URL foto tidak valid'),
+    ]),
+})
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setLoading(true)
+type TeacherFormValues = {
+    namaLengkap: string
+    nik: string
+    nip: string
+    tempatLahir: string
+    tanggalLahir: Date | undefined
+    jenisKelamin: TeacherGender
+    statusKepegawaian: TeacherEmploymentStatus
+    mataPelajaran: string[]
+    tanggalBergabung: Date | undefined
+    nomorHp: string
+    alamat: string
+    photoUrl: string
+}
 
-        setTimeout(() => {
-            toast.success('Data guru baru berhasil ditambahkan!')
-            setLoading(false)
-            setOpen(null)
-            setActiveTab('identitas')
-            setTanggalLahir(undefined)
-        }, 1000)
+const defaultValues: TeacherFormValues = {
+    namaLengkap: '',
+    nik: '',
+    nip: '',
+    tempatLahir: '',
+    tanggalLahir: undefined,
+    jenisKelamin: 'L',
+    statusKepegawaian: 'tetap',
+    mataPelajaran: [],
+    tanggalBergabung: undefined,
+    nomorHp: '',
+    alamat: '',
+    photoUrl: '',
+}
+
+function normalizeNullableString(value: string): string | null {
+    const normalized = value.trim()
+
+    return normalized.length > 0 ? normalized : null
+}
+
+function mapCurrentRowToFormValues(currentRow: TeacherRecord): TeacherFormValues {
+    const defaults = mapTeacherToEditFormDefaults(currentRow)
+
+    return {
+        namaLengkap: defaults.namaLengkap,
+        nik: defaults.nik,
+        nip: defaults.nip,
+        tempatLahir: defaults.tempatLahir,
+        tanggalLahir: defaults.tanggalLahir,
+        jenisKelamin: defaults.jenisKelamin,
+        statusKepegawaian: defaults.statusKepegawaian,
+        mataPelajaran: defaults.mataPelajaran,
+        tanggalBergabung: defaults.tanggalBergabung,
+        nomorHp: defaults.nomorHp,
+        alamat: defaults.alamat,
+        photoUrl: defaults.photoUrl,
     }
+}
+
+export function TeacherAddDialog() {
+    const { currentRow, open, setCurrentRow, setOpen } = useTeacher()
+    const createTeacher = useCreateTeacher()
+    const updateTeacher = useUpdateTeacher()
+    const isEditing = open === 'edit' && currentRow !== null
+    const isDialogOpen = open === 'add' || open === 'edit'
+    const isPending = createTeacher.isPending || updateTeacher.isPending
+    const tabsKey = isEditing && currentRow ? `edit-${currentRow.id}` : open ?? 'closed'
+    const subjectOptions = buildTeacherSubjectOptions(
+        isEditing && currentRow ? currentRow.mataPelajaran : []
+    )
+
+    const form = useForm<TeacherFormValues>({
+        resolver: zodResolver(teacherFormSchema),
+        defaultValues,
+    })
+
+    useEffect(() => {
+        if (!isDialogOpen) {
+            return
+        }
+
+        if (isEditing && currentRow) {
+            form.reset(mapCurrentRowToFormValues(currentRow))
+            return
+        }
+
+        form.reset(defaultValues)
+    }, [currentRow, form, isDialogOpen, isEditing])
 
     const handleClose = () => {
+        if (isPending) {
+            return
+        }
+
         setOpen(null)
-        setActiveTab('identitas')
-        setTanggalLahir(undefined)
+        setCurrentRow(null)
+        form.reset(defaultValues)
+    }
+
+    const onSubmit = (values: TeacherFormValues) => {
+        if (!values.tanggalBergabung) {
+            return
+        }
+
+        const rawPayload = {
+            namaLengkap: values.namaLengkap.trim(),
+            nik: values.nik.trim(),
+            nip: normalizeNullableString(values.nip),
+            tempatLahir: normalizeNullableString(values.tempatLahir),
+            tanggalLahir: values.tanggalLahir
+                ? format(values.tanggalLahir, 'yyyy-MM-dd')
+                : null,
+            jenisKelamin: values.jenisKelamin,
+            statusKepegawaian: values.statusKepegawaian,
+            mataPelajaran: values.mataPelajaran,
+            tanggalBergabung: format(values.tanggalBergabung, 'yyyy-MM-dd'),
+            nomorHp: normalizeNullableString(values.nomorHp),
+            alamat: normalizeNullableString(values.alamat),
+            photoUrl: normalizeNullableString(values.photoUrl),
+        }
+
+        if (isEditing && currentRow) {
+            const payload = updateTeacherSchema.parse(rawPayload)
+
+            updateTeacher.mutate(
+                {
+                    id: currentRow.id,
+                    ...payload,
+                },
+                {
+                    onSuccess: () => {
+                        handleClose()
+                    },
+                }
+            )
+
+            return
+        }
+
+        const payload = createTeacherSchema.parse(rawPayload)
+
+        createTeacher.mutate(payload, {
+            onSuccess: () => {
+                handleClose()
+            },
+        })
     }
 
     return (
-        <Dialog open={open === 'add'} onOpenChange={handleClose}>
-            <DialogContent className='max-w-none w-screen h-dvh m-0 p-0 rounded-none border-none flex flex-col sm:max-w-none sm:rounded-none'>
-                <form onSubmit={handleSubmit} className='flex flex-col h-full'>
-                    <DialogHeader className='px-6 py-4 border-b shrink-0'>
-                        <DialogTitle>Tambah Data Guru</DialogTitle>
-                        <DialogDescription>
-                            Isi formulir berikut untuk menambahkan data tenaga pengajar. Field dengan tanda (*) wajib diisi.
-                        </DialogDescription>
-                    </DialogHeader>
+        <Sheet open={isDialogOpen} onOpenChange={(nextOpen) => {
+            if (!nextOpen) {
+                handleClose()
+            }
+        }}>
+            <SheetContent className='flex h-dvh w-full flex-col gap-0 p-0 sm:max-w-[520px]'>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className='flex h-full flex-col'>
+                        <SheetHeader className='shrink-0 border-b px-6 py-4 text-start'>
+                            <SheetTitle>
+                                {isEditing ? 'Edit Data Guru' : 'Tambah Data Guru'}
+                            </SheetTitle>
+                            <SheetDescription>
+                                {isEditing
+                                    ? 'Perbarui data guru yang sudah terdaftar pada sistem live.'
+                                    : 'Isi formulir berikut untuk menambahkan data guru ke sistem live.'}
+                            </SheetDescription>
+                        </SheetHeader>
 
-                    <div className='flex-1 overflow-hidden'>
-                        <Tabs value={activeTab} onValueChange={setActiveTab} className='h-full flex flex-col'>
-                            <div className='px-6 pt-4 shrink-0'>
-                                <TabsList variant='line' className='w-full justify-start h-auto flex-wrap'>
-                                    <TabsTrigger value='identitas' className='gap-1.5 py-2'>
-                                        <UserCircle className='h-4 w-4' />
-                                        Identitas
-                                    </TabsTrigger>
-                                    <TabsTrigger value='profesi' className='gap-1.5 py-2'>
-                                        <BookOpen className='h-4 w-4' />
-                                        Kontak &amp; Profesi
-                                    </TabsTrigger>
-                                </TabsList>
+                        <div className='flex-1 overflow-hidden'>
+                            <Tabs
+                                key={tabsKey}
+                                defaultValue='identitas'
+                                className='flex h-full flex-col'
+                            >
+                                <div className='shrink-0 px-6 pt-4'>
+                                    <TabsList variant='line' className='h-auto w-full justify-start flex-wrap'>
+                                        <TabsTrigger value='identitas' className='gap-1.5 py-2'>
+                                            <UserCircle className='h-4 w-4' />
+                                            Identitas
+                                        </TabsTrigger>
+                                        <TabsTrigger value='profesi' className='gap-1.5 py-2'>
+                                            <BookOpen className='h-4 w-4' />
+                                            Kontak &amp; Profesi
+                                        </TabsTrigger>
+                                    </TabsList>
+                                </div>
+
+                                <ScrollArea className='flex-1 px-6 pb-6 pt-2'>
+                                    <TabsContent value='identitas' className='m-0 mt-4 space-y-6'>
+                                        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                                            <FormField
+                                                control={form.control}
+                                                name='namaLengkap'
+                                                render={({ field }) => (
+                                                    <FormItem className='md:col-span-2'>
+                                                        <FormLabel>Nama Lengkap *</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder='Nama lengkap sesuai KTP'
+                                                                {...field}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name='nik'
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>NIK *</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                inputMode='numeric'
+                                                                maxLength={16}
+                                                                placeholder='16 digit NIK'
+                                                                {...field}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name='nip'
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>NIP</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder='Isi jika tersedia'
+                                                                {...field}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name='jenisKelamin'
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Jenis Kelamin *</FormLabel>
+                                                        <Select
+                                                            value={field.value}
+                                                            onValueChange={field.onChange}
+                                                        >
+                                                            <FormControl>
+                                                                <SelectTrigger className='w-full'>
+                                                                    <SelectValue placeholder='Pilih jenis kelamin' />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                <SelectItem value='L'>Laki-laki</SelectItem>
+                                                                <SelectItem value='P'>Perempuan</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name='tempatLahir'
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Tempat Lahir</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder='Kabupaten/Kota' {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name='tanggalLahir'
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Tanggal Lahir</FormLabel>
+                                                        <Popover>
+                                                            <PopoverTrigger asChild>
+                                                                <FormControl>
+                                                                    <Button
+                                                                        variant='outline'
+                                                                        className={cn(
+                                                                            'w-full justify-start text-left font-normal text-sm',
+                                                                            !field.value && 'text-muted-foreground'
+                                                                        )}
+                                                                    >
+                                                                        <CalendarIcon className='mr-2 h-4 w-4 shrink-0' />
+                                                                        {field.value
+                                                                            ? format(field.value, 'd MMM yyyy', { locale: idLocale })
+                                                                            : 'Pilih tanggal'}
+                                                                    </Button>
+                                                                </FormControl>
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className='w-auto p-0' align='start'>
+                                                                <Calendar
+                                                                    mode='single'
+                                                                    selected={field.value}
+                                                                    onSelect={field.onChange}
+                                                                    captionLayout='dropdown'
+                                                                    fromYear={1950}
+                                                                    toYear={new Date().getFullYear()}
+                                                                    initialFocus
+                                                                />
+                                                            </PopoverContent>
+                                                        </Popover>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value='profesi' className='m-0 mt-4 space-y-6'>
+                                        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                                            <FormField
+                                                control={form.control}
+                                                name='statusKepegawaian'
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Status Kepegawaian *</FormLabel>
+                                                        <Select
+                                                            value={field.value}
+                                                            onValueChange={field.onChange}
+                                                        >
+                                                            <FormControl>
+                                                                <SelectTrigger className='w-full'>
+                                                                    <SelectValue placeholder='Pilih status kepegawaian' />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                {teacherEmploymentStatusOptions.map((option) => (
+                                                                    <SelectItem key={option.value} value={option.value}>
+                                                                        {option.label}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name='tanggalBergabung'
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Tanggal Bergabung *</FormLabel>
+                                                        <Popover>
+                                                            <PopoverTrigger asChild>
+                                                                <FormControl>
+                                                                    <Button
+                                                                        variant='outline'
+                                                                        className={cn(
+                                                                            'w-full justify-start text-left font-normal text-sm',
+                                                                            !field.value && 'text-muted-foreground'
+                                                                        )}
+                                                                    >
+                                                                        <CalendarIcon className='mr-2 h-4 w-4 shrink-0' />
+                                                                        {field.value
+                                                                            ? format(field.value, 'd MMM yyyy', { locale: idLocale })
+                                                                            : 'Pilih tanggal'}
+                                                                    </Button>
+                                                                </FormControl>
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className='w-auto p-0' align='start'>
+                                                                <Calendar
+                                                                    mode='single'
+                                                                    selected={field.value}
+                                                                    onSelect={field.onChange}
+                                                                    captionLayout='dropdown'
+                                                                    fromYear={1950}
+                                                                    toYear={new Date().getFullYear()}
+                                                                    initialFocus
+                                                                />
+                                                            </PopoverContent>
+                                                        </Popover>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name='nomorHp'
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Nomor HP</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder='08xxxxxxxxxx' {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name='photoUrl'
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>URL Foto</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                type='url'
+                                                                placeholder='https://contoh.com/foto-guru.jpg'
+                                                                {...field}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name='alamat'
+                                                render={({ field }) => (
+                                                    <FormItem className='md:col-span-2'>
+                                                        <FormLabel>Alamat</FormLabel>
+                                                        <FormControl>
+                                                            <Textarea
+                                                                className='min-h-24 resize-y'
+                                                                placeholder='Alamat lengkap guru'
+                                                                {...field}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name='mataPelajaran'
+                                                render={({ field }) => (
+                                                    <FormItem className='md:col-span-2'>
+                                                        <div className='flex items-center justify-between gap-2'>
+                                                            <FormLabel>Mata Pelajaran</FormLabel>
+                                                            <span className='text-xs text-muted-foreground'>
+                                                                {field.value.length} dipilih
+                                                            </span>
+                                                        </div>
+                                                        <div className='grid gap-3 rounded-md border p-4 sm:grid-cols-2 lg:grid-cols-3'>
+                                                            {subjectOptions.map((subject) => {
+                                                                const checked = field.value.includes(subject.value)
+
+                                                                return (
+                                                                    <label
+                                                                        key={subject.value}
+                                                                        className='flex items-start gap-3 rounded-md border border-transparent px-2 py-1.5 transition-colors hover:bg-muted/40'
+                                                                    >
+                                                                        <Checkbox
+                                                                            checked={checked}
+                                                                            onCheckedChange={(nextChecked) => {
+                                                                                if (nextChecked === true) {
+                                                                                    field.onChange(
+                                                                                        Array.from(
+                                                                                            new Set([
+                                                                                                ...field.value,
+                                                                                                subject.value,
+                                                                                            ])
+                                                                                        )
+                                                                                    )
+                                                                                    return
+                                                                                }
+
+                                                                                field.onChange(
+                                                                                    field.value.filter(
+                                                                                        (value) => value !== subject.value
+                                                                                    )
+                                                                                )
+                                                                            }}
+                                                                        />
+                                                                        <span className='text-sm leading-none'>
+                                                                            {subject.label}
+                                                                        </span>
+                                                                    </label>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    </TabsContent>
+                                </ScrollArea>
+                            </Tabs>
+                        </div>
+
+                        <div className='flex shrink-0 items-center justify-between border-t bg-muted/20 px-6 py-4'>
+                            <div className='hidden text-xs text-muted-foreground sm:block'>
+                                Periksa kembali tanggal dan identitas sebelum menyimpan ke API live.
                             </div>
-
-                            <ScrollArea className='flex-1 px-6 pb-6 pt-2'>
-                                {/* TAB: IDENTITAS */}
-                                <TabsContent value='identitas' className='space-y-4 m-0 mt-4'>
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                        <div className='space-y-2 md:col-span-2'>
-                                            <Label htmlFor='g-nip'>NIP <span className='text-red-500'>*</span></Label>
-                                            <Input id='g-nip' required placeholder='Cth: 19650101200101001' />
-                                        </div>
-                                    </div>
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                        <div className='space-y-2 md:col-span-2'>
-                                            <Label htmlFor='g-nama'>Nama Lengkap <span className='text-red-500'>*</span></Label>
-                                            <Input id='g-nama' required placeholder='Nama lengkap sesuai KTP' />
-                                        </div>
-                                    </div>
-                                    <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                                        <div className='space-y-2'>
-                                            <Label>Jenis Kelamin <span className='text-red-500'>*</span></Label>
-                                            <Select required>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder='Pilih...' />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value='L'>Laki-laki</SelectItem>
-                                                    <SelectItem value='P'>Perempuan</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className='space-y-2'>
-                                            <Label htmlFor='g-tempat'>Tempat Lahir <span className='text-red-500'>*</span></Label>
-                                            <Input id='g-tempat' required placeholder='Kab/Kota' />
-                                        </div>
-                                        <div className='space-y-2'>
-                                            <Label>Tanggal Lahir <span className='text-red-500'>*</span></Label>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button
-                                                        variant='outline'
-                                                        className={cn(
-                                                            'w-full justify-start text-left font-normal',
-                                                            !tanggalLahir && 'text-muted-foreground'
-                                                        )}
-                                                    >
-                                                        <CalendarIcon className='mr-2 h-4 w-4' />
-                                                        {tanggalLahir
-                                                            ? format(tanggalLahir, 'd MMMM yyyy', { locale: idLocale })
-                                                            : <span>Pilih tanggal</span>
-                                                        }
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className='w-auto p-0' align='start'>
-                                                    <Calendar
-                                                        mode='single'
-                                                        selected={tanggalLahir}
-                                                        onSelect={setTanggalLahir}
-                                                        captionLayout='dropdown'
-                                                        fromYear={1950}
-                                                        toYear={2005}
-                                                        initialFocus
-                                                    />
-                                                </PopoverContent>
-                                            </Popover>
-                                        </div>
-                                    </div>
-                                </TabsContent>
-
-                                {/* TAB: KONTAK & PROFESI */}
-                                <TabsContent value='profesi' className='space-y-4 m-0 mt-4'>
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                        <div className='space-y-2'>
-                                            <Label htmlFor='g-telepon'>Nomor HP <span className='text-red-500'>*</span></Label>
-                                            <Input id='g-telepon' required placeholder='08xxxxxxxxxx' />
-                                        </div>
-                                        <div className='space-y-2'>
-                                            <Label htmlFor='g-email'>Email</Label>
-                                            <Input id='g-email' type='email' placeholder='guru@madrasah.sch.id' />
-                                        </div>
-                                    </div>
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                        <div className='space-y-2'>
-                                            <Label>Mata Pelajaran <span className='text-red-500'>*</span></Label>
-                                            <Select required>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder='Pilih mata pelajaran...' />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {['Al-Quran Hadits','Aqidah Akhlak','Fiqih','SKI','Bahasa Arab','Bahasa Indonesia','Bahasa Inggris','Matematika','IPA','IPS','PKn','Seni Budaya','PJOK','Prakarya','TIK'].map((m) => (
-                                                        <SelectItem key={m} value={m}>{m}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className='space-y-2'>
-                                            <Label>Pendidikan Terakhir <span className='text-red-500'>*</span></Label>
-                                            <Select required>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder='Pilih...' />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value='D4'>D4</SelectItem>
-                                                    <SelectItem value='S1'>S1</SelectItem>
-                                                    <SelectItem value='S2'>S2</SelectItem>
-                                                    <SelectItem value='S3'>S3</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                        <div className='space-y-2'>
-                                            <Label>Status Kepegawaian <span className='text-red-500'>*</span></Label>
-                                            <Select defaultValue='active' required>
-                                                <SelectTrigger>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value='active'>Aktif</SelectItem>
-                                                    <SelectItem value='inactive'>Nonaktif</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                </TabsContent>
-                            </ScrollArea>
-                        </Tabs>
-                    </div>
-
-                    <div className='px-6 py-4 border-t shrink-0 flex items-center justify-between bg-muted/20'>
-                        <div className='text-xs text-muted-foreground hidden sm:block'>
-                            Pastikan data yang diisi sudah valid dan sesuai dengan dokumen asli.
+                            <div className='flex w-full justify-end gap-2 sm:w-auto'>
+                                <Button
+                                    type='button'
+                                    variant='outline'
+                                    onClick={handleClose}
+                                    disabled={isPending}
+                                >
+                                    Batal
+                                </Button>
+                                <Button type='submit' disabled={isPending} className='gap-2'>
+                                    {isPending ? (
+                                        <Loader2 className='h-4 w-4 animate-spin' />
+                                    ) : (
+                                        <Save className='h-4 w-4' />
+                                    )}
+                                    {isPending
+                                        ? 'Menyimpan...'
+                                        : isEditing
+                                            ? 'Simpan Perubahan'
+                                            : 'Simpan Data'}
+                                </Button>
+                            </div>
                         </div>
-                        <div className='flex gap-2 w-full sm:w-auto justify-end'>
-                            <Button type='button' variant='outline' onClick={handleClose} disabled={loading}>
-                                Batal
-                            </Button>
-                            <Button type='submit' disabled={loading} className='gap-2'>
-                                <Save className='h-4 w-4' />
-                                {loading ? 'Menyimpan...' : 'Simpan Data'}
-                            </Button>
-                        </div>
-                    </div>
-                </form>
-            </DialogContent>
-        </Dialog>
+                    </form>
+                </Form>
+            </SheetContent>
+        </Sheet>
     )
 }
