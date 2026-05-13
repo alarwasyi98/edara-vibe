@@ -1,10 +1,10 @@
 import * as z from 'zod'
 
-const teacherGenderSchema = z.enum(['L', 'P'])
+export const teacherGenderSchema = z.enum(['L', 'P'])
 
-const teacherEmploymentStatusSchema = z.enum(['tetap', 'honorer', 'gtt'])
+export const teacherEmploymentStatusSchema = z.enum(['tetap', 'honorer', 'gtt'])
 
-const teacherSubjectSchema = z
+export const teacherSubjectSchema = z
   .string()
   .trim()
   .min(1, 'Mata pelajaran wajib diisi')

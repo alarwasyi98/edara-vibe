@@ -1,0 +1,5 @@
+export { useTeachers } from './use-teachers'
+export { useTeacherById } from './use-teacher-by-id'
+export { useCreateTeacher } from './use-create-teacher'
+export { useUpdateTeacher } from './use-update-teacher'
+export { useDeactivateTeacher } from './use-deactivate-teacher'
