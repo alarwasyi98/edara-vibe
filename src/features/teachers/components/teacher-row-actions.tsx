@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { Eye, MoreHorizontal, Trash2, Pencil } from 'lucide-react'
+import { Eye, MoreHorizontal, Pencil, UserX } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
@@ -9,19 +9,20 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { type Row } from '@tanstack/react-table'
-import { type Teacher } from '../data/schema'
+import { type TeacherRecord } from '../data/schema'
 import { useTeacher } from './teacher-provider'
 
 interface TeacherRowActionsProps {
-    row: Row<Teacher>
+    row: Row<TeacherRecord>
 }
 
 export function TeacherRowActions({ row }: TeacherRowActionsProps) {
     const { setOpen, setCurrentRow } = useTeacher()
+    const isInactive = row.original.isActive === false
 
-    const handleDelete = () => {
+    const handleDeactivate = () => {
         setCurrentRow(row.original)
-        setOpen('delete')
+        setOpen('deactivate')
     }
 
     return (
@@ -48,11 +49,12 @@ export function TeacherRowActions({ row }: TeacherRowActionsProps) {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
+                    disabled={isInactive}
                     className='text-destructive focus:text-destructive'
-                    onClick={handleDelete}
+                    onClick={handleDeactivate}
                 >
-                    <Trash2 className='mr-2 h-4 w-4' />
-                    Hapus Guru
+                    <UserX className='mr-2 h-4 w-4' />
+                    {isInactive ? 'Guru Sudah Nonaktif' : 'Nonaktifkan Guru'}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

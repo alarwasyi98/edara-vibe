@@ -3,16 +3,23 @@ import { Button } from '@/components/ui/button'
 import { useTeacher } from './teacher-provider'
 
 export function TeacherActionButtons() {
-    const { setOpen } = useTeacher()
+    const { setCurrentRow, setOpen } = useTeacher()
+
     return (
         <div className='flex gap-2'>
             <Button variant='outline' className='gap-1.5' onClick={() => setOpen('import')}>
-                <Upload size={16} /> Import
+                <Upload size={16} /> Import Belum Tersedia
             </Button>
             <Button variant='outline' className='gap-1.5' onClick={() => setOpen('export')}>
-                <Download size={16} /> Eksport
+                <Download size={16} /> Eksport Belum Tersedia
             </Button>
-            <Button className='gap-1.5' onClick={() => setOpen('add')}>
+            <Button
+                className='gap-1.5'
+                onClick={() => {
+                    setCurrentRow(null)
+                    setOpen('add')
+                }}
+            >
                 <UserPlus size={16} /> Tambah Guru
             </Button>
         </div>

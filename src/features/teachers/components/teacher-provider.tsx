@@ -1,36 +1,21 @@
 import React, { useState } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
+import { type TeacherRecord } from '../data/schema'
 
-type Teacher = {
-    id: string
-    nip: string
-    namaLengkap: string
-    jenisKelamin: 'L' | 'P'
-    mataPelajaran: string
-    pendidikanTerakhir: string
-    telepon: string
-    email: string
-    status: 'active' | 'inactive'
-    tempatLahir: string
-    tanggalLahir: Date
-    createdAt: Date
-    updatedAt: Date
-}
-
-type TeacherDialogType = 'add' | 'edit' | 'import' | 'export' | 'delete'
+type TeacherDialogType = 'add' | 'edit' | 'import' | 'export' | 'deactivate'
 
 type TeacherContextType = {
     open: TeacherDialogType | null
     setOpen: (str: TeacherDialogType | null) => void
-    currentRow: Teacher | null
-    setCurrentRow: React.Dispatch<React.SetStateAction<Teacher | null>>
+    currentRow: TeacherRecord | null
+    setCurrentRow: React.Dispatch<React.SetStateAction<TeacherRecord | null>>
 }
 
 const TeacherContext = React.createContext<TeacherContextType | null>(null)
 
 export function TeacherProvider({ children }: { children: React.ReactNode }) {
     const [open, setOpen] = useDialogState<TeacherDialogType>(null)
-    const [currentRow, setCurrentRow] = useState<Teacher | null>(null)
+    const [currentRow, setCurrentRow] = useState<TeacherRecord | null>(null)
 
     return (
         <TeacherContext value={{ open, setOpen, currentRow, setCurrentRow }}>
