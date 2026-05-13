@@ -1,14 +1,29 @@
 import { type ColumnDef } from '@tanstack/react-table'
+import { formatPhone } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { LongText } from '@/components/long-text'
-import { genderLabels, teacherStatusColors } from '@/lib/constants'
-import { type Teacher } from '../data/schema'
+import {
+    genderLabels,
+    teacherStatusColors,
+    teacherStatusLabels,
+} from '@/lib/constants'
+import {
+    deriveTeacherStatus,
+    type TeacherEmploymentStatus,
+    type TeacherRecord,
+} from '../data/schema'
 import { TeacherRowActions } from './teacher-row-actions'
 
-export const teacherColumns: ColumnDef<Teacher>[] = [
+const teacherEmploymentStatusLabels = {
+    tetap: 'Tetap',
+    honorer: 'Honorer',
+    gtt: 'GTT',
+} satisfies Record<TeacherEmploymentStatus, string>
+
+export const teacherColumns: ColumnDef<TeacherRecord>[] = [
     {
         id: 'select',
         header: ({ table }) => (
@@ -41,15 +56,25 @@ export const teacherColumns: ColumnDef<Teacher>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title='Nama Lengkap' />
         ),
-        cell: ({ row }) => (
-            <LongText className='max-w-44'>{row.getValue('namaLengkap')}</LongText>
-        ),
+        cell: ({ row }) => {
+            const teacher = row.original
+
+            return (
+                <div className='flex flex-col gap-1'>
+                    <LongText className='max-w-44'>{teacher.namaLengkap}</LongText>
+                    <span className='text-xs text-muted-foreground'>
+                        {teacher.nip ? `NIP ${teacher.nip}` : `NIK ${teacher.nik}`}
+                    </span>
+                </div>
+            )
+        },
         meta: {
             className: cn(
                 'drop-shadow-[0_1px_2px_rgb(0_0_0_/_0.1)] dark:drop-shadow-[0_1px_2px_rgb(255_255_255_/_0.1)]',
                 'bg-background ps-0.5 max-md:sticky start-6 @4xl/content:table-cell @4xl/content:drop-shadow-none'
             ),
         },
+        enableSorting: false,
         enableHiding: false,
     },
     {
@@ -57,10 +82,7 @@ export const teacherColumns: ColumnDef<Teacher>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title='L/P' />
         ),
-        cell: ({ row }) => {
-            const jk = row.getValue('jenisKelamin') as 'L' | 'P'
-            return <span className='text-sm'>{genderLabels[jk]}</span>
-        },
+        cell: ({ row }) => <span className='text-sm'>{genderLabels[row.original.jenisKelamin]}</span>,
         enableSorting: false,
     },
     {
@@ -68,39 +90,66 @@ export const teacherColumns: ColumnDef<Teacher>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title='Mata Pelajaran' />
         ),
-        cell: ({ row }) => (
-            <Badge variant='outline' className='text-nowrap'>
-                {row.getValue('mataPelajaran')}
-            </Badge>
-        ),
-        filterFn: (row, id, value) => {
-            return value.includes(row.getValue(id))
+        cell: ({ row }) => {
+            const subjects = row.original.mataPelajaran
+
+            if (subjects.length === 0) {
+                return <span className='text-muted-foreground'>-</span>
+            }
+
+            return (
+                <div className='flex max-w-64 flex-wrap gap-1'>
+                    {subjects.map((subject) => (
+                        <Badge key={subject} variant='outline' className='text-nowrap'>
+                            {subject}
+                        </Badge>
+                    ))}
+                </div>
+            )
         },
         enableSorting: false,
     },
     {
-        accessorKey: 'pendidikanTerakhir',
+        accessorKey: 'statusKepegawaian',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Pendidikan' />
+            <DataTableColumnHeader column={column} title='Status Kepegawaian' />
         ),
-        cell: ({ row }) => <span>{row.getValue('pendidikanTerakhir')}</span>,
+        cell: ({ row }) => {
+            const statusKepegawaian = row.original.statusKepegawaian
+
+            return (
+                <Badge variant='outline' className='capitalize'>
+                    {teacherEmploymentStatusLabels[statusKepegawaian]}
+                </Badge>
+            )
+        },
         enableSorting: false,
     },
     {
-        accessorKey: 'telepon',
+        accessorKey: 'nomorHp',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Telepon' />
+            <DataTableColumnHeader column={column} title='Nomor HP' />
         ),
-        cell: ({ row }) => <div>{row.getValue('telepon')}</div>,
+        cell: ({ row }) => {
+            const nomorHp = row.original.nomorHp
+
+            if (!nomorHp) {
+                return <span className='text-muted-foreground'>-</span>
+            }
+
+            return <div className='font-mono text-sm'>{formatPhone(nomorHp)}</div>
+        },
         enableSorting: false,
     },
     {
-        accessorKey: 'status',
+        id: 'status',
+        accessorFn: (row) => deriveTeacherStatus(row),
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title='Status' />
         ),
         cell: ({ row }) => {
-            const status = row.getValue('status') as Teacher['status']
+            const status = deriveTeacherStatus(row.original)
+
             return (
                 <Badge
                     variant='outline'
@@ -109,12 +158,9 @@ export const teacherColumns: ColumnDef<Teacher>[] = [
                         teacherStatusColors[status]
                     )}
                 >
-                    {status === 'active' ? 'Aktif' : 'Nonaktif'}
+                    {teacherStatusLabels[status]}
                 </Badge>
             )
-        },
-        filterFn: (row, id, value) => {
-            return value.includes(row.getValue(id))
         },
         enableHiding: false,
         enableSorting: false,

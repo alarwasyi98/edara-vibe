@@ -9,15 +9,23 @@ import { PageHeader } from '@/components/shared/page-header'
 import { TeacherTable } from './components/teacher-table'
 import { TeacherProvider } from './components/teacher-provider'
 import { TeacherActionButtons } from './components/teacher-action-buttons'
-import { TeacherImportDialog, TeacherExportDialog } from './components/teacher-dialogs'
+import {
+    TeacherDeactivateDialog,
+    TeacherExportDialog,
+    TeacherImportDialog,
+} from './components/teacher-dialogs'
 import { TeacherAddDialog } from './components/teacher-add-dialog'
-import { teachers } from './data/teachers'
+import { useTeachers } from './hooks'
 
 const route = getRouteApi('/_authenticated/teachers/')
 
 export function DataTeacher() {
     const search = route.useSearch()
     const navigate = route.useNavigate()
+    const teachersQuery = useTeachers(search)
+
+    const teacherData = teachersQuery.data?.data ?? []
+    const teacherMeta = teachersQuery.data?.meta
 
     return (
         <TeacherProvider>
@@ -37,10 +45,20 @@ export function DataTeacher() {
                 >
                     <TeacherActionButtons />
                 </PageHeader>
-                <TeacherTable data={teachers} search={search} navigate={navigate} />
+                <TeacherTable
+                    data={teacherData}
+                    search={search}
+                    navigate={navigate}
+                    totalRows={teacherMeta?.total ?? 0}
+                    totalPages={teacherMeta?.totalPages ?? 0}
+                    isLoading={teachersQuery.isLoading}
+                    isFetching={teachersQuery.isFetching}
+                    isError={teachersQuery.isError}
+                />
             </Main>
 
             <TeacherAddDialog />
+            <TeacherDeactivateDialog />
             <TeacherImportDialog />
             <TeacherExportDialog />
         </TeacherProvider>
