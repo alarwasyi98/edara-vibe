@@ -8,10 +8,10 @@ export function TeacherActionButtons() {
     return (
         <div className='flex gap-2'>
             <Button variant='outline' className='gap-1.5' onClick={() => setOpen('import')}>
-                <Upload size={16} /> Import Belum Tersedia
+                <Upload size={16} /> Import Guru
             </Button>
             <Button variant='outline' className='gap-1.5' onClick={() => setOpen('export')}>
-                <Download size={16} /> Eksport Belum Tersedia
+                <Download size={16} /> Eksport Guru
             </Button>
             <Button
                 className='gap-1.5'
