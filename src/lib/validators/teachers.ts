@@ -44,6 +44,38 @@ export const createTeacherSchema = z.object({
   photoUrl: z.string().trim().url('URL foto tidak valid').nullish(),
 })
 
+export const teacherImportRowSchema = z.object({
+  rowNumber: z.number().int().min(2),
+  nip: z.string().trim().max(50).default(''),
+  nik: z.string().trim().max(50).default(''),
+  namaLengkap: z.string().trim().max(255).default(''),
+  jenisKelamin: z.string().trim().max(20).default(''),
+  tempatLahir: z.string().trim().max(100).default(''),
+  tanggalLahir: z.string().trim().max(20).default(''),
+  nomorHp: z.string().trim().max(20).default(''),
+  alamat: z.string().trim().max(1000).default(''),
+  statusKepegawaian: z.string().trim().max(20).default(''),
+  mataPelajaran: z.string().trim().max(1000).default(''),
+  tanggalBergabung: z.string().trim().max(20).default(''),
+  photoUrl: z.string().trim().max(1000).default(''),
+})
+
+export const previewTeacherImportSchema = z.object({
+  rows: z.array(teacherImportRowSchema).min(1).max(1000),
+})
+
+export const executeTeacherImportSchema = z.object({
+  rows: z.array(teacherImportRowSchema).min(1).max(1000),
+  selectedRowNumbers: z.array(z.number().int().min(2)).min(1),
+})
+
+export const exportTeachersSchema = listTeachersSchema.pick({
+  search: true,
+  statusKepegawaian: true,
+  mataPelajaran: true,
+  includeInactive: true,
+})
+
 export const updateTeacherSchema = z
   .object({
     nip: optionalTrimmedString(50),
@@ -75,3 +107,7 @@ export const updateTeacherSchema = z
 export type TeacherListInput = z.infer<typeof listTeachersSchema>
 export type CreateTeacherInput = z.infer<typeof createTeacherSchema>
 export type UpdateTeacherInput = z.infer<typeof updateTeacherSchema>
+export type TeacherImportRowInput = z.infer<typeof teacherImportRowSchema>
+export type PreviewTeacherImportInput = z.infer<typeof previewTeacherImportSchema>
+export type ExecuteTeacherImportInput = z.infer<typeof executeTeacherImportSchema>
+export type ExportTeachersInput = z.infer<typeof exportTeachersSchema>
