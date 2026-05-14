@@ -63,8 +63,8 @@ Run in order: `format:check` → `typecheck` → `lint --max-warnings 10` → `b
 ## Current Status
 
 - **Phase:** Phase 1 — Migration from Mock to Real Backend
-- **Progress:** Sections 1–7 are complete through Step 19, and Section 8 Step 20 is complete (teacher backend API is live; teacher frontend is still mock-backed)
-- **Next:** Continue Section 8 with Step 21 — wire Teacher Management frontend to the live API, while keeping AI memory files aligned with the real codebase state
+- **Progress:** Sections 1–8 are complete through Step 22. Teacher Management now runs fully against the tenant teacher API, including list/detail/create/update/deactivate plus bulk import preview/partial import and filtered Excel export.
+- **Next:** Continue Section 9 with Step 23 — Class API Router — and keep AI memory files aligned with the real codebase state as migration status changes.
 
 ## Documentation Map
 

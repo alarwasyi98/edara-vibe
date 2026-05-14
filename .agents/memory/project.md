@@ -8,9 +8,9 @@
 ## Current Status
 
 - **Phase:** Phase 1 — Migration from Mock to Real Backend
-- **Progress:** Sections 1–7 are complete through Step 19, and Section 8 Steps 20–21 are complete. Live today: auth runtime, tenant/school-unit flows, academic years, dashboard, activity logs, and Teacher Management list/detail/create/update/deactivate flows. Teacher import/export remains intentionally unavailable, and the remaining domain areas are still being migrated from mock data.
+- **Progress:** Sections 1–8 are complete through Step 22. Live today: auth runtime, tenant/school-unit flows, academic years, dashboard, activity logs, and full Teacher Management including list/detail/create/update/deactivate plus bulk import preview/partial import and filtered Excel export. The remaining domain areas are still being migrated from mock data.
 - **Active Branch:** Do not rely on this file for branch state; verify with `git status` / `git log`.
-- **Implementation Plan:** Sections 1–7 are complete, Section 8 Steps 20–21 are complete, and the next milestone is the next migration step after Teacher Management frontend wiring.
+- **Implementation Plan:** Sections 1–8 are complete through Step 22, and the next milestone is Section 9 Step 23 — Class API Router.
 
 ## Feature Inventory
 
@@ -20,7 +20,7 @@
 | 2 | Auth & RBAC | AUTH-01–05 | Schema ✅, Runtime ✅ | Better Auth session flow, route protection, and EDARA RBAC/unit-context middleware are live |
 | 3 | Academic Year | AY-01–04 | Schema ✅, API ✅, UI ✅ | Timeline, form modal, activation flow wired to live API |
 | 4 | Dashboard | DASH-01–05 | Schema ✅, API ✅, UI ✅ | Summary cards, cashflow chart, upcoming events, and recent activity use live API data |
-| 5 | Teachers | TCH-01–05 | Schema ✅, API ✅, UI ✅ (import/export deferred) | Step 20 complete: tenant-scoped teacher router (`list`, `getById`, `create`, `update`, `deactivate`) + validators live. Step 21 complete: teacher list, detail, create, update, and deactivate now use live API; import/export remain disabled placeholders |
+| 5 | Teachers | TCH-01–05 | Schema ✅, API ✅, UI ✅ | Step 20 complete: tenant-scoped teacher router (`list`, `getById`, `create`, `update`, `deactivate`) + validators live. Step 21 complete: teacher list, detail, create, update, and deactivate use the live API. Step 22 complete: bulk import preview/partial import and filtered Excel export are live through `tenant.teachers.previewImport`, `tenant.teachers.executeImport`, and `tenant.teachers.export` |
 | 6 | Classes | CLS-01–03 | Schema ✅, API ❌, UI mock | Class Grid per grade, Mass Promotion 3-step modal |
 | 7 | Students | STU-01–06 | Schema ✅, API ❌, UI mock | Registration Drawer, Detail Page with tabs, Status Transitions |
 | 8 | SPP Payment | SPP-01–10 | Schema ✅, API ❌, UI mock | Config, Recording (4-step), Monitoring (payment matrix) |
