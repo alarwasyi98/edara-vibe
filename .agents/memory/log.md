@@ -3,28 +3,57 @@
 > Layer 3: Episodic memory — what happened, when, and what changed.
 > Append new sessions at the top. Never delete old entries.
 
-## Current State Summary (as of Session 28)
+## Current State Summary (as of Session 29)
 
 | Property | Value |
 |----------|-------|
 | Branch | Do not trust this file for live branch state; verify with `git status` / `git log` |
 | SHA | Verify current SHA from git before acting on branch-sensitive work |
-| Last PR | #21 (feat: wire academic years frontend to live API) |
-| CI | Teacher Step 22 code gates pass locally (`format:check`, `test:run`, `typecheck`, `rtk lint --max-warnings 10`, `build`) |
+| Last PR | #25 (feat: complete teacher management live migration) |
+| CI | Class Step 23 code gates pass locally (`format:check`, `typecheck`, `rtk lint --max-warnings 10`, `build`) |
 | Deployment | https://edara.vercel.app/ (working, login functional) |
-| Next Step | **Advance to Section 9 Step 23 — Class API Router** |
+| Next Step | **Advance to Section 9 Step 24 — Class Frontend** |
 
 ### Current Implementation Snapshot
 
 **What's Done:**
-- Sections 1–8 are complete through Step 22
-- Live today: auth runtime, tenant/school-unit flows, academic years, dashboard, activity logs, and full Teacher Management including list/detail/create/update/deactivate plus bulk import preview/partial import and filtered Excel export
-- Section 9 onward still remains to be migrated from mock-backed frontend and/or missing domain routers: classes, students, SPP, cashflow, and events
+- Sections 1–8 are complete through Step 22, and Section 9 Step 23 is complete
+- Live today: auth runtime, tenant/school-unit flows, academic years, dashboard, activity logs, full Teacher Management including list/detail/create/update/deactivate plus bulk import preview/partial import and filtered Excel export, and the Class Management backend router with grouped listing, detail, create, update, and transactional mass promotion
+- Section 9 onward still remains to be migrated from mock-backed frontend and/or missing domain routers/UI surfaces: class frontend wiring, students, SPP, cashflow, and events
 
 **Next Actions:**
 1. Treat `docs/implementation-plan.md`, `AGENTS.md`, `.agents/memory/project.md`, and this log as the AI-facing source of truth for feature status
 2. Verify branch/SHA directly from git before doing branch-sensitive work
-3. Start Section 9 Step 23 (Class API Router) and preserve the current teacher import/export behavior unless requirements change
+3. Start Section 9 Step 24 (Class Frontend) and preserve the current teacher import/export behavior unless requirements change
+
+---
+
+## Session 29 — 2026-05-15: Section 9 Step 23 — Class API Router
+
+**Scope:** Implement the next migration milestone after Teacher Step 22 by creating the tenant-scoped Class API Router, validating it against the documented CI pipeline, and aligning the AI-facing docs/memory with the new post-Step-23 repo state.
+
+### What Happened
+Built `src/server/routers/classes/index.ts` and `src/lib/validators/classes.ts` to bring Class Management onto the live tenant API. The new router exposes `list`, `getById`, `create`, `update`, and `massPromotion` under `tenant.classes`, and `app-router.ts` now registers that namespace alongside the existing live domains.
+
+The `list` procedure resolves either an explicit academic year or the active one for the current unit, then returns classes grouped by `gradeLevel` with active enrollment counts versus capacity. `getById` returns the scoped class header data plus the active student roster for that class/year. `create` and `update` validate academic year ownership and active homeroom teachers inside the current tenant scope. `update` explicitly forbids changing `academicYearId` after class creation so existing enrollments cannot be orphaned from downstream detail/promotion flows.
+
+`massPromotion` uses a transaction on the tenant-scoped DB context, validates source enrollments and target-year classes inside the transaction boundary, writes source enrollment status changes to `promoted`, appends `enrollment_status_history` audit rows, and inserts the new target-year enrollments. After an Oracle review, the implementation was tightened further to scope teacher/student joins by tenant and to move promotion validation fully inside the transaction to reduce stale-read / unique-conflict race exposure.
+
+### Validation
+- `lsp_diagnostics` reported no issues on `src/lib/validators/classes.ts`, `src/server/routers/classes/index.ts`, and `src/server/routers/app-router.ts`
+- `pnpm format:check` ✅
+- `pnpm typecheck` ✅
+- `rtk lint --max-warnings 10` ✅ (same pre-existing 10-warning baseline)
+- `pnpm build` ✅
+
+### Files Changed
+- `src/lib/validators/classes.ts` — new class list/create/update/mass-promotion input schemas
+- `src/server/routers/classes/index.ts` — new tenant classes router with grouped listing, detail, create, update, and transactional mass promotion
+- `src/server/routers/app-router.ts` — registered `tenant.classes`
+- `docs/implementation-plan.md` — Step 23 completion status and next-step updates
+- `AGENTS.md` — current migration status updated
+- `.agents/memory/project.md` — feature inventory/current-state updated
+- `.agents/memory/log.md` — session log updated
 
 ---
 
