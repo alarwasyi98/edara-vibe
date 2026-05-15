@@ -21,7 +21,7 @@
 | 6. Academic Year Management | 16–17 | ✅ Done |
 | 7. Dashboard & Activity Log | 18–19 | ✅ Done |
 | 8. Teacher Management | 20–22 | ✅ Done |
-| 9. Class & Student Management | 23–27 | ❌ Not Started |
+| 9. Class & Student Management | 23–27 | 🟡 In Progress |
 | 10. SPP Payment System | 28–34 | ❌ Not Started |
 | 11. Cashflow, Events & Export | 35–40 | ❌ Not Started |
 
@@ -458,14 +458,15 @@
 
 > **Refs:** CLS-01–03, STU-01–06, Feature Stories §6–7, ADR-02, B3, B9, B10, B11, C6
 
-### Step 23: Class API Router
+### Step 23: Class API Router ✅
 
 - **Task:** Create `classesRouter` with procedures: `list` (by academic year, grouped by grade, with enrollment count vs capacity per CLS-02), `create` (bound to academic year per CLS-01/AY-04), `update`, `getById`, `massPromotion` (transaction: batch UPDATE old enrollments status→'promoted' + batch INSERT new enrollments in target classes per CLS-03). Mass promotion must use `db.transaction(async (tx) => { ... })` with `tx` inside. Register in `appRouter`.
+- **Completed:** 2026-05-15 — Added `tenant.classes.list`, `getById`, `create`, `update`, and `massPromotion` in `src/server/routers/classes/index.ts`, added Zod schemas in `src/lib/validators/classes.ts`, and registered `tenant.classes` in `src/server/routers/app-router.ts`. The live implementation uses the tenant-scoped transaction context (`context.tx.transaction(...)`) so RLS state stays intact during mass promotion. `update` now keeps classes bound to their original academic year, and the router scopes joined teacher/student reads by tenant.
 - **Files (5):**
   - `src/server/routers/classes/index.ts` ← new: classesRouter
   - `src/lib/validators/classes.ts` ← new: createClassSchema, massPromotionSchema
   - `src/server/routers/app-router.ts (exists)` ← register classesRouter
-  - `src/server/utils/pagination.ts (exists)` ← reuse
+  - `src/server/shared/index.ts (exists)` ← reuse shared id/error helpers
   - `src/server/routers/middlewares/index.ts (exists)` ← reuse
 - **Step Dependencies:** Step 16 (academic year dependency)
 - **User Instructions:** Run `pnpm build` — must pass.
