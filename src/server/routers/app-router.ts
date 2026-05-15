@@ -35,6 +35,13 @@ import {
   previewTeacherImport,
   updateTeacher,
 } from './teachers'
+import {
+  createClass,
+  getClassById,
+  listClasses,
+  massPromotion,
+  updateClass,
+} from './classes'
 
 export const appRouter = {
   admin: {
@@ -80,6 +87,13 @@ export const appRouter = {
       previewImport: previewTeacherImport,
       executeImport: executeTeacherImport,
       export: exportTeachers,
+    },
+    classes: {
+      list: listClasses,
+      getById: getClassById,
+      create: createClass,
+      update: updateClass,
+      massPromotion,
     },
   },
 }
