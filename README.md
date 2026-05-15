@@ -34,7 +34,7 @@
 | **Forms** | [React Hook Form](https://www.react-hook-form.com/) ^7.x + [Zod](https://zod.dev/) ^4.x | Schema-driven validation |
 | **Charts** | [Recharts](https://recharts.org/) ^2.x | Cashflow and SPP trend charts |
 | **Calendar** | [react-big-calendar](https://github.com/vazco/react-big-calendar) | Calendar view for events |
-| **Backend** | [TanStack Start](https://tanstack.com/start) | Full-stack framework (SPA Phase 1, SSR Phase 2) |
+| **Backend** | [TanStack Start](https://tanstack.com/start) | Full-stack framework running in SPA mode for Phase 1 |
 | **API** | [oRPC](https://orc.js.org/) | Type-safe RPC layer |
 | **Auth** | [Better Auth](https://better-auth.com/) | Auth with email/password, sessions |
 | **ORM** | [Drizzle ORM](https://orm.drizzle.team/) | Type-safe SQL query builder |
@@ -173,7 +173,7 @@ pnpm lint
 | **Multi-Tenant Management** | Register and manage foundations with multiple educational units |
 | **Unit Switching** | Role-based context switching between units |
 | **Academic Year** | Manage academic years with exclusive activation |
-| **Teacher Management** | CRUD, soft-delete, bulk import from Excel |
+| **Teacher Management** | Live CRUD, soft-delete, bulk import preview/partial import, and filtered Excel export |
 | **Student Lifecycle** | Registration, enrollment, status transitions (promote, transfer, graduate) |
 | **Class Management** | Class CRUD, capacity tracking, mass promotion |
 | **SPP Billing** | Categories, per-class rates, discount schemes, auto-generation |

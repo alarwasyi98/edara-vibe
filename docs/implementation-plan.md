@@ -20,7 +20,7 @@
 | 5. Tenant & Org Structure | 14–15 | ✅ Done |
 | 6. Academic Year Management | 16–17 | ✅ Done |
 | 7. Dashboard & Activity Log | 18–19 | ✅ Done |
-| 8. Teacher Management | 20–22 | ❌ Not Started |
+| 8. Teacher Management | 20–22 | ✅ Done |
 | 9. Class & Student Management | 23–27 | ❌ Not Started |
 | 10. SPP Payment System | 28–34 | ❌ Not Started |
 | 11. Cashflow, Events & Export | 35–40 | ❌ Not Started |
@@ -392,7 +392,7 @@
 
 > **Refs:** TCH-01–05, Feature Stories §5 (Table, Side Drawer 520px, Bulk Import 4-step), ADR-06 (subjects as JSON), B8, B12
 
-### Step 20: Teacher API Router
+### Step 20: Teacher API Router ✅
 
 - **Task:** Create `teachersRouter` with procedures: `list` (paginated, filterable by status/subject/search via `ilike`, per TCH-02), `create` (full validation, subjects as JSON array per ADR-06, with activity log), `update` (with activity log), `deactivate` (soft-delete: `is_active = false` per TCH-03/B12, with activity log), `getById`. All mutations wrapped by `withActivityLog` middleware. Register in `appRouter`.
 - **Files (5):**
@@ -405,7 +405,7 @@
 - **User Instructions:** Run `pnpm build` — must pass.
 - **Rollback:** Delete new files, revert `app-router.ts`.
 
-### Step 21: Teacher Frontend — Table & CRUD
+### Step 21: Teacher Frontend — Table & CRUD ✅
 
 - **Task:** Wire Teacher Management page to real API. Create hooks: `useTeachers()` (paginated query with filters), `useCreateTeacher()`, `useUpdateTeacher()`, `useDeactivateTeacher()`, `useTeacherById()`. Replace mock data with oRPC queries. Wire Filter Bar (status dropdown, subject multi-select, "Tampilkan Nonaktif" toggle per feature stories). Wire DataTable with server-side pagination. Wire Add/Edit Side Drawer (520px per feature stories) with react-hook-form + Zod. Wire soft-delete confirmation dialog.
 - **Files (14):**
@@ -430,28 +430,26 @@
   3. Run `pnpm build` — must pass
 - **Rollback:** `git stash`
 
-### Step 22: Teacher Bulk Import & Export
+### Step 22: Teacher Bulk Import & Export ✅
 
-- **Task:** Implement bulk import (TCH-04) and filtered export (TCH-05). Install missing dependencies: `xlsx` (SheetJS for parsing), `exceljs` (for export generation). Create pg-boss job for bulk import processing. Implement 4-step import flow per feature stories: Step 1 = Download Template, Step 2 = Upload File, Step 3 = Preview & Validation (highlight errors per row), Step 4 = Confirm Import. Server validates each row, imports valid rows in transaction, returns error report. Export applies current filter conditions to query.
-- **Files (12):**
-  - `src/server/routers/teachers/import.ts` ← new: import procedures (parseFile, executeImport)
-  - `src/server/routers/teachers/export.ts` ← new: export procedure (generateExcel)
-  - `src/server/jobs/teacher-import.ts` ← new: pg-boss job handler
-  - `src/server/jobs/index.ts` ← new: job registry + pg-boss init
-  - `src/features/teachers/components/bulk-import-modal.tsx (exists)` ← wire 4-step flow
-  - `src/features/teachers/components/import-preview-table.tsx` ← new: validation preview
-  - `src/features/teachers/hooks/use-import-teachers.ts` ← new: useMutation
-  - `src/features/teachers/hooks/use-export-teachers.ts` ← new: useMutation
-  - `src/lib/validators/teachers.ts (exists)` ← add importRowSchema
-  - `src/features/teachers/templates/teacher-import-template.xlsx` ← new: Excel template
-  - `package.json (exists)` ← add xlsx, exceljs dependencies
-  - `src/server/routers/app-router.ts (exists)` ← verify teacher router includes import/export
+- **Task:** Implement bulk import (TCH-04) and filtered export (TCH-05). Use `xlsx` in the browser to parse uploaded workbooks and generate the downloadable template, then send JSON-safe parsed rows to the server for authoritative preview validation and partial import. Use `exceljs` on the server to generate filtered `.xlsx` exports returned as a JSON-safe base64 payload for browser download. Keep the procedures flat under `tenant.teachers` instead of introducing a new background-jobs subsystem.
+- **Files (11):**
+  - `src/lib/teachers-bulk.ts` ← new: shared template columns, worksheet parsing, subject splitting, filename helpers
+  - `src/lib/__tests__/teachers-bulk.test.ts` ← new: template header, worksheet-row mapping, and subject parsing tests
+  - `src/lib/validators/teachers.ts (exists)` ← add import/export schemas and input types
+  - `src/server/routers/teachers/index.ts (exists)` ← add `previewImport`, `executeImport`, and `export` procedures
+  - `src/server/routers/app-router.ts (exists)` ← register teacher import/export procedures
+  - `src/features/teachers/components/teacher-dialogs.tsx (exists)` ← replace placeholders with the live 4-step import flow and filtered export dialog
+  - `src/features/teachers/components/teacher-action-buttons.tsx (exists)` ← enable live import/export actions
+  - `src/features/teachers/hooks/use-preview-teacher-import.ts` ← new: preview mutation
+  - `src/features/teachers/hooks/use-execute-teacher-import.ts` ← new: execute-import mutation + list invalidation
+  - `src/features/teachers/hooks/use-export-teachers.ts` ← new: export mutation
+  - `package.json (exists)` ← add `xlsx` and `exceljs`
 - **Step Dependencies:** Step 21
 - **User Instructions:**
   1. Run `pnpm install` after package.json update
-  2. Run `pnpm dev` — test download template, upload, preview, import
-  3. Test export with active filters
-  4. Run `pnpm build` — must pass
+  2. Run `pnpm dev` — test template download, workbook upload, preview validation, partial import, and filtered export
+  3. Run `pnpm test:run && pnpm typecheck && rtk lint --max-warnings 10 && pnpm build` — must pass
 - **Rollback:** `git stash`, `pnpm install` to restore lockfile.
 
 ---

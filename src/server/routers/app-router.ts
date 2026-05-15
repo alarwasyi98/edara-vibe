@@ -28,8 +28,11 @@ import { listActivityLogs } from './activity-logs'
 import {
   createTeacher,
   deactivateTeacher,
+  executeTeacherImport,
+  exportTeachers,
   getTeacherById,
   listTeachers,
+  previewTeacherImport,
   updateTeacher,
 } from './teachers'
 
@@ -74,6 +77,9 @@ export const appRouter = {
       create: createTeacher,
       update: updateTeacher,
       deactivate: deactivateTeacher,
+      previewImport: previewTeacherImport,
+      executeImport: executeTeacherImport,
+      export: exportTeachers,
     },
   },
 }

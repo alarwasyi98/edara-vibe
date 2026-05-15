@@ -3,29 +3,57 @@
 > Layer 3: Episodic memory — what happened, when, and what changed.
 > Append new sessions at the top. Never delete old entries.
 
-## Current State Summary (as of Session 27)
+## Current State Summary (as of Session 28)
 
 | Property | Value |
 |----------|-------|
 | Branch | Do not trust this file for live branch state; verify with `git status` / `git log` |
 | SHA | Verify current SHA from git before acting on branch-sensitive work |
 | Last PR | #21 (feat: wire academic years frontend to live API) |
-| CI | Teacher Step 21 code gates pass locally (`test:run`, `typecheck`, `lint`); local build remains env-blocked at prerender without `DATABASE_URL` |
+| CI | Teacher Step 22 code gates pass locally (`format:check`, `test:run`, `typecheck`, `rtk lint --max-warnings 10`, `build`) |
 | Deployment | https://edara.vercel.app/ (working, login functional) |
-| Next Step | **Advance to the next planned migration step after Teacher Management frontend wiring**; Teacher import/export is still intentionally deferred |
+| Next Step | **Advance to Section 9 Step 23 — Class API Router** |
 
 ### Current Implementation Snapshot
 
 **What's Done:**
-- Sections 1–7 are complete through Step 19
-- Live today: auth runtime, tenant/school-unit flows, academic years, dashboard, activity logs, and Teacher Management list/detail/create/update/deactivate flows
-- Remaining migration areas still using mock-backed frontend and/or missing domain routers: classes, students, SPP, cashflow, and events
-- Teacher import/export is deliberately left unavailable until a later step
+- Sections 1–8 are complete through Step 22
+- Live today: auth runtime, tenant/school-unit flows, academic years, dashboard, activity logs, and full Teacher Management including list/detail/create/update/deactivate plus bulk import preview/partial import and filtered Excel export
+- Section 9 onward still remains to be migrated from mock-backed frontend and/or missing domain routers: classes, students, SPP, cashflow, and events
 
 **Next Actions:**
 1. Treat `docs/implementation-plan.md`, `AGENTS.md`, `.agents/memory/project.md`, and this log as the AI-facing source of truth for feature status
 2. Verify branch/SHA directly from git before doing branch-sensitive work
-3. Start the next migration milestone after Teacher Step 21, while keeping the teacher import/export deferment explicit
+3. Start Section 9 Step 23 (Class API Router) and preserve the current teacher import/export behavior unless requirements change
+
+---
+
+## Session 28 — 2026-05-15: Section 8 Step 22 — Teacher Bulk Import & Export
+
+**Scope:** Implement the next migration milestone after Teacher Step 21 by turning Teacher bulk import/export from placeholders into live tenant API workflows, then re-run the repo code gates and align the AI-facing docs/memory.
+
+### What Happened
+Built Step 22 around the existing flat `tenant.teachers` router shape instead of introducing a new jobs subsystem. The final flow parses uploaded Excel workbooks in the browser with `xlsx`, sends parsed rows to the server for authoritative preview validation and partial import, and generates filtered teacher exports on the server with `exceljs` as a JSON-safe base64 workbook payload for browser download.
+
+On the server, `src/server/routers/teachers/index.ts` now exposes `previewImport`, `executeImport`, and `export` alongside the existing CRUD procedures. Validation reuses `createTeacherSchema`, detects duplicate `nik` values inside the upload batch and against existing teachers in the same `schoolId + unitId`, surfaces row-level errors and warnings, and only inserts valid selected rows during the execute step while preserving activity-log coverage on the bulk import mutation.
+
+On the client, `src/features/teachers/components/teacher-dialogs.tsx` was rewritten from placeholders into the live 4-step import flow described in the feature stories: download template, upload workbook, preview/validate, and confirm import. The export dialog now reads the active teacher filters from route search state and downloads a filtered workbook, while `src/features/teachers/components/teacher-action-buttons.tsx` now advertises live import/export actions instead of “Belum Tersedia”.
+
+A shared helper layer was added in `src/lib/teachers-bulk.ts` with tests in `src/lib/__tests__/teachers-bulk.test.ts`, plus new teacher import/export hooks and validator schemas. One bug surfaced during verification: worksheet row numbering initially collapsed after blank rows were skipped, so `mapTeacherBulkWorksheetRows` was corrected to preserve original Excel row numbers in validation feedback.
+
+### Verification
+- `pnpm install` succeeded after adding `exceljs` and `xlsx`
+- `lsp_diagnostics` was clean on all changed teacher bulk files
+- `pnpm format:check` passed
+- `pnpm test:run` passed (`4` test files, `19` tests)
+- `pnpm typecheck` passed
+- `rtk lint --max-warnings 10` passed with the same 10 pre-existing warnings in unrelated files
+- `pnpm build` passed; the known chunk-size warning still appears but does not fail the build
+
+### Resulting State
+- Section 8 is now complete through Step 22
+- Teacher Management now covers TCH-01 through TCH-05 in the live app
+- Next planned migration work is Section 9 Step 23 — Class API Router
 
 ---
 
