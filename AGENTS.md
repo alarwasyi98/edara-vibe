@@ -64,8 +64,8 @@ Run in order: `format:check` → `typecheck` → `lint --max-warnings 10` → `b
 ## Current Status
 
 - **Phase:** Phase 1 — Migration from Mock to Real Backend
-- **Progress:** Sections 1–8 are complete through Step 22, and Section 9 Step 23 is now complete. Teacher Management remains fully live, and Class Management now has a live tenant API router with `list`, `getById`, `create`, `update`, and transactional `massPromotion`.
-- **Next:** Continue Section 9 with Step 24 — Class Frontend — and keep AI memory files aligned with the real codebase state as migration status changes.
+- **Progress:** Sections 1–8 are complete through Step 22, and Section 9 Step 24 is now complete. Teacher Management remains fully live, and Class Management is now live end-to-end with a tenant API router plus frontend wiring for grouped class listing, class detail/student roster, create, update, and transactional `massPromotion`.
+- **Next:** Continue Section 9 with Step 25 — Student API Router — and keep AI memory files aligned with the real codebase state as migration status changes.
 
 ## Architecture Mental Model
 

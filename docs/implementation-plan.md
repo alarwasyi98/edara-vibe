@@ -475,18 +475,20 @@
 ### Step 24: Class Frontend
 
 - **Task:** Wire Class Management page to real API. Create hooks: `useClasses()`, `useCreateClass()`, `useUpdateClass()`, `useMassPromotion()`. Replace mock data. Implement Class Grid per grade (subheader per grade level, cards with progress bar showing enrollment/capacity per feature stories). Implement Add/Edit form. Implement Mass Promotion 3-step modal per feature stories: Step 1 = Confirm students, Step 2 = Select target classes, Step 3 = Summary & execute. Handle empty state (no classes for active academic year).
+- **Completed:** 2026-05-20 — Replaced the mock/local-state classes page with live oRPC + TanStack Query wiring. `src/features/classes/index.tsx` now derives the active academic year from `tenant.academicYears.list`, fetches grouped class cards from `tenant.classes.list`, loads class detail/student rosters from `tenant.classes.getById`, and wires real create/update/mass-promotion mutations. Added live hooks, a query-cache helper, explicit frontend types, grouped class-grid rendering, a live RHF/Zod class dialog with teacher options from `tenant.teachers.list`, and a 3-step mass-promotion modal with explicit target-class error handling. The fake delete/demo flow was removed because no live delete mutation exists.
 - **Files (12):**
   - `src/features/classes/hooks/use-classes.ts` ← new: useQuery
   - `src/features/classes/hooks/use-create-class.ts` ← new: useMutation
   - `src/features/classes/hooks/use-update-class.ts` ← new: useMutation
   - `src/features/classes/hooks/use-mass-promotion.ts` ← new: useMutation
   - `src/features/classes/hooks/index.ts` ← new: barrel
-  - `src/features/classes/components/class-grid.tsx (exists)` ← wire to real data
-  - `src/features/classes/components/class-card.tsx (exists)` ← wire capacity progress bar
-  - `src/features/classes/components/class-form-modal.tsx (exists)` ← wire to mutations + RHF + Zod
-  - `src/features/classes/components/mass-promotion-modal.tsx (exists)` ← wire 3-step flow
-  - `src/routes/_authenticated/classes/index.tsx (exists)` ← wire to hooks
-  - `src/features/classes/data/ (exists)` ← remove mock data
+  - `src/features/classes/hooks/class-query-cache.ts` ← new: targeted invalidation helpers
+  - `src/features/classes/types.ts` ← new: live frontend response/input shapes
+  - `src/features/classes/components/class-grid.tsx` ← new: grouped grade cards + card actions
+  - `src/features/classes/components/classes-dialog.tsx (exists)` ← rewired to RHF + Zod + live teacher options
+  - `src/features/classes/components/kelas-row-actions.tsx (exists)` ← rewired to live actions only (`Lihat Siswa`, `Edit Kelas`)
+  - `src/features/classes/components/mass-promotion-modal.tsx` ← new: wire 3-step flow to live target classes and students
+  - `src/features/classes/index.tsx (exists)` ← rewired to live queries, detail panel, empty state, and mutations
   - `src/lib/validators/classes.ts (exists)` ← reuse for client validation
 - **Step Dependencies:** Step 23, Step 17 (academic year UI for context)
 - **User Instructions:**

@@ -3,28 +3,53 @@
 > Layer 3: Episodic memory — what happened, when, and what changed.
 > Append new sessions at the top. Never delete old entries.
 
-## Current State Summary (as of Session 29)
+## Current State Summary (as of Session 31)
 
 | Property | Value |
 |----------|-------|
 | Branch | Do not trust this file for live branch state; verify with `git status` / `git log` |
 | SHA | Verify current SHA from git before acting on branch-sensitive work |
 | Last PR | #25 (feat: complete teacher management live migration) |
-| CI | Class Step 23 code gates pass locally (`format:check`, `typecheck`, `rtk lint --max-warnings 10`, `build`) |
+| CI | Latest class frontend work passed `pnpm format:check`, `pnpm typecheck`, `pnpm test:run`, `rtk lint --max-warnings 10`, and `pnpm build` locally |
 | Deployment | https://edara.vercel.app/ (working, login functional) |
-| Next Step | **Advance to Section 9 Step 24 — Class Frontend** |
+| Next Step | **Advance to Section 9 Step 25 — Student API Router** |
 
 ### Current Implementation Snapshot
 
 **What's Done:**
 - Sections 1–8 are complete through Step 22, and Section 9 Step 23 is complete
-- Live today: auth runtime, tenant/school-unit flows, academic years, dashboard, activity logs, full Teacher Management including list/detail/create/update/deactivate plus bulk import preview/partial import and filtered Excel export, and the Class Management backend router with grouped listing, detail, create, update, and transactional mass promotion
-- Section 9 onward still remains to be migrated from mock-backed frontend and/or missing domain routers/UI surfaces: class frontend wiring, students, SPP, cashflow, and events
+- Live today: auth runtime, tenant/school-unit flows, academic years, dashboard, activity logs, full Teacher Management including list/detail/create/update/deactivate plus bulk import preview/partial import and filtered Excel export, and full Class Management frontend/backend wiring including grouped cards, class detail roster, create/update, and transactional mass promotion
+- Section 9 onward still remains to be migrated from mock-backed frontend and/or missing domain routers/UI surfaces: students, SPP, cashflow, and events
 
 **Next Actions:**
 1. Treat `docs/implementation-plan.md`, `AGENTS.md`, `.agents/memory/project.md`, and this log as the AI-facing source of truth for feature status
 2. Verify branch/SHA directly from git before doing branch-sensitive work
-3. Start Section 9 Step 24 (Class Frontend) and preserve the current teacher import/export behavior unless requirements change
+3. Start Section 9 Step 25 (Student API Router) and preserve the current class frontend/teacher import-export behavior unless requirements change
+
+---
+
+## Session 31 — 2026-05-20: Section 9 Step 24 — Class Frontend
+
+**Scope:** Replace the mock Class Management frontend with live oRPC/TanStack Query wiring on the current branch, reusing the existing backend router and existing teacher/academic-year query patterns.
+
+### What Happened
+Rebuilt `src/features/classes/index.tsx` to use live `tenant.classes.list` data grouped by grade, live academic-year selection from `tenant.academicYears.list`, live class detail/student roster from `tenant.classes.getById`, and real create/update/mass-promotion mutations. The page now renders grouped class cards, an empty state for years with no classes, a class detail section with active students, and a mass-promotion CTA that only appears when a next academic year exists.
+
+Added `src/features/classes/hooks/use-classes.ts`, `use-create-class.ts`, `use-update-class.ts`, `use-mass-promotion.ts`, `hooks/index.ts`, and `hooks/class-query-cache.ts` to mirror the Teacher feature hook style. Replaced the mock class dialog and row actions with live versions, added `class-grid.tsx` for grouped class cards and capacity bars, added `mass-promotion-modal.tsx` for the 3-step promotion flow, and introduced `types.ts` to keep the live response shapes explicit on the frontend.
+
+### Why It Matters
+This closes Step 24 and removes the old local/demo behavior from Class Management. The Classes domain is now live end-to-end on the frontend, which unblocks the next migration steps that depend on real class/year/student relationships.
+
+### Verification
+- LSP diagnostics returned clean results for all modified files under `src/features/classes/` and for `src/routes/_authenticated/classes/index.tsx`
+- `pnpm format:check` passed
+- `pnpm typecheck` passed
+- `pnpm test:run` passed (4 files, 19 tests)
+- `rtk lint --max-warnings 10` passed with 0 errors and 9 baseline warnings
+- `pnpm build` passed; remaining output was baseline bundle/runtime warnings only
+
+### Follow-up Notes
+- Oracle review identified and I fixed two release-blocking UX/correctness gaps before closing the step: `src/features/classes/index.tsx` now renders an explicit error state when `classDetailQuery` fails, and `src/features/classes/components/mass-promotion-modal.tsx` now renders an explicit error state when target classes fail to load.
 
 ---
 
