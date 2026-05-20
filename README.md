@@ -34,19 +34,24 @@
 | **Forms** | [React Hook Form](https://www.react-hook-form.com/) ^7.x + [Zod](https://zod.dev/) ^4.x | Schema-driven validation |
 | **Charts** | [Recharts](https://recharts.org/) ^2.x | Cashflow and SPP trend charts |
 | **Calendar** | [react-big-calendar](https://github.com/vazco/react-big-calendar) | Calendar view for events |
-| **Backend** | [TanStack Start](https://tanstack.com/start) | Full-stack framework running in SPA mode for Phase 1 |
+| **App Runtime** | [TanStack Start](https://tanstack.com/start) | SPA-rendered app shell plus embedded server runtime for auth and RPC |
 | **API** | [oRPC](https://orc.js.org/) | Type-safe RPC layer |
 | **Auth** | [Better Auth](https://better-auth.com/) | Auth with email/password, sessions |
 | **ORM** | [Drizzle ORM](https://orm.drizzle.team/) | Type-safe SQL query builder |
 | **Jobs** | [pg-boss](https://github.com/tgriesser/pg-boss) | PostgreSQL-native job queue |
 | **Database** | [Neon](https://neon.tech/) (PostgreSQL) | Serverless PostgreSQL |
+| **Deployment Runtime** | Nitro / Node server output | Hosts `/api/auth` and `/api/rpc` in production |
 | **Package Manager** | [pnpm](https://pnpm.io/) | Fast, disk space efficient |
 
 ---
 
 ## Project Architecture
 
-EDARA uses **TanStack Start** as a unified full-stack framework with the following key patterns:
+EDARA uses **TanStack Start** in **SPA render mode**. The UI is client-rendered, while the same repo also ships an embedded server runtime that hosts Better Auth and oRPC endpoints. The correct mental model is **SPA-first, not backendless**.
+
+Current Phase 1 reality is mixed by domain: auth, tenant flows, academic years, dashboard, activity logs, teachers, and the class backend router are already live on the real backend; other domains still have mock/local-state frontends while their backend migration steps are unfinished.
+
+EDARA follows these key patterns:
 
 ### Multi-Tenancy (Shared Schema)
 Every database table carries `school_id` (tenant) and optionally `unit_id` (sub-tenant). PostgreSQL Row Level Security (RLS) policies enforce isolation at the database layer, independent from application code.

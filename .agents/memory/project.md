@@ -12,6 +12,13 @@
 - **Active Branch:** Do not rely on this file for branch state; verify with `git status` / `git log`.
 - **Implementation Plan:** Section 9 Step 23 is complete, and the next milestone is Section 9 Step 24 — Class Frontend.
 
+## Working Mental Model
+
+- EDARA is a **SPA-first application with an embedded TanStack Start server runtime**, not a backendless static app.
+- The frontend shell is client-rendered and avoids SSR/page `loader` patterns.
+- The backend boundary already exists in-repo via `src/server.ts`, `src/routes/api/auth/$`, `src/routes/api/rpc/$`, Better Auth, oRPC routers, and Drizzle/Neon access.
+- Migration status is mixed by domain: some areas are fully live on the real backend, while unfinished domains still rely on mock/local-state frontends until their implementation-plan steps are completed.
+
 ## Feature Inventory
 
 | # | Feature | Spec IDs | Status | Notes |

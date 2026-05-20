@@ -92,15 +92,15 @@
 ## C7: Auth Provider — Better Auth (Migration from Clerk)
 
 - **Date:** 2026-04
-- **Status:** Active (migration ~40% complete)
+- **Status:** Superseded in runtime details by ADR-007, ADR-008, and C10
 - **Context:** Originally used Clerk for authentication. Migrated to Better Auth for self-hosted control and cost reduction.
 - **Decision:** Better Auth handles identity and session management. EDARA handles tenancy and RBAC via `user_school_assignments` table.
 - **Consequences:**
   - Schema renamed `clerkUserId` → `userId`
   - Better Auth tables: `user`, `session`, `account`, `verification`
-  - Route mount: `/api/auth/$` (currently removed due to SPA constraints)
+  - Route mount: `/api/auth/$` (historical note from pre-runtime wiring stage; current state is documented in C10)
   - Client SDK: `@better-auth/client`
-  - Server runtime not yet functional (needs backend scaffold)
+  - Server runtime not yet functional (historical note from pre-runtime wiring stage; current state is documented in C10)
   - oRPC middleware pattern: `context.ts` → `auth.ts` → `authorized.ts`
 
 ## C3: pg-boss Colocated (Same Process)
@@ -130,13 +130,13 @@
 ## C9: Session Management Strategy
 
 - **Date:** 2026-04
-- **Status:** Active
+- **Status:** Superseded in runtime-validation details by C10
 - **Context:** SPA needs session management without SSR server-side session handling.
 - **Decision:** Better Auth client-side session with cookie baseline. `getSession()` returns `null` on error (graceful degradation). Route guards redirect to `/sign-in?redirect=...`.
 - **Consequences:**
-  - No server-side session validation in Phase 1 SPA
+  - No server-side session validation in Phase 1 SPA (historical note from earlier migration stage; current runtime state is documented in C10)
   - Client checks session on route navigation
-  - Backend oRPC will validate session tokens when implemented
+  - Backend oRPC will validate session tokens when implemented (historical note from earlier migration stage; current runtime state is documented in C10)
 ## ADR-007: TanStack Start SPA Mode Migration
 
 - **Date:** 2026-04-29
@@ -153,6 +153,29 @@
   - `pnpm run build` → `vite build` (builds client + Nitro server)
   - `pnpm run start` → `node .output/server/index.mjs`
   - `@tanstack/react-start` and `nitro` moved from devDependencies to dependencies
-  - `@tanstack/router-plugin` kept (tanstackStart includes it but explicit dep doesn't conflict)
-  - API routes now possible via `createFileRoute` with `server.handlers`
+- `@tanstack/router-plugin` kept (tanstackStart includes it but explicit dep doesn't conflict)
+- API routes now possible via `createFileRoute` with `server.handlers`
+
+## ADR-008: SPA Render Mode with Embedded Server Runtime
+
+- **Date:** 2026-05-20
+- **Status:** Active
+- **Context:** After the TanStack Start migration, EDARA now has a client-rendered SPA shell plus live server runtime entrypoints in-repo (`src/server.ts`, `/api/auth/$`, `/api/rpc/$`). Some documentation still described the app as browser-only or static-only, which no longer matches the codebase.
+- **Decision:** Treat EDARA as a **SPA-first application with an embedded TanStack Start/Nitro server runtime**. “No SSR” means no server-rendered pages, no route-loader page fetching, and no `createServerFn` feature architecture for domain work; it does **not** mean “no backend runtime.”
+- **Consequences:**
+  - Auth and RPC handlers are first-class runtime boundaries, not placeholder scaffolding
+  - Production deployment must host the Nitro/Node server output, not only static assets
+  - Client feature data flow remains oRPC + TanStack Query driven
+  - Future docs and sessions must describe the app as SPA-rendered UI + embedded server runtime
+
+## C10: Better Auth Runtime Is Live In-Repo
+
+- **Date:** 2026-05-20
+- **Status:** Active
+- **Context:** Earlier migration notes in C7/C9 reflected an intermediate state where Better Auth runtime wiring was incomplete.
+- **Decision:** The current source of truth is the live TanStack Start route mount at `src/routes/api/auth/$.ts`, backed by `src/server/auth/index.ts` and the shared server runtime entry in `src/server.ts`.
+- **Consequences:**
+  - Future sessions must not describe Better Auth as “removed due to SPA constraints” or “not yet functional” unless code evidence changes again
+  - Session and identity logic exist on the server boundary, while UI/session consumption remains client-first
+  - C7 and C9 remain historically accurate snapshots of an earlier migration stage, but C10 supersedes their runtime-status wording
 

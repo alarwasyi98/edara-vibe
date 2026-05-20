@@ -28,6 +28,24 @@
 
 ---
 
+## Session 30 — 2026-05-20: Documentation Mental-Model Reconciliation
+
+**Scope:** Reconcile the AI-facing architecture documentation so future sessions stop treating EDARA as a backendless/static SPA and instead use the actual SPA-rendered plus embedded-server mental model.
+
+### What Happened
+Reviewed `AGENTS.md`, `.agents/memory/system.md`, `.agents/memory/project.md`, `.agents/memory/decisions.md`, and `README.md` against the live code boundaries in `src/server.ts`, `src/routes/api/auth/$.ts`, and `src/routes/api/rpc/$.ts`.
+
+Updated the canonical docs to describe EDARA as a **client-rendered SPA shell backed by an embedded TanStack Start/Nitro server runtime**. Clarified that “No SSR” means no server-rendered pages, route loaders, or `createServerFn` feature architecture, not “no backend runtime.” Added `ADR-008` for the corrected architecture mental model and `C10` to supersede older Better Auth runtime notes that reflected a pre-runtime migration stage.
+
+### Why It Matters
+Future AI sessions were at risk of inheriting a stale model from docs that still said “browser-only SPA,” “static hosting possible,” or implied Better Auth server wiring was absent. The updated docs now match the codebase reality: live auth and oRPC runtime boundaries exist in-repo, while some product domains remain mock/local-state on the frontend until later implementation-plan steps.
+
+### Verification
+- LSP diagnostics were clean for `AGENTS.md`, `README.md`, `.agents/memory/system.md`, `.agents/memory/project.md`, and `.agents/memory/decisions.md`
+- No feature/runtime code changed; this session only corrected documentation and AI memory alignment
+
+---
+
 ## Session 29 — 2026-05-15: Section 9 Step 23 — Class API Router
 
 **Scope:** Implement the next migration milestone after Teacher Step 22 by creating the tenant-scoped Class API Router, validating it against the documented CI pipeline, and aligning the AI-facing docs/memory with the new post-Step-23 repo state.

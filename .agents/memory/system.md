@@ -11,7 +11,7 @@
 - **Name:** EDARA (Sistem Administrasi Madrasah Multi-Tenant)
 - **Phase:** Phase 1 — Migration from Mock to Real Backend
 - **Language:** TypeScript (strict mode, no `any`)
-- **Runtime:** Browser-only SPA (no SSR in Phase 1)
+- **Runtime:** SPA-rendered frontend with embedded TanStack Start server runtime for auth and RPC (no SSR page rendering in Phase 1)
 - **OS:** Windows (primary dev environment — use PowerShell equivalents)
 
 ## Tech Stack
@@ -19,7 +19,7 @@
 | Layer | Technology | Version / Notes |
 |-------|-----------|----------------|
 | Frontend Framework | React | 19 |
-| Meta-framework | TanStack Start | Vite SPA mode — **NO SSR** |
+| Meta-framework | TanStack Start | SPA render mode + embedded server runtime — **NO SSR page rendering** |
 | Routing | TanStack Router | File-based, type-safe |
 | Server State | TanStack Query | Via oRPC integration |
 | Client State | Zustand | Minimal stores |
@@ -37,7 +37,7 @@
 
 ## Architectural Constraints
 
-1. **Vite SPA (ADR-01):** No SSR code (`loader`, `getServerSideProps`). All data fetching via oRPC + TanStack Query on the client.
+1. **SPA Render Mode (ADR-01, ADR-007, ADR-008):** No SSR page-rendering code (`loader`, `getServerSideProps`, `createServerFn` feature pattern). UI data fetching stays on the client via oRPC + TanStack Query, while auth/RPC handlers run on the embedded server runtime.
 2. **Multi-Tenancy & RLS (ADR-02):** Every tenant-scoped table MUST have `school_id` (and `unit_id` if under a unit). RLS enforced at DB level via `set_config()` before queries.
 3. **Computed Financial Status (ADR-03):** SPP status (paid/partial/unpaid) is NEVER stored as a static column. Always compute via SQL aggregation (`SUM(amount)` vs `net_amount`).
 4. **Append-Only Transactions (ADR-04):** `payment_transactions` table has NO UPDATE or DELETE at application level. Corrections use new `reversal` type transactions.
