@@ -144,7 +144,10 @@ export function DataKelas() {
   const selectedAcademicYear =
     academicYears.find((year) => year.id === effectiveSelectedAcademicYearId) ?? null
 
-  const classesQuery = useClasses(selectedAcademicYear?.id)
+  const classesQuery = useClasses(
+    selectedAcademicYear?.id,
+    Boolean(selectedAcademicYear),
+  )
   const nextAcademicYear = useMemo(
     () => findNextAcademicYear(academicYears, selectedAcademicYear),
     [academicYears, selectedAcademicYear],
