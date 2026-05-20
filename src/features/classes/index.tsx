@@ -1,359 +1,545 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useNavigate, useRouter } from '@tanstack/react-router'
 import {
-    type ColumnDef,
-    type SortingState,
-    type VisibilityState,
-    type ColumnFiltersState,
-    type PaginationState,
-    flexRender,
-    getCoreRowModel,
-    getFacetedRowModel,
-    getFacetedUniqueValues,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    useReactTable,
-} from '@tanstack/react-table'
-import { Shapes, BookOpen, Users, UserCheck, TrendingUp } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+  ArrowRight,
+  BookOpen,
+  GraduationCap,
+  Plus,
+  Shapes,
+  UserCheck,
+  Users,
+} from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card'
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { toast } from 'sonner'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
+import { EmptyState } from '@/components/shared/empty-state'
 import { PageHeader } from '@/components/shared/page-header'
 import { StatCard } from '@/components/shared/stat-card'
-import { cn } from '@/lib/utils'
-import { kelasJenjangColors } from '@/lib/constants'
-import { DataTableToolbar, DataTablePagination, DataTableColumnHeader } from '@/components/data-table'
+import { ThemeSwitch } from '@/components/theme-switch'
+import { orpc } from '@/lib/orpc-react'
+import type { CreateClassInput, MassPromotionInput } from '@/lib/validators/classes'
+import { ClassGrid } from './components/class-grid'
 import { ClassesDialog } from './components/classes-dialog'
-import { ClassesRowActions } from './components/kelas-row-actions'
+import { MassPromotionModal } from './components/mass-promotion-modal'
+import {
+  useClasses,
+  useCreateClass,
+  useMassPromotion,
+  useUpdateClass,
+} from './hooks'
+import type { AcademicYearOption, ClassDetail, ClassSummary, TeacherOption } from './types'
 
-type Kelas = {
-    id: string
-    namaKelas: string
-    jenjang: 'VII' | 'VIII' | 'IX'
-    waliKelas: string
-    jumlahSiswa: number
-    kapasitas: number
-    tahunAjaran: string
+const EMPTY_UUID = '00000000-0000-0000-0000-000000000000'
+
+const teacherListInput = {
+  page: 1,
+  pageSize: 100,
+  search: '',
+  statusKepegawaian: [],
+  mataPelajaran: [],
+  includeInactive: false,
+} as const
+
+function getProgressPercentage(total: number, capacity: number): number {
+  if (capacity <= 0) {
+    return 0
+  }
+
+  return Math.round((total / capacity) * 100)
 }
 
-const initialKelas: Kelas[] = [
-    { id: '1', namaKelas: 'VII-A', jenjang: 'VII', waliKelas: 'Ustdzh. Fatimah Hidayatullah', jumlahSiswa: 32, kapasitas: 35, tahunAjaran: '2025/2026' },
-    { id: '2', namaKelas: 'VII-B', jenjang: 'VII', waliKelas: 'Ibu Sari Nugroho', jumlahSiswa: 30, kapasitas: 35, tahunAjaran: '2025/2026' },
-    { id: '3', namaKelas: 'VII-C', jenjang: 'VII', waliKelas: 'Ustadz Ahmad Maulana', jumlahSiswa: 28, kapasitas: 35, tahunAjaran: '2025/2026' },
-    { id: '4', namaKelas: 'VIII-A', jenjang: 'VIII', waliKelas: 'Pak Budi Santoso', jumlahSiswa: 33, kapasitas: 35, tahunAjaran: '2025/2026' },
-    { id: '5', namaKelas: 'VIII-B', jenjang: 'VIII', waliKelas: 'Ibu Dewi Permana', jumlahSiswa: 31, kapasitas: 35, tahunAjaran: '2025/2026' },
-    { id: '6', namaKelas: 'VIII-C', jenjang: 'VIII', waliKelas: 'Ustadz Ridwan Hakim', jumlahSiswa: 29, kapasitas: 35, tahunAjaran: '2025/2026' },
-    { id: '7', namaKelas: 'IX-A', jenjang: 'IX', waliKelas: 'Ibu Ratna Wibowo', jumlahSiswa: 34, kapasitas: 35, tahunAjaran: '2025/2026' },
-    { id: '8', namaKelas: 'IX-B', jenjang: 'IX', waliKelas: 'Pak Eko Kurniawan', jumlahSiswa: 30, kapasitas: 35, tahunAjaran: '2025/2026' },
-    { id: '9', namaKelas: 'IX-C', jenjang: 'IX', waliKelas: 'Ustdz. Zahra Firdaus', jumlahSiswa: 27, kapasitas: 35, tahunAjaran: '2025/2026' },
-]
+function findNextAcademicYear(
+  academicYears: AcademicYearOption[],
+  selectedAcademicYear: AcademicYearOption | null,
+): AcademicYearOption | null {
+  if (!selectedAcademicYear) {
+    return null
+  }
 
+  const selectedStartTime = new Date(selectedAcademicYear.startDate).getTime()
+
+  return (
+    academicYears
+      .filter(
+        (year) =>
+          year.id !== selectedAcademicYear.id &&
+          new Date(year.startDate).getTime() > selectedStartTime,
+      )
+      .sort(
+        (left, right) =>
+          new Date(left.startDate).getTime() - new Date(right.startDate).getTime(),
+      )[0] ?? null
+  )
+}
+
+function flattenClasses(classGroups: ClassSummary[][]): ClassSummary[] {
+  return classGroups.flatMap((group) => group)
+}
+
+function renderClassDetailLoading() {
+  return (
+    <Card>
+      <CardHeader className='gap-3'>
+        <Skeleton className='h-7 w-48' />
+        <Skeleton className='h-4 w-64' />
+      </CardHeader>
+      <CardContent className='flex flex-col gap-4'>
+        <div className='grid gap-4 md:grid-cols-3'>
+          <Skeleton className='h-24' />
+          <Skeleton className='h-24' />
+          <Skeleton className='h-24' />
+        </div>
+        <Skeleton className='h-64' />
+      </CardContent>
+    </Card>
+  )
+}
 
 export function DataKelas() {
-    const [kelasList, setKelasList] = useState<Kelas[]>(initialKelas)
-    const [dialogOpen, setDialogOpen] = useState(false)
-    const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add')
-    const [selectedKelas, setSelectedKelas] = useState<Kelas | undefined>()
-    const [deleteTarget, setDeleteTarget] = useState<Kelas | null>(null)
+  const navigate = useNavigate()
+  const { history } = useRouter()
 
-    const [sorting, setSorting] = useState<SortingState>([])
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-    const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
+  const [selectedAcademicYearId, setSelectedAcademicYearId] = useState<string | null>(null)
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add')
+  const [editingClass, setEditingClass] = useState<ClassSummary | null>(null)
+  const [promotionOpen, setPromotionOpen] = useState(false)
 
-    const totalSiswa = kelasList.reduce((s, k) => s + k.jumlahSiswa, 0)
+  const academicYearsQuery = useQuery(orpc.tenant.academicYears.list.queryOptions({}))
+  const teachersQuery = useQuery(
+    orpc.tenant.teachers.list.queryOptions({ input: teacherListInput }),
+  )
 
-    const handleAdd = () => {
-        setDialogMode('add')
-        setSelectedKelas(undefined)
-        setDialogOpen(true)
+  const academicYears = useMemo(
+    () => (academicYearsQuery.data ?? []) as AcademicYearOption[],
+    [academicYearsQuery.data],
+  )
+  const activeAcademicYear = academicYears.find((year) => year.isActive) ?? null
+
+  const effectiveSelectedAcademicYearId =
+    selectedAcademicYearId ?? activeAcademicYear?.id ?? academicYears[0]?.id ?? null
+  const selectedAcademicYear =
+    academicYears.find((year) => year.id === effectiveSelectedAcademicYearId) ?? null
+
+  const classesQuery = useClasses(selectedAcademicYear?.id)
+  const nextAcademicYear = useMemo(
+    () => findNextAcademicYear(academicYears, selectedAcademicYear),
+    [academicYears, selectedAcademicYear],
+  )
+  const targetClassesQuery = useClasses(nextAcademicYear?.id, Boolean(nextAcademicYear))
+
+  const classGroups = useMemo(
+    () => classesQuery.data?.grades ?? [],
+    [classesQuery.data],
+  )
+  const allClasses = useMemo(
+    () => flattenClasses(classGroups.map((group) => group.classes)),
+    [classGroups],
+  )
+
+  const effectiveSelectedClassId = useMemo(() => {
+    if (allClasses.length === 0) {
+      return null
     }
 
-    const handleEdit = (k: Kelas) => {
-        setDialogMode('edit')
-        setSelectedKelas(k)
-        setDialogOpen(true)
-    }
-
-    const handleSave = (data: Omit<Kelas, 'id' | 'jumlahSiswa'>) => {
-        if (dialogMode === 'add') {
-            setKelasList((prev) => [
-                ...prev,
-                { ...data, id: String(Date.now()), jumlahSiswa: 0 },
-            ])
-        } else if (selectedKelas) {
-            setKelasList((prev) =>
-                prev.map((k) =>
-                    k.id === selectedKelas.id ? { ...k, ...data } : k
-                )
-            )
-        }
-    }
-
-    const handleDelete = (k: Kelas) => setDeleteTarget(k)
-
-    const confirmDelete = () => {
-        if (!deleteTarget) return
-        setKelasList((prev) => prev.filter((k) => k.id !== deleteTarget.id))
-        toast.success(`Kelas ${deleteTarget.namaKelas} dihapus. (Demo)`)
-        setDeleteTarget(null)
-    }
-
-    const columns: ColumnDef<Kelas>[] = [
-        {
-            accessorKey: 'namaKelas',
-            header: ({ column }) => <DataTableColumnHeader column={column} title='Nama Kelas' />,
-            cell: ({ row }) => <span className='font-medium'>{row.getValue('namaKelas')}</span>,
-        },
-        {
-            accessorKey: 'jenjang',
-            header: ({ column }) => <DataTableColumnHeader column={column} title='Jenjang' />,
-            cell: ({ row }) => {
-                const jenjang = row.getValue('jenjang') as string
-                return (
-                    <Badge variant='outline' className={kelasJenjangColors[jenjang]}>
-                        Kelas {jenjang}
-                    </Badge>
-                )
-            },
-            filterFn: (row, id, value) => value.includes(row.getValue(id)),
-        },
-        {
-            accessorKey: 'waliKelas',
-            header: ({ column }) => <DataTableColumnHeader column={column} title='Wali Kelas' />,
-            cell: ({ row }) => <span className='text-sm'>{row.getValue('waliKelas')}</span>,
-        },
-        {
-            accessorKey: 'jumlahSiswa',
-            header: ({ column }) => <DataTableColumnHeader column={column} title='Siswa' />,
-            cell: ({ row }) => <span className='font-mono text-center block'>{row.getValue('jumlahSiswa')}</span>,
-            meta: { className: 'text-center' },
-        },
-        {
-            accessorKey: 'kapasitas',
-            header: ({ column }) => <DataTableColumnHeader column={column} title='Kapasitas' />,
-            cell: ({ row }) => <span className='font-mono text-center block text-muted-foreground'>{row.getValue('kapasitas')}</span>,
-            meta: { className: 'text-center' },
-        },
-        {
-            id: 'terisi',
-            header: ({ column }) => <DataTableColumnHeader column={column} title='Terisi' />,
-            cell: ({ row }) => {
-                const { jumlahSiswa, kapasitas } = row.original
-                const pct = kapasitas > 0 ? Math.round((jumlahSiswa / kapasitas) * 100) : 0
-                return (
-                    <span className={cn('text-center block', pct >= 90 ? 'font-medium text-amber-600' : 'text-muted-foreground')}>
-                        {pct}%
-                    </span>
-                )
-            },
-            meta: { className: 'text-center' },
-        },
-        {
-            accessorKey: 'tahunAjaran',
-            header: ({ column }) => <DataTableColumnHeader column={column} title='Tahun Ajaran' />,
-            cell: ({ row }) => <span className='text-sm text-muted-foreground'>{row.getValue('tahunAjaran')}</span>,
-            filterFn: (row, id, value) => value.includes(row.getValue(id)),
-        },
-        {
-            id: 'actions',
-            cell: ({ row }) => (
-                <div className='text-right'>
-                    <ClassesRowActions kelas={row.original} onEdit={handleEdit} onDelete={handleDelete} />
-                </div>
-            ),
-        },
-    ]
-
-    const table = useReactTable({
-        data: kelasList,
-        columns,
-        state: { sorting, columnFilters, columnVisibility, pagination },
-        onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
-        onColumnVisibilityChange: setColumnVisibility,
-        onPaginationChange: setPagination,
-        getCoreRowModel: getCoreRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        getFacetedRowModel: getFacetedRowModel(),
-        getFacetedUniqueValues: getFacetedUniqueValues(),
-    })
-
-    return (
-        <>
-            <Header fixed>
-                <Search />
-                <div className='ms-auto flex items-center space-x-4'>
-                    <ThemeSwitch />
-                    <ConfigDrawer />
-                    <ProfileDropdown />
-                </div>
-            </Header>
-
-            <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
-                <PageHeader
-                    title='Data Kelas'
-                    description='Kelola kelas dan rombongan belajar madrasah.'
-                >
-                    <Button className='gap-1.5' onClick={handleAdd}>
-                        <Shapes size={16} /> Tambah
-                    </Button>
-                </PageHeader>
-
-                <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-                    <StatCard title='Total Kelas' value={`${kelasList.length}`} description='aktif TA 2025/2026' icon={<BookOpen className='h-4 w-4 text-muted-foreground' />} />
-                    <StatCard title='Total Siswa' value={`${totalSiswa}`} description='seluruh kelas' icon={<Users className='h-4 w-4 text-muted-foreground' />} />
-                    <StatCard title='Wali Kelas' value={`${kelasList.length}`} description='guru yang bertugas' icon={<UserCheck className='h-4 w-4 text-muted-foreground' />} />
-                    <StatCard title='Rata-rata Siswa' value={`${kelasList.length ? Math.round(totalSiswa / kelasList.length) : 0}`} description='per kelas' icon={<TrendingUp className='h-4 w-4 text-muted-foreground' />} />
-                </div>
-
-                <Card>
-                    <CardHeader className='space-y-4'>
-                        <div>
-                            <CardTitle>Daftar Kelas</CardTitle>
-                            <CardDescription>Tahun ajaran 2025/2026 — {kelasList.length} kelas</CardDescription>
-                        </div>
-                        <DataTableToolbar
-                            table={table}
-                            searchPlaceholder='Cari kelas...'
-                            searchKey='namaKelas'
-                            filters={[
-                                {
-                                    columnId: 'jenjang',
-                                    title: 'Jenjang',
-                                    options: [
-                                        { label: 'Kelas VII', value: 'VII' },
-                                        { label: 'Kelas VIII', value: 'VIII' },
-                                        { label: 'Kelas IX', value: 'IX' },
-                                    ],
-                                },
-                                {
-                                    columnId: 'tahunAjaran',
-                                    title: 'Tahun Ajaran',
-                                    options: [
-                                        { label: '2024/2025', value: '2024/2025' },
-                                        { label: '2025/2026', value: '2025/2026' },
-                                    ],
-                                },
-                            ]}
-                        />
-                    </CardHeader>
-                    <CardContent className='space-y-4'>
-                        <div className='overflow-auto rounded-md border'>
-                            <Table>
-                                <TableHeader>
-                                    {table.getHeaderGroups().map((headerGroup) => (
-                                        <TableRow key={headerGroup.id} className='group/row'>
-                                            {headerGroup.headers.map((header) => (
-                                                <TableHead
-                                                    key={header.id}
-                                                    colSpan={header.colSpan}
-                                                    className={cn(
-                                                        'group-hover/row:bg-muted',
-                                                        header.column.columnDef.meta?.className
-                                                    )}
-                                                >
-                                                    {header.isPlaceholder
-                                                        ? null
-                                                        : flexRender(header.column.columnDef.header, header.getContext())}
-                                                </TableHead>
-                                            ))}
-                                        </TableRow>
-                                    ))}
-                                </TableHeader>
-                                <TableBody>
-                                    {table.getRowModel().rows?.length ? (
-                                        table.getRowModel().rows.map((row) => (
-                                            <TableRow
-                                                key={row.id}
-                                                data-state={row.getIsSelected() && 'selected'}
-                                                className='group/row'
-                                            >
-                                                {row.getVisibleCells().map((cell) => (
-                                                    <TableCell
-                                                        key={cell.id}
-                                                        className={cn(
-                                                            'group-hover/row:bg-muted',
-                                                            cell.column.columnDef.meta?.className
-                                                        )}
-                                                    >
-                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                    </TableCell>
-                                                ))}
-                                            </TableRow>
-                                        ))
-                                    ) : (
-                                        <TableRow>
-                                            <TableCell colSpan={columns.length} className='h-24 text-center'>
-                                                Tidak ada data kelas.
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </div>
-                        <DataTablePagination table={table} />
-                    </CardContent>
-                </Card>
-            </Main>
-
-            <ClassesDialog
-                open={dialogOpen}
-                onOpenChange={setDialogOpen}
-                mode={dialogMode}
-                initialData={selectedKelas}
-                onSave={handleSave}
-            />
-
-            <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Hapus Kelas?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Kelas <strong>{deleteTarget?.namaKelas}</strong> akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Batal</AlertDialogCancel>
-                        <AlertDialogAction onClick={confirmDelete} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
-                            Ya, Hapus
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-        </>
+    const nextSelectedClass = allClasses.find(
+      (classItem) => classItem.id === selectedClassId,
     )
+
+    return nextSelectedClass?.id ?? allClasses[0]?.id ?? null
+  }, [allClasses, selectedClassId])
+
+  const classDetailQuery = useQuery({
+    ...orpc.tenant.classes.getById.queryOptions({
+      input: { id: effectiveSelectedClassId ?? EMPTY_UUID },
+    }),
+    enabled: Boolean(effectiveSelectedClassId),
+  })
+
+  const classDetail = (classDetailQuery.data ?? null) as ClassDetail | null
+  const targetClasses = useMemo(
+    () =>
+      flattenClasses(
+        (targetClassesQuery.data?.grades ?? []).map((group) => group.classes),
+      ),
+    [targetClassesQuery.data],
+  )
+
+  const teacherOptions = useMemo<TeacherOption[]>(
+    () =>
+      (teachersQuery.data?.data ?? []).map((teacher) => ({
+        id: teacher.id,
+        label: teacher.namaLengkap,
+      })),
+    [teachersQuery.data],
+  )
+
+  const totalStudents = classGroups.reduce(
+    (sum, group) => sum + group.totalStudents,
+    0,
+  )
+  const assignedHomeroomCount = allClasses.filter(
+    (classItem) => classItem.homeroomTeacherId !== null,
+  ).length
+  const occupancyAverage =
+    allClasses.length === 0
+      ? 0
+      : Math.round(
+          allClasses.reduce(
+            (sum, classItem) =>
+              sum + getProgressPercentage(classItem.activeStudentCount, classItem.capacity),
+            0,
+          ) / allClasses.length,
+        )
+
+  const createClassMutation = useCreateClass()
+  const updateClassMutation = useUpdateClass()
+  const massPromotionMutation = useMassPromotion()
+
+  const isDialogPending = createClassMutation.isPending || updateClassMutation.isPending
+  const isClassesEmpty = !classesQuery.isLoading && allClasses.length === 0
+
+  const handleAddClass = () => {
+    setDialogMode('add')
+    setEditingClass(null)
+    setDialogOpen(true)
+  }
+
+  const handleEditClass = (classItem: ClassSummary) => {
+    setDialogMode('edit')
+    setEditingClass(classItem)
+    setDialogOpen(true)
+  }
+
+  const handleClassSubmit = async (input: CreateClassInput) => {
+    if (dialogMode === 'edit' && editingClass) {
+      const updatedClass = await updateClassMutation.mutateAsync({
+        id: editingClass.id,
+        ...input,
+      })
+
+      setSelectedClassId(updatedClass.id)
+      setDialogOpen(false)
+      setEditingClass(null)
+      return
+    }
+
+    const createdClass = await createClassMutation.mutateAsync(input)
+
+    setSelectedClassId(createdClass.id)
+    setDialogOpen(false)
+    setEditingClass(null)
+  }
+
+  const handleMassPromotion = async (input: MassPromotionInput) => {
+    await massPromotionMutation.mutateAsync(input)
+    setPromotionOpen(false)
+  }
+
+  return (
+    <>
+      <Header fixed>
+        <Search />
+        <div className='ms-auto flex items-center space-x-4'>
+          <ThemeSwitch />
+          <ConfigDrawer />
+          <ProfileDropdown />
+        </div>
+      </Header>
+
+      <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
+        <PageHeader
+          title='Data Kelas'
+          description='Kelola kelas per tahun pelajaran, lihat siswa aktif, dan jalankan kenaikan kelas massal.'
+        >
+          <div className='flex flex-col gap-3 sm:flex-row sm:items-center'>
+            <Select
+              value={selectedAcademicYear?.id}
+              onValueChange={(value) => {
+                setSelectedAcademicYearId(value)
+                setSelectedClassId(null)
+              }}
+              disabled={academicYearsQuery.isLoading || academicYears.length === 0}
+            >
+              <SelectTrigger className='w-full sm:w-56'>
+                <SelectValue placeholder='Pilih tahun pelajaran' />
+              </SelectTrigger>
+              <SelectContent>
+                {academicYears.map((academicYear) => (
+                  <SelectItem key={academicYear.id} value={academicYear.id}>
+                    {academicYear.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button onClick={handleAddClass} disabled={!selectedAcademicYear}>
+              <Plus data-icon='inline-start' />
+              Tambah Kelas
+            </Button>
+          </div>
+        </PageHeader>
+
+        {(academicYearsQuery.isError || teachersQuery.isError || classesQuery.isError) && (
+          <Alert variant='destructive'>
+            <AlertTitle>Gagal memuat data kelas</AlertTitle>
+            <AlertDescription>
+              {academicYearsQuery.error?.message ??
+                teachersQuery.error?.message ??
+                classesQuery.error?.message ??
+                'Terjadi kesalahan saat memuat data kelas.'}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div className='grid gap-4 md:grid-cols-2 xl:grid-cols-4'>
+          <StatCard
+            title='Tahun Pelajaran'
+            value={selectedAcademicYear?.name ?? '-'}
+            description={selectedAcademicYear?.isActive ? 'Sedang aktif' : 'Arsip / nonaktif'}
+            icon={<BookOpen className='h-4 w-4' />}
+          />
+          <StatCard
+            title='Total Kelas'
+            value={classesQuery.data?.totalClasses ?? 0}
+            description='Tersusun per tingkat'
+            icon={<Shapes className='h-4 w-4' />}
+          />
+          <StatCard
+            title='Siswa Aktif'
+            value={totalStudents}
+            description='Terdaftar di kelas terpilih'
+            icon={<Users className='h-4 w-4' />}
+          />
+          <StatCard
+            title='Rata-rata Okupansi'
+            value={`${occupancyAverage}%`}
+            description={`${assignedHomeroomCount} kelas sudah punya wali kelas`}
+            icon={<UserCheck className='h-4 w-4' />}
+          />
+        </div>
+
+        {!selectedAcademicYear && !academicYearsQuery.isLoading ? (
+          <Card className='border-dashed'>
+            <CardContent className='flex flex-col items-center gap-4 py-12 text-center'>
+              <div className='space-y-2'>
+                <h2 className='text-lg font-semibold'>Belum ada tahun pelajaran</h2>
+                <p className='max-w-lg text-sm text-muted-foreground'>
+                  Buat tahun pelajaran terlebih dahulu agar kelas bisa dikelola dari frontend live.
+                </p>
+              </div>
+              <Button onClick={() => navigate({ to: '/academic-years' })}>
+                <ArrowRight data-icon='inline-start' />
+                Kelola Tahun Pelajaran
+              </Button>
+            </CardContent>
+          </Card>
+        ) : classesQuery.isLoading ? (
+          <div className='grid gap-4 lg:grid-cols-2 xl:grid-cols-3'>
+            {Array.from({ length: 3 }, (_, index) => (
+              <Card key={index}>
+                <CardHeader className='gap-3'>
+                  <Skeleton className='h-5 w-28' />
+                  <Skeleton className='h-4 w-20' />
+                </CardHeader>
+                <CardContent className='flex flex-col gap-4'>
+                  <Skeleton className='h-10' />
+                  <Skeleton className='h-8' />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : isClassesEmpty ? (
+          <Card className='border-dashed'>
+            <CardContent className='py-12'>
+              <div className='flex flex-col items-center gap-4 text-center'>
+                <GraduationCap className='size-12 text-muted-foreground' />
+                <div className='space-y-2'>
+                  <h2 className='text-lg font-semibold'>Belum ada kelas untuk tahun pelajaran ini</h2>
+                  <p className='max-w-lg text-sm text-muted-foreground'>
+                    Tambahkan kelas baru untuk {selectedAcademicYear?.name ?? 'tahun pelajaran terpilih'} atau kembali ke halaman sebelumnya.
+                  </p>
+                </div>
+                <div className='flex flex-col gap-3 sm:flex-row'>
+                  <Button variant='outline' onClick={() => history.go(-1)}>
+                    Kembali
+                  </Button>
+                  <Button onClick={() => navigate({ to: '/' })}>Ke Beranda</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <ClassGrid
+            grades={classGroups}
+            selectedClassId={effectiveSelectedClassId}
+            onSelectClass={setSelectedClassId}
+            onEditClass={handleEditClass}
+          />
+        )}
+
+        {effectiveSelectedClassId && (
+          classDetailQuery.isLoading ? renderClassDetailLoading() : classDetailQuery.isError ? (
+            <Alert variant='destructive'>
+              <AlertTitle>Gagal memuat detail kelas</AlertTitle>
+              <AlertDescription>
+                {classDetailQuery.error.message}
+              </AlertDescription>
+            </Alert>
+          ) : classDetail ? (
+            <Card>
+              <CardHeader className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
+                <div className='space-y-1'>
+                  <CardTitle>{classDetail.name}</CardTitle>
+                  <p className='text-sm text-muted-foreground'>
+                    {classDetail.academicYearName} · Wali kelas {classDetail.homeroomTeacherName ?? 'belum ditentukan'}
+                  </p>
+                </div>
+
+                {nextAcademicYear && (
+                  <Button
+                    onClick={() => setPromotionOpen(true)}
+                    disabled={classDetail.students.length === 0}
+                  >
+                    <ArrowRight data-icon='inline-start' />
+                    Kenaikan Kelas Massal
+                  </Button>
+                )}
+              </CardHeader>
+
+              <CardContent className='flex flex-col gap-6'>
+                <div className='grid gap-4 md:grid-cols-3'>
+                  <Card>
+                    <CardHeader className='pb-2'>
+                      <CardTitle className='text-sm font-medium'>Tingkat Kelas</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className='text-2xl font-semibold'>Kelas {classDetail.gradeLevel}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className='pb-2'>
+                      <CardTitle className='text-sm font-medium'>Siswa Aktif</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className='text-2xl font-semibold'>{classDetail.activeStudentCount}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className='pb-2'>
+                      <CardTitle className='text-sm font-medium'>Kapasitas</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className='text-2xl font-semibold'>{classDetail.capacity}</div>
+                      <p className='text-xs text-muted-foreground'>
+                        {classDetail.remainingCapacity >= 0
+                          ? `Sisa ${classDetail.remainingCapacity} kursi`
+                          : `Lebih ${Math.abs(classDetail.remainingCapacity)} siswa`}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {classDetail.students.length === 0 ? (
+                  <EmptyState
+                    title='Belum ada siswa aktif di kelas ini'
+                    description='Kelas sudah live, tetapi belum ada enrollment aktif yang terhubung pada tahun pelajaran ini.'
+                  />
+                ) : (
+                  <div className='rounded-lg border'>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Nama siswa</TableHead>
+                          <TableHead>NIS / NISN</TableHead>
+                          <TableHead>Nama wali</TableHead>
+                          <TableHead>Nomor HP wali</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {classDetail.students.map((student) => (
+                          <TableRow key={student.enrollmentId}>
+                            <TableCell>
+                              <div className='flex flex-col'>
+                                <span className='font-medium'>{student.namaLengkap}</span>
+                                <span className='text-xs text-muted-foreground'>
+                                  Enrollment aktif
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className='text-sm text-muted-foreground'>
+                              <div className='flex flex-col'>
+                                <span>{student.nis ?? '-'}</span>
+                                <span>{student.nisn ?? '-'}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className='text-sm text-muted-foreground'>
+                              {student.namaWali ?? '-'}
+                            </TableCell>
+                            <TableCell className='text-sm text-muted-foreground'>
+                              {student.nomorHpWali ?? '-'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ) : null
+        )}
+      </Main>
+
+      <ClassesDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        mode={dialogMode}
+        academicYearId={selectedAcademicYear?.id ?? ''}
+        academicYearName={selectedAcademicYear?.name ?? 'Tahun pelajaran belum tersedia'}
+        teachers={teacherOptions}
+        isTeachersLoading={teachersQuery.isLoading}
+        initialData={editingClass}
+        isPending={isDialogPending}
+        onSubmit={handleClassSubmit}
+      />
+
+        <MassPromotionModal
+          open={promotionOpen}
+          onOpenChange={setPromotionOpen}
+          sourceClass={classDetail}
+          targetAcademicYear={nextAcademicYear}
+          targetClasses={targetClasses}
+          isTargetClassesLoading={targetClassesQuery.isLoading}
+          targetClassesErrorMessage={
+            targetClassesQuery.isError ? targetClassesQuery.error.message : null
+          }
+          isPending={massPromotionMutation.isPending}
+          onSubmit={handleMassPromotion}
+        />
+    </>
+  )
 }
