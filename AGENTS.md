@@ -23,7 +23,7 @@ This project uses a layered memory architecture. Read files in this order:
 
 ## Critical Rules (Quick Reference)
 
-1. **No SSR** — Vite SPA only. No `loader`, no `getServerSideProps`, no `createServerFn`.
+1. **No SSR pages** — Keep the UI in SPA render mode. No `loader`, no `getServerSideProps`, no `createServerFn` feature pattern. Auth and oRPC still run on the embedded TanStack Start server runtime.
 2. **decimal.js for money** — NEVER use JS `+ - * /` for financial calculations.
 3. **Append-only transactions** — `payment_transactions` has no UPDATE/DELETE. Use reversals.
 4. **Multi-tenancy** — Every table MUST have `school_id`. RLS enforced at DB level.
@@ -35,8 +35,9 @@ This project uses a layered memory architecture. Read files in this order:
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 19, TanStack Start (SPA), TanStack Router/Query, Zustand |
+| Frontend | React 19, TanStack Start (SPA render mode), TanStack Router/Query, Zustand |
 | Styling | Tailwind CSS v4, shadcn/ui |
+| Runtime | TanStack Start/Nitro server output for auth + oRPC handlers |
 | API | oRPC |
 | Auth | Better Auth (identity/session) + EDARA RBAC (`user_school_assignments`) |
 | Database | Neon PostgreSQL, Drizzle ORM, pg-boss |
@@ -63,8 +64,15 @@ Run in order: `format:check` → `typecheck` → `lint --max-warnings 10` → `b
 ## Current Status
 
 - **Phase:** Phase 1 — Migration from Mock to Real Backend
-- **Progress:** Sections 1–8 are complete through Step 22, and Section 9 Step 23 is now complete. Teacher Management remains fully live, and Class Management now has a live tenant API router with `list`, `getById`, `create`, `update`, and transactional `massPromotion`.
-- **Next:** Continue Section 9 with Step 24 — Class Frontend — and keep AI memory files aligned with the real codebase state as migration status changes.
+- **Progress:** Sections 1–8 are complete through Step 22, and Section 9 Step 24 is now complete. Teacher Management remains fully live, and Class Management is now live end-to-end with a tenant API router plus frontend wiring for grouped class listing, class detail/student roster, create, update, and transactional `massPromotion`.
+- **Next:** Continue Section 9 with Step 25 — Student API Router — and keep AI memory files aligned with the real codebase state as migration status changes.
+
+## Architecture Mental Model
+
+- Treat EDARA as a **client-rendered SPA shell backed by an embedded TanStack Start server runtime**.
+- `src/server.ts`, `src/routes/api/auth/$`, and `src/routes/api/rpc/$` are real runtime entrypoints, not placeholder scaffolding.
+- “No SSR” means no server-rendered pages or route-loader data architecture, not “no backend.”
+- During Phase 1, expect a mixed migration state: live backend-backed domains coexist with mock/local-state frontends that still need migration.
 
 ## Documentation Map
 
