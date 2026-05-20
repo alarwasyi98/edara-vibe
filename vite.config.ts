@@ -8,7 +8,7 @@ import viteCompression from 'vite-plugin-compression'
 import { nitro } from 'nitro/vite'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     tailwindcss(),
     tanstackStart({
@@ -17,13 +17,17 @@ export default defineConfig({
       },
     }),
     react(),
-    nitro({
-      preset: 'vercel',
-      prerender: {
-        routes: [],
-        crawlLinks: false,
-      },
-    }),
+    ...(command === 'build'
+      ? [
+          nitro({
+            preset: 'vercel',
+            prerender: {
+              routes: [],
+              crawlLinks: false,
+            },
+          }),
+        ]
+      : []),
     viteCompression({
       algorithm: 'brotliCompress',
       ext: '.br',
@@ -44,4 +48,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-})
+}))
